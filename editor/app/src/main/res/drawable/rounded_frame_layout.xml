@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetBottom="@dimen/export_panel_border_width_neg" >
+
+    <shape>
+        <solid android:color="?attr/bgColor" />
+        <corners
+            android:radius="@dimen/export_panel_corner_radius"
+            android:topLeftRadius="@dimen/export_panel_corner_radius"
+            android:topRightRadius="@dimen/export_panel_corner_radius"
+            android:bottomLeftRadius="0dp"
+            android:bottomRightRadius="0dp" />
+        <stroke
+            android:width="@dimen/export_panel_border_width"
+            android:color="@color/export_panel_border" />
+        <padding
+            android:left="@dimen/layout_margin_medium"
+            android:top="@dimen/layout_margin_medium"
+            android:right="@dimen/layout_margin_medium"
+            android:bottom="@dimen/layout_margin_medium" />
+    </shape>
+
+</inset>

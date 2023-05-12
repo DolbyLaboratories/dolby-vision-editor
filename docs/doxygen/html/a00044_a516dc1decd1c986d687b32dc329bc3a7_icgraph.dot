@@ -1,0 +1,17 @@
+digraph "enumerateTracks"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="enumerateTracks",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="getTracksByType",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$a00044.html#af82b93f179042c42e999b2087e3a2cb7",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="getPlayableTrack",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$a00044.html#ab7bc70c0c4e433f5adefc5ab71c84917",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="armExtractor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$a00044.html#a9fddbcf75e24c10c08518f3403f70c3a",tooltip=" "];
+  Node3 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node5 [label="getFrameRate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$a00044.html#a58f224d9dfd07ad67cc8e1a53c321993",tooltip=" "];
+}

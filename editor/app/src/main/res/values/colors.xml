@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray">#808080</color>
+
+    <!-- UI styling values: dark theme -->
+    <color name="dark_background">#13141C</color>
+    <color name="light_text">#FAFBFF</color>
+    <color name="meta_text">#9FA1B3</color>
+    <color name="accent_active">#F3058A</color>
+    <color name="accent_inactive">#3D3F4D</color>
+    <color name="dropdown_background">#32333D</color>
+    <color name="button_color">#C62480</color>
+    <color name="export_panel_border">#393A42</color>
+</resources>

@@ -1,0 +1,65 @@
+@font-face {
+  font-family: 'Avenir Next LT Pro Bold';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Bold'),
+       local('AvenirNextLTPro-Bold'),
+       url(AvenirNextLTPro-Bold.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Bold Italic';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Bold Italic'),
+       local('AvenirNextLTPro-BoldIt'),
+       url(AvenirNextLTPro-BoldIt.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Demi';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Demi'),
+       local('AvenirNextLTPro-Demi'),
+       url(AvenirNextLTPro-Demi.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Demi Italic';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Demi Italic'),
+       local('AvenirNextLTPro-DemiIt'),
+       url(AvenirNextLTPro-DemiIt.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Italic';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Italic'),
+       local('AvenirNextLTPro-It'),
+       url(AvenirNextLTPro-It.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Medium';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Medium'),
+       local('AvenirNextLTPro-Medium'),
+       url(AvenirNextLTPro-Medium.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Medium Italic';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Medium Italic'),
+       local('AvenirNextLTPro-MediumIt'),
+       url(AvenirNextLTPro-MediumIt.ttf) format('truetype')
+}
+@font-face {
+  font-family: 'Avenir Next LT Pro Regular';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Avenir Next LT Pro Regular'),
+       local('AvenirNextLTPro-Regular'),
+       url(AvenirNextLTPro-Regular.ttf) format('truetype')
+}
+

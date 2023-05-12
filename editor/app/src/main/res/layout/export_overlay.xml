@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_frame_layout">
+
+    <!-- EXPORT -->
+
+    <TextView
+        android:id="@+id/tv_heading_export"
+        android:text="@string/heading_export"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:layout_marginBottom="@dimen/layout_margin_large"
+        app:layout_constraintTop_toTopOf="parent"
+        style="@style/Custom.HeadingText" />
+
+    <ImageButton
+        android:id="@+id/btn_close_export_panel"
+        android:background="@drawable/close"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginRight="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_resolution"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:text="@string/resolution"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_heading_export"
+        style="@style/Custom.ControlText" />
+
+    <Spinner
+        android:id="@+id/spinner_resolution_val"
+        android:layout_width="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_resolution"
+        style="@style/Custom.Spinner" />
+
+    <ImageView
+        android:src="@drawable/chevron_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:clickable="false"
+        app:layout_constraintTop_toTopOf="@+id/spinner_resolution_val"
+        app:layout_constraintBottom_toBottomOf="@+id/spinner_resolution_val"
+        app:layout_constraintEnd_toEndOf="@+id/spinner_resolution_val" />
+
+    <TextView
+        android:id="@+id/tv_encoder_format"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:text="@string/encoder_format"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_resolution_val"
+        style="@style/Custom.ControlText" />
+
+    <Spinner
+        android:id="@+id/spinner_encoder_format"
+        android:layout_width="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_encoder_format"
+        style="@style/Custom.Spinner" />
+
+    <ImageView
+        android:src="@drawable/chevron_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:clickable="false"
+        app:layout_constraintTop_toTopOf="@+id/spinner_encoder_format"
+        app:layout_constraintBottom_toBottomOf="@+id/spinner_encoder_format"
+        app:layout_constraintEnd_toEndOf="@+id/spinner_encoder_format" />
+
+    <TextView
+        android:id="@+id/tv_iframe_interval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:text="@string/iframe_interval"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_encoder_format"
+        style="@style/Custom.ControlText" />
+
+    <Spinner
+        android:id="@+id/spinner_iframe_interval"
+        android:layout_width="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_iframe_interval"
+        style="@style/Custom.Spinner" />
+
+    <ImageView
+        android:src="@drawable/chevron_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:clickable="false"
+        app:layout_constraintTop_toTopOf="@+id/spinner_iframe_interval"
+        app:layout_constraintBottom_toBottomOf="@+id/spinner_iframe_interval"
+        app:layout_constraintEnd_toEndOf="@+id/spinner_iframe_interval" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_trimOnly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/layout_margin_large"
+        android:checked="false"
+        android:text="@string/trim_only"
+        android:textColor="?attr/textColor"
+        app:switchPadding="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_iframe_interval"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        style="@style/Custom.Switch" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_start_video_export"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="@string/export_video"
+        android:layout_marginTop="28dp"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginEnd="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/switch_trimOnly"
+        app:layout_constraintLeft_toLeftOf="parent"
+        style="@style/Custom.Button" />
+
+    <!-- SPACING -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/btn_start_video_export"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

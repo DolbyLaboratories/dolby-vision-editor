@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DarkTheme" parent="Theme.FilterSimulation">
+        <item name="textColor">@color/light_text</item>
+        <item name="metaTextColor">@color/meta_text</item>
+        <item name="bgColor">@color/dark_background</item>
+    </style>
+
+    <style name="Custom.Slider" parent="Widget.MaterialComponents.Slider">
+        <item name="trackColorActive">@color/accent_active</item>
+        <item name="trackColorInactive">@color/accent_inactive</item>
+        <item name="thumbColor">@color/white</item>
+    </style>
+
+    <style name="Custom.ControlText" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:layout_marginLeft">@dimen/layout_margin_medium</item>
+        <item name="android:gravity">left</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Custom.HeadingText" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">?attr/metaTextColor</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontWeight">700</item>
+    </style>
+
+    <style name="Custom.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="trackTint">@drawable/active_color_selector</item>
+        <item name="thumbTint">@color/white</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="Custom.Button" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">28dp</item>
+        <item name="backgroundTint">@color/button_color</item>
+        <item name="textColor">@color/white</item>
+        <item name="android:letterSpacing">0.0</item>
+    </style>
+
+    <style name="Custom.RadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:buttonTint">@drawable/active_color_selector</item>
+        <item name="android:textColor">?attr/textColor</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Custom.Spinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:layout_marginTop">@dimen/layout_margin_medium</item>
+        <item name="android:layout_marginStart">@dimen/layout_margin_large</item>
+        <item name="android:layout_marginEnd">@dimen/layout_margin_large</item>
+        <item name="android:layout_height">42dp</item>
+        <item name="android:background">@color/dropdown_background</item>
+    </style>
+
+</resources>

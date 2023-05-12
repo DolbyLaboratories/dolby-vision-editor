@@ -1,0 +1,202 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" data-whc_version="24.1">
+    <head><link rel="shortcut icon" href="../oxygen-webhelp/template/images/favicon.ico"/><link rel="icon" href="../oxygen-webhelp/template/images/favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="description" content="In the context of Dolby Vision, a series of precalcuated display management data stored in a static text file that saves processing time and cycles for display management. Abbreviation: LUT"/><meta name="generator" content="DITA-OT"/><meta name="prodname" content="Dolby Vision"/><meta name="version" content="Version 1.0"/><meta name="rights" content="© 2023 &#xA;                Dolby Laboratories&#xA;            "/><title>look-up table</title><!--  Generated with Oxygen version 24.1, build number 2022041410.  --><meta name="wh-path2root" content="../"/><meta name="wh-source-relpath" content="../../terms/g_6448.xml"/><meta name="wh-out-relpath" content="topics/g_6448.html"/>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/lib/bootstrap/css/bootstrap.min.css"/>
+    
+    <link rel="stylesheet" href="../oxygen-webhelp/lib/jquery-ui/jquery-ui.min.css"/>
+    
+    <!-- Template default styles  -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic-page.css?buildId=2022041410"/>
+    
+    
+    <script src="../oxygen-webhelp/lib/jquery/jquery-3.5.1.min.js"></script>
+    
+    <script data-main="../oxygen-webhelp/app/topic-page.js" src="../oxygen-webhelp/lib/requirejs/require.js"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/SourceSansPro.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/material-icons/material-icons.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/css/dolby-webhelp.css?buildId=2022041410"/></head>
+
+    <body id="_termbase_id_6448" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">Jump to main content</a>
+        
+        
+        
+
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        
+        
+        
+        <div class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <!--
+                            This component will be generated when the next parameters are specified in the transformation scenario:
+                            'webhelp.logo.image' and 'webhelp.logo.image.target.url'.
+                            See: http://oxygenxml.com/doc/versions/17.1/ug-editor/#topics/dita_webhelp_output.html.
+                    -->
+                    <!-- Hide the log in the banner -->
+                    <!--<whc:webhelp_logo class="d-none d-sm-block"/>-->
+                    <a href="../index.html"><div class=" wh_publication_title "><span class="prodname">
+            <span class="keyword">Dolby Vision</span>
+         </span><div><span class="subtitle">Content Editing for Third-Party Developers</span></div></div></a>
+                    
+                    <nav class=" wh_top_menu " aria-label="Menu Container"><ul role="menubar" aria-label="Menu"><li role="menuitem"><span id="c_introduction-d4029e80771-mi" data-tocid="c_introduction-d4029e80771" data-state="leaf" class=" topicref " data-id="c_introduction"><span class="title"><a href="../topics/c_introduction.html">Introduction</a></span></span></li><li role="menuitem"><span id="c_display_management-d4029e80856-mi" data-tocid="c_display_management-d4029e80856" data-state="leaf" class=" topicref " data-id="c_display_management"><span class="title"><a href="../topics/c_display_management.html">Display management</a></span></span></li><li role="menuitem"><span id="c_editing_gpu_shaders-d4029e80932-mi" data-tocid="c_editing_gpu_shaders-d4029e80932" data-state="leaf" class=" topicref " data-id="c_editing_gpu_shaders"><span class="title"><a href="../topics/c_editing_gpu_shaders.html">Editing using the GPU shaders</a></span></span></li><li role="menuitem"><span id="c_signaling_preview-d4029e81009-mi" data-tocid="c_signaling_preview-d4029e81009" data-state="leaf" class=" topicref " data-id="c_signaling_preview"><span class="title"><a href="../topics/c_signaling_previewing.html">HLG signaling and previewing</a></span></span></li><li role="menuitem"><span id="c_chapter3-d4029e81083-mi" data-tocid="c_chapter3-d4029e81083" data-state="leaf" class=" topicref " data-id="c_chapter3"><span class="title"><a href="../topics/c_trimming_remuxing.html">Trimming and remultiplexing</a></span></span></li><li role="menuitem"><span id="r_appendix-d4029e81158-mi" data-tocid="r_appendix-d4029e81158" data-state="leaf" class=" topicref " data-id="r_appendix"><span class="title"><a href="../topics/r_appendix.html">Appendix</a></span></span></li><li role="menuitem"><span id="tocId-d4029e81225-mi" data-tocid="tocId-d4029e81225" data-state="leaf" class=" topicref glossary"><span class="title"><a href="../topics/r_ov_glossary.html">Glossary</a></span></span></li><li role="menuitem"><span id="Chunk1633017108-d4029e80571-mi" data-tocid="Chunk1633017108-d4029e80571" data-state="leaf" class=" topicref frontmatter" data-id="Chunk1633017108"><span class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108">Notices</a></span></span></li></ul></nav>
+                </div>
+
+                <!-- The menu button for mobile devices is copied in the output only when the 'webhelp.show.top.menu' parameter is set to 'yes' -->
+                <button type="button" data-target="#wh_top_menu_and_indexterms_link" id="wh_menu_mobile_button" data-toggle="collapse" class="navbar-toggler collapsed wh_toggle_button" aria-expanded="false" aria-label="Toggle menu" aria-controls="wh_top_menu_and_indexterms_link">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <!-- Expand/Collapse publishing TOC 
+                             The menu button for mobile devices is copied in the output only when the publication TOC is available
+                        -->
+                <button type="button" data-target="#wh_publication_toc" id="wh_toc_button" data-toggle="collapse" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                    <span class="toggler-icon">
+                        <i class="material-icons">view_headline</i>
+                    </span>
+                </button>
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                <!--<whc:webhelp_indexterms_link/>-->
+                <!-- Search form -->
+                <div class=" wh_product_numbers "><span class="production-version">Version 1.0</span></div>
+                <div class=" wh_search_input navbar-form wh_main_page_search " role="form">
+                    
+                    <div class="wh_welcome"></div>          
+                    <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="Search... " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="Search query" required="required"/><button type="submit" class="wh_search_button" aria-label="Search..."><span>Search...</span></button></div></form>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</header>
+
+
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+<div data-tooltip-position="bottom" class=" wh_breadcrumb "></div>
+
+
+                    
+<div class="wh_right_tools">
+                        <span class="tools-icon"><button class="wh_hide_highlight" aria-label="Toggle search highlights" title="Toggle search highlights"></button></span>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="Collapse sections" title="Collapse sections"></button>
+                        <div class=" wh_navigation_links "><span id="topic_navigation_links" class="navheader">
+<span class="navnext"><a class="- topic/link link" href="Chunk1633017108.html#Chunk1633017108" title="Notices" aria-label="Next topic: Notices" rel="next"></a></span>  </span></div>
+<!--External resource link-->
+
+                        <span class="tools-icon"><a onClick="window.print()" href="" title="Print this page"><i class="material-icons">print</i></a></span>
+                        
+
+                        <!-- PUBENG-1261 -->
+                        <span class="tools-icon"><a href="r_ov_glossary.html" title="Review the glossary"><i class="material-icons">sort_by_alpha</i></a></span>
+
+                        <!-- PUBENG-1199 -->
+                        
+
+                        <!-- PUBENG-1207 -->
+                        
+                    </div>
+
+                </nav>
+            </div>
+
+            
+
+            <div class="wh_content_area" id="wh_content_area">
+                <div class="row">
+                    
+
+                    <div class="col-12" id="wh_topic_body">
+<script type="text/javascript">document.getElementById('wh_topic_body').className += ' fouc';</script>
+
+
+                        
+<div class=" wh_topic_content body "><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+   <h1 class="- topic/title concept/title glossentry/glossterm title glossterm topictitle1" id="ariaid-title1">look-up table</h1>
+   
+   <div class="- topic/body concept/conbody glossentry/glossBody body conbody glossBody"><div class="- topic/abstract concept/abstract glossentry/glossdef abstract glossdef">In the context of Dolby Vision, a series of precalcuated display management data stored in a static text file that saves processing time and cycles for display management.</div>
+      
+      <section class="- topic/section concept/section glossentry/glossAlt section glossAlt">Abbreviation: <abbr>LUT</abbr>
+         
+      </section>
+      <section class="- topic/section concept/section glossentry/glossAlt section glossAlt">
+         
+      </section>
+   </div>
+</article></main></div>
+
+
+                        
+                        
+                        
+
+                        
+
+                    </div>
+                    
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="wh_footer">
+
+  <div class=" footer-container container-fluid">
+
+   <!-- PUBENG-1263 simplify bootstrap to fix footer stubborness  -->
+    <div class=" wh_footer_tiles container-fluid">
+
+        <div class="wh_tile footer-left">
+          <!-- PUBENG-1492 adding black icon for print, and hiding white icon for screens -->
+          <a href="https://www.dolby.com" target="_blank" class=" wh_logo d-print-none "><img src="../oxygen-webhelp/template/images/Dolby_vertical_White.svg" alt="&#xA;            Dolby Vision&#xA;         "/></a>
+          
+        </div>
+
+        <div class="wh_tile footer-center">
+          <div class="copyright-statement">©2023 Dolby Laboratories. All rights reserved.  Dolby and the double-D symbol are registered trademarks of Dolby Laboratories. All other trademarks remain
+        the property of their respective owners.</div>
+        </div>
+
+        <div class="wh_tile footer-right">
+          <div class="support-links"><div role="support-link"><span class="title"><a href="Chunk1633017108.html#Chunk1633017108">Notices</a></span></div></div>
+          1 May 2023<span class="copyright-date"> </span>
+          <div class="confidential"></div>
+        </div>
+
+    </div>
+
+    <!--    <whc:dolby_footer_title class="d-none d-sm-block"/>-->
+
+    <!--
+    
+    <!-\-    <whc:include_html href="${webhelp.fragment.footer}"/>-\->
+    <div class="permissions_date">
+     
+    </div>-->
+
+  </div>
+</footer>
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        <!-- The modal container for images -->
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <!-- Modal Content (The Image) -->
+            <div id="modal_img_container"></div>
+            <!-- Modal Caption (Image Text) -->
+            <div id="caption"></div>
+        </div>
+        
+
+    </body>
+</html>

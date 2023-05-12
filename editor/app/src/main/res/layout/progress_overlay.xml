@@ -1,0 +1,33 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/progress_overlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:alpha="0.4"
+    android:animateLayoutChanges="true"
+    android:background="@color/black"
+    android:clickable="true"
+    android:elevation="14dp"
+    android:focusable="true"
+    android:visibility="gone">
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="120dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/white"/>
+
+    <TextView
+        android:id="@+id/tv_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="200dp"
+        android:textColor="@color/white"
+        android:text="@string/progress"
+        android:textSize="20sp" />
+
+</FrameLayout>

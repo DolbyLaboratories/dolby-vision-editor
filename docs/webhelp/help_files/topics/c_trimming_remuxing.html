@@ -1,0 +1,233 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" data-whc_version="24.1">
+    <head><link rel="shortcut icon" href="../oxygen-webhelp/template/images/favicon.ico"/><link rel="icon" href="../oxygen-webhelp/template/images/favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="generator" content="DITA-OT"/><meta name="description" content="When trimming directly on an encoded video bitstream to preserve video quality, Dolby Vision multiplexer information must be added to the MP4 file. Dolby provides a tool to do this that can be integrated into an application."/><meta name="prodname" content="Dolby Vision"/><meta name="version" content="Version 1.0"/><meta name="rights" content="© 2023 &#xA;                Dolby Laboratories&#xA;            "/>        
+      <title>Trimming and remultiplexing</title><!--  Generated with Oxygen version 24.1, build number 2022041410.  --><meta name="wh-path2root" content="../"/><meta name="wh-source-relpath" content="guide/c_trimming_remuxing.xml"/><meta name="wh-out-relpath" content="topics/c_trimming_remuxing.html"/>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/lib/bootstrap/css/bootstrap.min.css"/>
+    
+    <link rel="stylesheet" href="../oxygen-webhelp/lib/jquery-ui/jquery-ui.min.css"/>
+    
+    <!-- Template default styles  -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic-page.css?buildId=2022041410"/>
+    
+    
+    <script src="../oxygen-webhelp/lib/jquery/jquery-3.5.1.min.js"></script>
+    
+    <script data-main="../oxygen-webhelp/app/topic-page.js" src="../oxygen-webhelp/lib/requirejs/require.js"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/SourceSansPro.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/material-icons/material-icons.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/css/dolby-webhelp.css?buildId=2022041410"/></head>
+
+    <body id="c_chapter3" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">Jump to main content</a>
+        
+        
+        
+
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        
+        
+        
+        <div class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <!--
+                            This component will be generated when the next parameters are specified in the transformation scenario:
+                            'webhelp.logo.image' and 'webhelp.logo.image.target.url'.
+                            See: http://oxygenxml.com/doc/versions/17.1/ug-editor/#topics/dita_webhelp_output.html.
+                    -->
+                    <!-- Hide the log in the banner -->
+                    <!--<whc:webhelp_logo class="d-none d-sm-block"/>-->
+                    <a href="../index.html"><div class=" wh_publication_title "><span class="prodname">
+            <span class="keyword">Dolby Vision</span>
+         </span><div><span class="subtitle">Content Editing for Third-Party Developers</span></div></div></a>
+                    
+                    <nav class=" wh_top_menu " aria-label="Menu Container"><ul role="menubar" aria-label="Menu"><li role="menuitem"><span id="c_introduction-d4029e80771-mi" data-tocid="c_introduction-d4029e80771" data-state="leaf" class=" topicref " data-id="c_introduction"><span class="title"><a href="../topics/c_introduction.html">Introduction</a></span></span></li><li role="menuitem"><span id="c_display_management-d4029e80856-mi" data-tocid="c_display_management-d4029e80856" data-state="leaf" class=" topicref " data-id="c_display_management"><span class="title"><a href="../topics/c_display_management.html">Display management</a></span></span></li><li role="menuitem"><span id="c_editing_gpu_shaders-d4029e80932-mi" data-tocid="c_editing_gpu_shaders-d4029e80932" data-state="leaf" class=" topicref " data-id="c_editing_gpu_shaders"><span class="title"><a href="../topics/c_editing_gpu_shaders.html">Editing using the GPU shaders</a></span></span></li><li role="menuitem"><span id="c_signaling_preview-d4029e81009-mi" data-tocid="c_signaling_preview-d4029e81009" data-state="leaf" class=" topicref " data-id="c_signaling_preview"><span class="title"><a href="../topics/c_signaling_previewing.html">HLG signaling and previewing</a></span></span></li><li role="menuitem"><span id="c_chapter3-d4029e81083-mi" data-tocid="c_chapter3-d4029e81083" data-state="leaf" class=" topicref " data-id="c_chapter3"><span class="title"><a href="../topics/c_trimming_remuxing.html">Trimming and remultiplexing</a></span></span></li><li role="menuitem"><span id="r_appendix-d4029e81158-mi" data-tocid="r_appendix-d4029e81158" data-state="leaf" class=" topicref " data-id="r_appendix"><span class="title"><a href="../topics/r_appendix.html">Appendix</a></span></span></li><li role="menuitem"><span id="tocId-d4029e81225-mi" data-tocid="tocId-d4029e81225" data-state="leaf" class=" topicref glossary"><span class="title"><a href="../topics/r_ov_glossary.html">Glossary</a></span></span></li><li role="menuitem"><span id="Chunk1633017108-d4029e80571-mi" data-tocid="Chunk1633017108-d4029e80571" data-state="leaf" class=" topicref frontmatter" data-id="Chunk1633017108"><span class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108">Notices</a></span></span></li></ul></nav>
+                </div>
+
+                <!-- The menu button for mobile devices is copied in the output only when the 'webhelp.show.top.menu' parameter is set to 'yes' -->
+                <button type="button" data-target="#wh_top_menu_and_indexterms_link" id="wh_menu_mobile_button" data-toggle="collapse" class="navbar-toggler collapsed wh_toggle_button" aria-expanded="false" aria-label="Toggle menu" aria-controls="wh_top_menu_and_indexterms_link">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <!-- Expand/Collapse publishing TOC 
+                             The menu button for mobile devices is copied in the output only when the publication TOC is available
+                        -->
+                <button type="button" data-target="#wh_publication_toc" id="wh_toc_button" data-toggle="collapse" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                    <span class="toggler-icon">
+                        <i class="material-icons">view_headline</i>
+                    </span>
+                </button>
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                <!--<whc:webhelp_indexterms_link/>-->
+                <!-- Search form -->
+                <div class=" wh_product_numbers "><span class="production-version">Version 1.0</span></div>
+                <div class=" wh_search_input navbar-form wh_main_page_search " role="form">
+                    
+                    <div class="wh_welcome"></div>          
+                    <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="Search... " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="Search query" required="required"/><button type="submit" class="wh_search_button" aria-label="Search..."><span>Search...</span></button></div></form>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</header>
+
+
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+<div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>Home</span></a></span></li><li class="active"><div class="topicref" data-id="c_chapter3"><div class="title"><a href="../topics/c_trimming_remuxing.html">Trimming and remultiplexing</a><div class="wh-tooltip">When trimming directly on an encoded video bitstream to preserve video quality, Dolby Vision multiplexer information must be added to the MP4 file. Dolby provides a tool to do this that can be integrated into an application.</div></div></div></li></ol></div>
+
+
+                    
+<div class="wh_right_tools">
+                        <span class="tools-icon"><button class="wh_hide_highlight" aria-label="Toggle search highlights" title="Toggle search highlights"></button></span>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="Collapse sections" title="Collapse sections"></button>
+                        <div class=" wh_navigation_links "><span id="topic_navigation_links" class="navheader">
+<span class="navprev"><a class="- topic/link link" href="c_signaling_previewing.html" title="HLG signaling and previewing" aria-label="Previous topic: HLG signaling and previewing" rel="prev"></a></span>  
+<span class="navnext"><a class="- topic/link link" href="r_appendix.html" title="Appendix" aria-label="Next topic: Appendix" rel="next"></a></span>  </span></div>
+<!--External resource link-->
+
+                        <span class="tools-icon"><a onClick="window.print()" href="" title="Print this page"><i class="material-icons">print</i></a></span>
+                        
+
+                        <!-- PUBENG-1261 -->
+                        <span class="tools-icon"><a href="r_ov_glossary.html" title="Review the glossary"><i class="material-icons">sort_by_alpha</i></a></span>
+
+                        <!-- PUBENG-1199 -->
+                        
+
+                        <!-- PUBENG-1207 -->
+                        
+                    </div>
+
+                </nav>
+            </div>
+
+            
+
+            <div class="wh_content_area" id="wh_content_area">
+                <div class="row">
+                    
+
+
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+<div id="wh_publication_toc_content">
+
+
+                            <div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="c_introduction-d4029e80771" class="topicref" data-id="c_introduction" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_introduction.html" id="c_introduction-d4029e80771-link">Introduction</a><div class="wh-tooltip">This documentation focuses on video editing of Dolby Vision files in an Android application, and covers support provided in a sample application for critical aspects on both graphics processing unit (GPU) and display processing unit (DPU)  platforms and corresponding Dolby Vision versions.</div></div></div></li><li role="treeitem"><div data-tocid="c_display_management-d4029e80856" class="topicref" data-id="c_display_management" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_display_management.html" id="c_display_management-d4029e80856-link">Display management</a><div class="wh-tooltip">There are two versions of Dolby Vision capture; the version present on a device depends on the display management processing unit or platform used for Dolby Vision. It is critical that an application can determine which version is present, and can run correctly on both versions. Determining the version reliably involves examining the Dolby Vision codecs present on the device.</div></div></div></li><li role="treeitem"><div data-tocid="c_editing_gpu_shaders-d4029e80932" class="topicref" data-id="c_editing_gpu_shaders" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_editing_gpu_shaders.html" id="c_editing_gpu_shaders-d4029e80932-link">Editing using the GPU shaders</a><div class="wh-tooltip">The sample application provides two GPU (graphics processing unit) shaders for editing.  The DPU (display processing unit) is not used for editing, but is used for display.</div></div></div></li><li role="treeitem"><div data-tocid="c_signaling_preview-d4029e81009" class="topicref" data-id="c_signaling_preview" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_signaling_previewing.html" id="c_signaling_preview-d4029e81009-link">HLG signaling and previewing</a><div class="wh-tooltip">Adding support for Dolby Vision editing involves understanding how to process hybrid log-gamma (HLG) frames correctly so that the preview surface is aware of their format.</div></div></div></li><li role="treeitem" class="active"><div data-tocid="c_chapter3-d4029e81083" class="topicref" data-id="c_chapter3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_trimming_remuxing.html" id="c_chapter3-d4029e81083-link">Trimming and remultiplexing</a><div class="wh-tooltip">When trimming directly on an encoded video bitstream to preserve video quality, Dolby Vision multiplexer information must be added to the MP4 file. Dolby provides a tool to do this that can be integrated into an application.</div></div></div></li><li role="treeitem"><div data-tocid="r_appendix-d4029e81158" class="topicref" data-id="r_appendix" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/r_appendix.html" id="r_appendix-d4029e81158-link">Appendix</a></div></div></li><li role="treeitem"><div data-tocid="tocId-d4029e81225" class="topicref glossary" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/r_ov_glossary.html" id="tocId-d4029e81225-link">Glossary</a></div></div></li><li role="treeitem"><div data-tocid="Chunk1633017108-d4029e80571" class="topicref frontmatter" data-id="Chunk1633017108" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108" id="Chunk1633017108-d4029e80571-link">Notices</a></div></div></li></ul></div>
+                        
+
+</div>
+</nav>
+                    
+
+
+
+                    <div class="col-lg-9 col-md-9 col-sm-12" id="wh_topic_body">
+<script type="text/javascript">document.getElementById('wh_topic_body').className += ' fouc';</script>
+<button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true"><span class="close-toc-icon-container"><span class="close-toc-icon"></span></span></button>
+
+                        
+<div class=" wh_topic_content body "><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">Trimming and remultiplexing</h1>
+    
+    <div class="- topic/body concept/conbody body conbody"><p class="- topic/shortdesc shortdesc">When trimming directly on an encoded video bitstream to preserve video quality, <span class="keyword">Dolby Vision</span> multiplexer information must be added to the <span class="keyword">MP4</span> file. <span class="keyword">Dolby</span> provides a tool to do this that can be integrated into an application.</p>
+        <p class="- topic/p p">One the most common editing operations is trimming or removing parts of a clip. One of the main objectives of a trimming algorithm is to trim in a nondestructive manner. With few exceptions, the codecs used by mobile devices to capture content use a form of lossy compression. Consequently, every time a video is transcoded or edited at a pixel level, video quality is degraded. </p>
+        <p class="- topic/p p">Trimming differs from transcoding or editing in that it does not alter pixels. Therefore, an application can preserve video quality by trimming directly on the encoded video bitstream. This approach is taken by the sample application. When transcoding or performing any other operation with a video encoder, the Android multiplexer performs correctly. This includes adding multiplexer metadata to the <span class="keyword">MP4</span> file telling the playback device that the video is <span class="keyword">Dolby Vision</span> and should be interpreted as such. However, this is currently not the case for trimming. Instead of running baseband frames through an encoder, the sample application trims without loss by extracting encoded data from one file and copying it to another file just when the time stamp is within a certain range. Currently, the Android multiplexer does not add <span class="keyword">Dolby Vision</span>
+            <span class="keyword">MP4</span> metadata in this scenario. </p>
+        <p class="- topic/p p"><span class="keyword">Dolby Vision</span> teams are investigating ways to optimize this process. For now, as a work-around, <span class="keyword">Dolby</span> has developed a tool to add <span class="keyword">Dolby Vision</span>
+            <span class="keyword">MP4</span> metadata to the video file. This tool is implemented in C, in the file <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/mp4remuxer.c" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">mp4remuxer.c</span></u></a>. Additionally, there is a JNI method in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/mp4remuxer-jni.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">mp4remuxer-jni.cpp</span></u></a>, which can be called directly from your application. The following code example demonstrates usage of this tool.</p>
+        <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>String inputPath        = this.getMuxer().getOutputPath();
+String outputPath       = "/sdcard" + "/DCIM/" + System.currentTimeMillis() + "_REMUXED.mp4";
+
+int dvProfile           = 8;
+int dvLevel             = fr2lv(this.fps, this.decoder.getDimensions());
+int dvBackCompatibility = 4;
+
+remuxFile(inputPath, outputPath, dvProfile, dvLevel, dvBackCompatibility);
+
+deleteMuxedFile(inputPath);</code></pre>
+        <p class="- topic/p p">This code example adds <span class="keyword">Dolby Vision</span>
+            <span class="keyword">MP4</span> metadata including profile, level, and backward compatibility.  </p>
+        <p class="- topic/p p">The function <code class="+ topic/ph pr-d/codeph ph codeph">fr2lv</code> takes argument values for the frame rate and the resolution of the video and returns the appropriate level. </p>
+        <p class="- topic/p p">The <code class="+ topic/ph pr-d/codeph ph codeph">remuxFile</code> function  adds <span class="keyword">Dolby Vision</span>
+            <span class="keyword">MP4</span> metadata in the remultiplexed output file; the file name begins with a precise system time and ends with <span class="+ topic/ph sw-d/filepath ph filepath">_REMUXED.mp4</span>.</p>
+        <p class="- topic/p p">The <code class="+ topic/ph pr-d/codeph ph codeph">deleteMuxedFile</code> function deletes the input file without <span class="keyword">Dolby Vision</span>
+            <span class="keyword">MP4</span> metadata.</p>
+    </div>
+</article></main></div>
+
+
+                        
+                        
+                        
+
+                        
+
+                    </div>
+                    
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="wh_footer">
+
+  <div class=" footer-container container-fluid">
+
+   <!-- PUBENG-1263 simplify bootstrap to fix footer stubborness  -->
+    <div class=" wh_footer_tiles container-fluid">
+
+        <div class="wh_tile footer-left">
+          <!-- PUBENG-1492 adding black icon for print, and hiding white icon for screens -->
+          <a href="https://www.dolby.com" target="_blank" class=" wh_logo d-print-none "><img src="../oxygen-webhelp/template/images/Dolby_vertical_White.svg" alt="&#xA;            Dolby Vision&#xA;         "/></a>
+          
+        </div>
+
+        <div class="wh_tile footer-center">
+          <div class="copyright-statement">©2023 Dolby Laboratories. All rights reserved.  Dolby and the double-D symbol are registered trademarks of Dolby Laboratories. All other trademarks remain
+        the property of their respective owners.</div>
+        </div>
+
+        <div class="wh_tile footer-right">
+          <div class="support-links"><div role="support-link"><span class="title"><a href="Chunk1633017108.html#Chunk1633017108">Notices</a></span></div></div>
+          1 May 2023<span class="copyright-date"> </span>
+          <div class="confidential"></div>
+        </div>
+
+    </div>
+
+    <!--    <whc:dolby_footer_title class="d-none d-sm-block"/>-->
+
+    <!--
+    
+    <!-\-    <whc:include_html href="${webhelp.fragment.footer}"/>-\->
+    <div class="permissions_date">
+     
+    </div>-->
+
+  </div>
+</footer>
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        <!-- The modal container for images -->
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <!-- Modal Content (The Image) -->
+            <div id="modal_img_container"></div>
+            <!-- Modal Caption (Image Text) -->
+            <div id="caption"></div>
+        </div>
+        
+
+    </body>
+</html>

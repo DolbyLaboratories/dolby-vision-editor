@@ -1,0 +1,35 @@
+<resources>
+
+    <string name="app_name">Video Editor</string>
+
+    <string name="select_video">Choose a video file...</string>
+
+    <string name="heading_effects">EFFECTS</string>
+    <string name="gain">GAIN</string>
+    <string name="offset">OFFSET</string>
+    <string name="contrast">CONTRAST</string>
+    <string name="saturation">SATURATION</string>
+    <string name="wiper">PREVIEW WIPER</string>
+    <string name="filter">FILTER</string>
+    <string name="zebra">ZEBRA</string>
+    <string name="gamut">GAMUT</string>
+
+    <string name="heading_overlay_text">OVERLAY TEXT</string>
+    <string name="enter_text_here">Enter text here</string>
+    <string name="color">COLOR</string>
+    <string name="opacity">OPACITY</string>
+    <string name="position">POSITION</string>
+    <string name="top">Top</string>
+    <string name="middle">Middle</string>
+    <string name="bottom">Bottom</string>
+
+    <string name="heading_export">EXPORT</string>
+    <string name="resolution">RESOLUTION</string>
+    <string name="encoder_format">ENCODER FORMAT</string>
+    <string name="iframe_interval">I-FRAME INTERVAL</string>
+    <string name="trim_only">TRIM ONLY\n(ignores other settings)</string>
+    <string name="export_video">EXPORT VIDEO</string>
+
+    <string name="progress">Processing...</string>
+
+</resources>

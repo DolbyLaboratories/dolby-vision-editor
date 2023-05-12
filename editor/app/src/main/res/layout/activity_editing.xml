@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/bgColor">
+
+    <!-- EFFECTS -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_effects_heading_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:layout_marginBottom="@dimen/layout_margin_large"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tv_heading_effects"
+            android:text="@string/heading_effects"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_reset_effects"
+            style="@style/Custom.HeadingText" />
+
+        <ImageButton
+            android:id="@+id/btn_reset_effects"
+            android:background="@drawable/reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/layout_margin_medium"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_heading_effects"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textGainSlider"
+        android:text="@string/gain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/cl_effects_heading_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/gainSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:value="100.0"
+        android:valueFrom="0.0"
+        android:valueTo="400.0"
+        style="@style/Custom.Slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textGainSlider" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textOffsetSlider"
+        android:text="@string/offset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/gainSlider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/offsetSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:value="0.0"
+        android:valueFrom="-100.0"
+        android:valueTo="100.0"
+        style="@style/Custom.Slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textOffsetSlider" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textContrastSlider"
+        android:text="@string/contrast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/offsetSlider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/contrastSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:value="100.0"
+        android:valueFrom="0.0"
+        android:valueTo="400.0"
+        style="@style/Custom.Slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textContrastSlider" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textSaturationSlider"
+        android:text="@string/saturation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/contrastSlider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/saturationSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:value="100.0"
+        android:valueFrom="0.0"
+        android:valueTo="400.0"
+        style="@style/Custom.Slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textSaturationSlider" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textWiperSlider"
+        android:text="@string/wiper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/saturationSlider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/wiperSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:value="0.0"
+        android:valueFrom="0.0"
+        android:valueTo="100.0"
+        style="@style/Custom.Slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textWiperSlider" />
+
+    <TextView
+        android:id="@+id/tv_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:text="@string/filter"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/wiperSlider"
+        style="@style/Custom.ControlText" />
+
+    <Spinner
+        android:id="@+id/spinner_filter_type"
+        android:layout_width="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_filter"
+        style="@style/Custom.Spinner" />
+
+    <ImageView
+        android:src="@drawable/chevron_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:clickable="false"
+        app:layout_constraintTop_toTopOf="@+id/spinner_filter_type"
+        app:layout_constraintBottom_toBottomOf="@+id/spinner_filter_type"
+        app:layout_constraintEnd_toEndOf="@+id/spinner_filter_type" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_zebra"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:checked="false"
+        android:text="@string/zebra"
+        android:textColor="?attr/textColor"
+        app:switchPadding="5dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/switch_gamut"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_filter_type"
+        style="@style/Custom.Switch" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_gamut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:checked="false"
+        android:text="@string/gamut"
+        android:textColor="?attr/textColor"
+        app:switchPadding="5dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/switch_zebra"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_filter_type"
+        style="@style/Custom.Switch" />
+
+    <!-- OVERLAY TEXT -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_overlay_text_heading_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/layout_section_spacing"
+        android:layout_marginBottom="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/switch_gamut"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tv_heading_overlay_text"
+            android:text="@string/heading_overlay_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_reset_overlay_text"
+            style="@style/Custom.HeadingText" />
+
+        <ImageButton
+            android:id="@+id/btn_reset_overlay_text"
+            android:background="@drawable/reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/layout_margin_medium"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_heading_overlay_text"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <EditText
+        android:id="@+id/simpleEditText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginEnd="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        android:hint="@string/enter_text_here"
+        android:maxLength="30"
+        android:textColor="?attr/textColor"
+        android:textColorHint="@color/gray"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cl_overlay_text_heading_bar" />
+
+    <TextView
+        android:id="@+id/tv_text_color"
+        android:text="@string/color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_medium"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/simpleEditText"
+        style="@style/Custom.ControlText" />
+
+    <Spinner
+        android:id="@+id/spinner_text_color"
+        android:layout_width="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_text_color"
+        style="@style/Custom.Spinner" />
+
+    <ImageView
+        android:src="@drawable/chevron_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:clickable="false"
+        app:layout_constraintTop_toTopOf="@+id/spinner_text_color"
+        app:layout_constraintBottom_toBottomOf="@+id/spinner_text_color"
+        app:layout_constraintEnd_toEndOf="@+id/spinner_text_color" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textOpacitySlider"
+        android:text="@string/opacity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        android:layout_marginTop="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_text_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/opacitySlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/layout_margin_small"
+        android:value="0.5"
+        android:valueFrom="0.0"
+        android:valueTo="1.0"
+        style="@style/Custom.Slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textOpacitySlider" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/textPosition"
+        android:text="@string/position"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/layout_margin_large"
+        app:layout_constraintTop_toBottomOf="@+id/opacitySlider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Custom.ControlText" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupTextPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/textPosition"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" >
+
+        <RadioButton
+            android:id="@+id/radioTop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/top"
+            android:checked="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Custom.RadioButton" />
+
+        <RadioButton
+            android:id="@+id/radioMiddle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/middle"
+            app:layout_constraintTop_toBottomOf="@+id/radioTop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Custom.RadioButton" />
+
+        <RadioButton
+            android:id="@+id/radioBottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bottom"
+            app:layout_constraintTop_toBottomOf="@+id/radioMiddle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Custom.RadioButton" />
+
+    </RadioGroup>
+
+    <!-- SPACING -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroupTextPosition"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

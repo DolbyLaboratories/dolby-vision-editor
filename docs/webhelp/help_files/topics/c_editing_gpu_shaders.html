@@ -1,0 +1,377 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" data-whc_version="24.1">
+    <head><link rel="shortcut icon" href="../oxygen-webhelp/template/images/favicon.ico"/><link rel="icon" href="../oxygen-webhelp/template/images/favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="generator" content="DITA-OT"/><meta name="description" content="The sample application provides two graphics processing unit (graphics processing unit) shaders for editing. The display processing unit (display processing unit) is not used for editing, but is used for display."/><meta name="prodname" content="Dolby Vision"/><meta name="version" content="Version 1.0"/><meta name="rights" content="© 2023 &#xA;                Dolby Laboratories&#xA;            "/>        
+      <title>Editing using the graphics processing unit shaders</title><!--  Generated with Oxygen version 24.1, build number 2022041410.  --><meta name="wh-path2root" content="../"/><meta name="wh-source-relpath" content="guide/c_editing_gpu_shaders.xml"/><meta name="wh-out-relpath" content="topics/c_editing_gpu_shaders.html"/>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/lib/bootstrap/css/bootstrap.min.css"/>
+    
+    <link rel="stylesheet" href="../oxygen-webhelp/lib/jquery-ui/jquery-ui.min.css"/>
+    
+    <!-- Template default styles  -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic-page.css?buildId=2022041410"/>
+    
+    
+    <script src="../oxygen-webhelp/lib/jquery/jquery-3.5.1.min.js"></script>
+    
+    <script data-main="../oxygen-webhelp/app/topic-page.js" src="../oxygen-webhelp/lib/requirejs/require.js"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/SourceSansPro.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/material-icons/material-icons.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/css/dolby-webhelp.css?buildId=2022041410"/></head>
+
+    <body id="c_editing_gpu_shaders" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">Jump to main content</a>
+        
+        
+        
+
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        
+        
+        
+        <div class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <!--
+                            This component will be generated when the next parameters are specified in the transformation scenario:
+                            'webhelp.logo.image' and 'webhelp.logo.image.target.url'.
+                            See: http://oxygenxml.com/doc/versions/17.1/ug-editor/#topics/dita_webhelp_output.html.
+                    -->
+                    <!-- Hide the log in the banner -->
+                    <!--<whc:webhelp_logo class="d-none d-sm-block"/>-->
+                    <a href="../index.html"><div class=" wh_publication_title "><span class="prodname">
+            <span class="keyword">Dolby Vision</span>
+         </span><div><span class="subtitle">Content Editing for Third-Party Developers</span></div></div></a>
+                    
+                    <nav class=" wh_top_menu " aria-label="Menu Container"><ul role="menubar" aria-label="Menu"><li role="menuitem"><span id="c_introduction-d4029e80771-mi" data-tocid="c_introduction-d4029e80771" data-state="leaf" class=" topicref " data-id="c_introduction"><span class="title"><a href="../topics/c_introduction.html">Introduction</a></span></span></li><li role="menuitem"><span id="c_display_management-d4029e80856-mi" data-tocid="c_display_management-d4029e80856" data-state="leaf" class=" topicref " data-id="c_display_management"><span class="title"><a href="../topics/c_display_management.html">Display management</a></span></span></li><li role="menuitem"><span id="c_editing_gpu_shaders-d4029e80932-mi" data-tocid="c_editing_gpu_shaders-d4029e80932" data-state="leaf" class=" topicref " data-id="c_editing_gpu_shaders"><span class="title"><a href="../topics/c_editing_gpu_shaders.html">Editing using the GPU shaders</a></span></span></li><li role="menuitem"><span id="c_signaling_preview-d4029e81009-mi" data-tocid="c_signaling_preview-d4029e81009" data-state="leaf" class=" topicref " data-id="c_signaling_preview"><span class="title"><a href="../topics/c_signaling_previewing.html">HLG signaling and previewing</a></span></span></li><li role="menuitem"><span id="c_chapter3-d4029e81083-mi" data-tocid="c_chapter3-d4029e81083" data-state="leaf" class=" topicref " data-id="c_chapter3"><span class="title"><a href="../topics/c_trimming_remuxing.html">Trimming and remultiplexing</a></span></span></li><li role="menuitem"><span id="r_appendix-d4029e81158-mi" data-tocid="r_appendix-d4029e81158" data-state="leaf" class=" topicref " data-id="r_appendix"><span class="title"><a href="../topics/r_appendix.html">Appendix</a></span></span></li><li role="menuitem"><span id="tocId-d4029e81225-mi" data-tocid="tocId-d4029e81225" data-state="leaf" class=" topicref glossary"><span class="title"><a href="../topics/r_ov_glossary.html">Glossary</a></span></span></li><li role="menuitem"><span id="Chunk1633017108-d4029e80571-mi" data-tocid="Chunk1633017108-d4029e80571" data-state="leaf" class=" topicref frontmatter" data-id="Chunk1633017108"><span class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108">Notices</a></span></span></li></ul></nav>
+                </div>
+
+                <!-- The menu button for mobile devices is copied in the output only when the 'webhelp.show.top.menu' parameter is set to 'yes' -->
+                <button type="button" data-target="#wh_top_menu_and_indexterms_link" id="wh_menu_mobile_button" data-toggle="collapse" class="navbar-toggler collapsed wh_toggle_button" aria-expanded="false" aria-label="Toggle menu" aria-controls="wh_top_menu_and_indexterms_link">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <!-- Expand/Collapse publishing TOC 
+                             The menu button for mobile devices is copied in the output only when the publication TOC is available
+                        -->
+                <button type="button" data-target="#wh_publication_toc" id="wh_toc_button" data-toggle="collapse" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                    <span class="toggler-icon">
+                        <i class="material-icons">view_headline</i>
+                    </span>
+                </button>
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                <!--<whc:webhelp_indexterms_link/>-->
+                <!-- Search form -->
+                <div class=" wh_product_numbers "><span class="production-version">Version 1.0</span></div>
+                <div class=" wh_search_input navbar-form wh_main_page_search " role="form">
+                    
+                    <div class="wh_welcome"></div>          
+                    <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="Search... " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="Search query" required="required"/><button type="submit" class="wh_search_button" aria-label="Search..."><span>Search...</span></button></div></form>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</header>
+
+
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+<div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>Home</span></a></span></li><li class="active"><div class="topicref" data-id="c_editing_gpu_shaders"><div class="title"><a href="../topics/c_editing_gpu_shaders.html">Editing using the GPU shaders</a><div class="wh-tooltip">The sample application provides two GPU (graphics processing unit) shaders for editing.  The DPU (display processing unit) is not used for editing, but is used for display.</div></div></div></li></ol></div>
+
+
+                    
+<div class="wh_right_tools">
+                        <span class="tools-icon"><button class="wh_hide_highlight" aria-label="Toggle search highlights" title="Toggle search highlights"></button></span>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="Collapse sections" title="Collapse sections"></button>
+                        <div class=" wh_navigation_links "><span id="topic_navigation_links" class="navheader">
+<span class="navprev"><a class="- topic/link link" href="c_display_management.html" title="Display management" aria-label="Previous topic: Display management" rel="prev"></a></span>  
+<span class="navnext"><a class="- topic/link link" href="c_signaling_previewing.html" title="HLG signaling and previewing" aria-label="Next topic: HLG signaling and previewing" rel="next"></a></span>  </span></div>
+<!--External resource link-->
+
+                        <span class="tools-icon"><a onClick="window.print()" href="" title="Print this page"><i class="material-icons">print</i></a></span>
+                        
+
+                        <!-- PUBENG-1261 -->
+                        <span class="tools-icon"><a href="r_ov_glossary.html" title="Review the glossary"><i class="material-icons">sort_by_alpha</i></a></span>
+
+                        <!-- PUBENG-1199 -->
+                        
+
+                        <!-- PUBENG-1207 -->
+                        
+                    </div>
+
+                </nav>
+            </div>
+
+            
+
+            <div class="wh_content_area" id="wh_content_area">
+                <div class="row">
+                    
+
+
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+<div id="wh_publication_toc_content">
+
+
+                            <div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="c_introduction-d4029e80771" class="topicref" data-id="c_introduction" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_introduction.html" id="c_introduction-d4029e80771-link">Introduction</a><div class="wh-tooltip">This documentation focuses on video editing of Dolby Vision files in an Android application, and covers support provided in a sample application for critical aspects on both graphics processing unit (GPU) and display processing unit (DPU)  platforms and corresponding Dolby Vision versions.</div></div></div></li><li role="treeitem"><div data-tocid="c_display_management-d4029e80856" class="topicref" data-id="c_display_management" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_display_management.html" id="c_display_management-d4029e80856-link">Display management</a><div class="wh-tooltip">There are two versions of Dolby Vision capture; the version present on a device depends on the display management processing unit or platform used for Dolby Vision. It is critical that an application can determine which version is present, and can run correctly on both versions. Determining the version reliably involves examining the Dolby Vision codecs present on the device.</div></div></div></li><li role="treeitem" class="active"><div data-tocid="c_editing_gpu_shaders-d4029e80932" class="topicref" data-id="c_editing_gpu_shaders" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_editing_gpu_shaders.html" id="c_editing_gpu_shaders-d4029e80932-link">Editing using the GPU shaders</a><div class="wh-tooltip">The sample application provides two GPU (graphics processing unit) shaders for editing.  The DPU (display processing unit) is not used for editing, but is used for display.</div></div></div></li><li role="treeitem"><div data-tocid="c_signaling_preview-d4029e81009" class="topicref" data-id="c_signaling_preview" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_signaling_previewing.html" id="c_signaling_preview-d4029e81009-link">HLG signaling and previewing</a><div class="wh-tooltip">Adding support for Dolby Vision editing involves understanding how to process hybrid log-gamma (HLG) frames correctly so that the preview surface is aware of their format.</div></div></div></li><li role="treeitem"><div data-tocid="c_chapter3-d4029e81083" class="topicref" data-id="c_chapter3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_trimming_remuxing.html" id="c_chapter3-d4029e81083-link">Trimming and remultiplexing</a><div class="wh-tooltip">When trimming directly on an encoded video bitstream to preserve video quality, Dolby Vision multiplexer information must be added to the MP4 file. Dolby provides a tool to do this that can be integrated into an application.</div></div></div></li><li role="treeitem"><div data-tocid="r_appendix-d4029e81158" class="topicref" data-id="r_appendix" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/r_appendix.html" id="r_appendix-d4029e81158-link">Appendix</a></div></div></li><li role="treeitem"><div data-tocid="tocId-d4029e81225" class="topicref glossary" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/r_ov_glossary.html" id="tocId-d4029e81225-link">Glossary</a></div></div></li><li role="treeitem"><div data-tocid="Chunk1633017108-d4029e80571" class="topicref frontmatter" data-id="Chunk1633017108" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108" id="Chunk1633017108-d4029e80571-link">Notices</a></div></div></li></ul></div>
+                        
+
+</div>
+</nav>
+                    
+
+
+
+                    <div class="col-lg-6 col-md-9 col-sm-12" id="wh_topic_body">
+<script type="text/javascript">document.getElementById('wh_topic_body').className += ' fouc';</script>
+<button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true"><span class="close-toc-icon-container"><span class="close-toc-icon"></span></span></button><button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true"><span class="close-toc-icon-container"><span class="close-toc-icon"></span></span></button>
+
+                        
+<div class=" wh_topic_content body "><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">Editing using the <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> shaders</h1>
+    
+    <div class="- topic/body concept/conbody body conbody"><p class="- topic/shortdesc shortdesc">The sample application provides two <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> (<span class="keyword">graphics processing unit</span>) shaders for editing.  The <a href="g_6650.html" title="display processing unit: A hardware component of a Qualcomm system-on-chip (SoC) designed for accelerated processing of visual data represented as pixels."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">DPU</dfn></a> (<span class="keyword">display processing unit</span>) is not used for editing, but is used for display.</p>
+        <p class="- topic/p p">Editing supports either <a href="g_6588.html" title="ITU-R Recommendation BT.709: A standard with a color space, for characterizing and encoding high-definition television."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">BT.709</dfn></a> or <a href="g_6587.html" title="ITU-R Recommendation BT.2020: A standard with a color space, for characterizing and encoding ultra-high-definition television."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">BT.2020</dfn></a> color standards.  The correct color standard is signaled by the input decoder. The corresponding color space conversions are selected automatically in the editing <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> shader.</p>
+        <div class="- topic/p p">Using these <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> shaders involves: <ul class="- topic/ul ul">
+                <li class="- topic/li li">Choosing a shader</li>
+
+                <li class="- topic/li li">Selecting a processing approach (single-pixel or quad-pixel)</li>
+
+                <li class="- topic/li li">Using uniform blocks and parameters</li>
+
+                <li class="- topic/li li">Adjusting image texture dimensions</li>
+
+                <li class="- topic/li li">Managing resources for shader compilers</li>
+
+                <li class="- topic/li li">Timing <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> execution</li>
+
+                <li class="- topic/li li">Debugging</li>
+
+            </ul>
+        </div>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_locating" data-ofbid="c_editing_gpu_shaders__section_locating"><h2 class="- topic/title title sectiontitle">Locating the shaders</h2>
+            
+            <p class="- topic/p p">The two <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> shaders and their editing functions are in subfolders of <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">editor\app\src\main</span></u></a>. </p>
+            <p class="- topic/p p">C++ code for the shaders is in the <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">cpp</span></u></a> subfolder. </p>
+            <p class="- topic/p p">Java code for an input surface and a filter simulation is in the <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/java/com/dolby/capture" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">java/com/dolby/capture</span></u></a> subfolder. </p>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_compute_copy" data-ofbid="c_editing_gpu_shaders__section_compute_copy"><h2 class="- topic/title title sectiontitle">The compute and copy shaders</h2>
+            
+            <div class="- topic/p p">The sample code includes two shaders as basic components: <ul class="- topic/ul ul" id="c_editing_gpu_shaders__ul_ybb_cdm_wwb" data-ofbid="c_editing_gpu_shaders__ul_ybb_cdm_wwb">
+                    <li class="- topic/li li">A compute shader that implements all editing functionality</li>
+
+                    <li class="- topic/li li">A simple vertex and fragment copy shader that renders output in a manner compatible with Android rendering</li>
+
+                </ul></div>
+            <p class="- topic/p p">The compute shader provides efficiencies that offset the incremental costs of using the copy shader, and performs better than a single vertex and fragment copy shader that implements all operations. </p>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_using_compute" data-ofbid="c_editing_gpu_shaders__section_using_compute"><h2 class="- topic/title title sectiontitle">Using the compute shader and its processing approaches</h2>
+            
+            <div class="- topic/p p">The compute shader has two <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> editing functions, defined in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShadersText.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShadersText.cpp</span></u></a>, which implement two approaches to processing: <ul class="- topic/ul ul" id="c_editing_gpu_shaders__ul_vws_jdm_wwb" data-ofbid="c_editing_gpu_shaders__ul_vws_jdm_wwb">
+                    <li class="- topic/li li">The <code class="+ topic/ph pr-d/codeph ph codeph">editPixel</code> function in <code class="+ topic/ph pr-d/codeph ph codeph">EditShaders::mEditLibrary</code> implements the single-pixel approach, a conventional programming of the <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> for processing a single pixel at a time.</li>
+
+                    <li class="- topic/li li">The <code class="+ topic/ph pr-d/codeph ph codeph">editPixel</code> function in <code class="+ topic/ph pr-d/codeph ph codeph">EditShaders::mEditLibraryQuad</code> implements the quad-pixel approach, which processes four pixels at a time for better performance and lower power consumption.</li>
+
+                </ul>
+            </div>
+            <div class="- topic/p p">The compute shader engine allows a bitmap image to be composited into the video stream. The bitmap image must meet the following requirements for blending: <ul class="- topic/ul ul" id="c_editing_gpu_shaders__ul_dzv_mdm_wwb" data-ofbid="c_editing_gpu_shaders__ul_dzv_mdm_wwb">
+                    <li class="- topic/li li">The bitmap image must be a four channel <span class="keyword">RGB</span>A image. <p class="- topic/p p">In the sample code, the A channel is used as an alpha key to control the blending of the bitmap with the video.</p></li>
+
+                    <li class="- topic/li li">The bitmap image must have the same dimensions as the video stream.</li>
+
+                </ul></div>
+            <div class="- topic/p p">There are two means of configuring and controlling the compute shader: <ul class="- topic/ul ul">
+                    <li class="- topic/li li">By <code class="+ topic/ph pr-d/codeph ph codeph">#define</code> directives (when the shader text is assembled and compiled)</li>
+
+                    <li class="- topic/li li">By run-time controls passed in a uniform block</li>
+
+                </ul>
+            </div>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_single_pixel_approach" data-ofbid="c_editing_gpu_shaders__section_single_pixel_approach"><h2 class="- topic/title title sectiontitle">The single-pixel approach</h2>
+            
+            <p class="- topic/p p">The compute shader edit function for the single-pixel approach processes one pixel at a time.</p>
+            <p class="- topic/p p">The single-pixel approach is included primarily for illustration of editing functions, but could be used in the copy shader (if needed for some application). </p>
+            <p class="- topic/p p">The single-pixel edit function is declared as follows, with its implementation in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShadersText.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShadersText.cpp</span></u></a>: </p>
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code>vec4 editPixel( vec4 originalPixel, vec4 compositePixel, vec2 vidCoords, vec2 fCoords)</code></pre>
+            <p class="- topic/p p">In the shader code, if the input is <span class="keyword">YUV</span>, it is converted to <span class="keyword">RGB</span> by the <code class="+ topic/ph pr-d/codeph ph codeph">icsc</code> function. If the editing is to be performed in <a href="g_6587.html" title="ITU-R Recommendation BT.2020: A standard with a color space, for characterizing and encoding ultra-high-definition television."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">BT.2020</dfn></a>, input conversion is performed by the <code class="+ topic/ph pr-d/codeph ph codeph">sRGB2L</code> function and compositing texture by the <code class="+ topic/ph pr-d/codeph ph codeph">L2HLG</code> function, to upconvert to <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a>. </p>
+            <p class="- topic/p p">Edit functions are performed using both <span class="keyword">YUV</span> and <span class="keyword">RGB</span>. The <code class="+ topic/ph pr-d/codeph ph codeph">editYUV</code> and <code class="+ topic/ph pr-d/codeph ph codeph">editRGB</code> functions are used to convert pixels back and forth in the editing domain. The operations in these functions vary depending on whether the editing is performed in <a href="g_6588.html" title="ITU-R Recommendation BT.709: A standard with a color space, for characterizing and encoding high-definition television."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">BT.709</dfn></a> or <a href="g_6587.html" title="ITU-R Recommendation BT.2020: A standard with a color space, for characterizing and encoding ultra-high-definition television."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">BT.2020</dfn></a>. Gain and offset are applied in <span class="keyword">RGB</span>; contrast and saturation are applied in <span class="keyword">YUV</span>. A rudimentary gamut limitation is performed before <span class="keyword">YUV</span> override values are then applied. </p>
+            <p class="- topic/p p">Switching back to <span class="keyword">RGB</span>, the text or graphics compositing texture is then blended with the input using the A channel in the compositing image. </p>
+            <p class="- topic/p p">Four wipers between original and processed values are applied, although only the left wiper is exposed in the Java interface. A zebra pattern is then applied to mark both range and gamut excursions. </p>
+            <p class="- topic/p p">Finally, the output color-space conversion is performed, using a static <span class="keyword">look-up table</span> (<a href="g_6448.html" title="look-up table: In the context of Dolby Vision, a series of precalcuated display management data stored in a static text file that saves processing time and cycles for display management."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">LUT</dfn></a>) (see <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/hlg_lut_500_p3_33.h" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">hlg_lut_500_p3_33.h</code></u></a> and <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/hlg_lut_500_p3_33.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">hlg_lut_500_p3_33.cpp</code></u></a>). </p>
+            <p class="- topic/p p">Color space changes are performed conventionally, using 3×3 matrices and matrix and vector multiplication. Because OpenGL is column-major rather than row-major, the matrices are transposed as compared to C++. </p>
+            <div class="- topic/p p">The color-space conversion function used with the single-pixel approach is declared as follows with its implementation in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShadersText.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShadersText.cpp</span></u></a>:<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_f43_cdk_pwb" data-ofbid="c_editing_gpu_shaders__codeblock_f43_cdk_pwb"><code>vec4 ColorSpaceConversion(mat3 csc, vec4 pixel) </code></pre>
+            </div>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_quad_pixel_approach" data-ofbid="c_editing_gpu_shaders__section_quad_pixel_approach"><h2 class="- topic/title title sectiontitle">The quad-pixel approach</h2>
+            
+            <p class="- topic/p p">The compute shader edit function for the quad-pixel approach processes four pixels at a time. </p>
+            <p class="- topic/p p">The quad-pixel edit function is declared as follows with its implementation in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShadersText.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShadersText.cpp</span></u></a>: </p>
+            <div class="- topic/p p">
+                <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_k2d_xdt_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_k2d_xdt_nwb"><code>mat4 editPixel( mat4 originalPixel, mat4 compositePixel, mat2x4 vidCoords, mat4x2 fCoords)</code></pre>
+            </div>
+            <p class="- topic/p p">A <code class="+ topic/ph pr-d/codeph ph codeph">mat4</code> matrix is used as a convenient container to hold four pixels. This makes it easy to pass four pixels as inputs to and outputs from functions in the shader. </p>
+            <p class="- topic/p p">OpenGL is column-major, meaning that color components are adjacent when sorted by component, producing convenient <code class="+ topic/ph pr-d/codeph ph codeph">vec4</code> vectors. For example, <code class="+ topic/ph pr-d/codeph ph codeph">mtx[0]</code> is a <code class="+ topic/ph pr-d/codeph ph codeph">vec4</code> of the red (or luma) components for the four pixels. Processing by color components permits better utilization of the four vectorized computation channels in the <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a>. </p>
+            <p class="- topic/p p">Four pixels are read at a time into the <code class="+ topic/ph pr-d/codeph ph codeph">mat4</code> matrix, effectively sorted by pixel. The matrix is then transposed to sort by component for processing. Finally, the matrix is transposed back to sort by pixel to write out the pixels. </p>
+            <p class="- topic/p p">Color-space changes still use the same 3×3 matrices, but instead process four pixels at a time, sorted by component. </p>
+            <div class="- topic/p p">The color-space conversion function used with the quad-pixel approach is declared as follows with its implementation in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShadersText.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShadersText.cpp</span></u></a>:<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_gf4_ydt_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_gf4_ydt_nwb"><code>mat4 ColorSpaceConversion(mat3 csc, mat4 pixels)</code></pre></div>
+            <p class="- topic/p p">The computation can be accomplished using just six fused multiply-and-add operations and three multiply instructions. </p>
+            <p class="- topic/p p">Other subordinate functions are modified accordingly, although some still process pixels individually where an efficient quad-pixel approach may not exist. </p>
+            <p class="- topic/p p">For both the initial <span class="keyword">RGB</span> and <span class="keyword">YUV</span> offset, gain, contrast and saturation calculations, four pixels can be computed using the same number of instructions as processing three of them individually. </p>
+            <p class="- topic/p p">The <code class="+ topic/ph pr-d/codeph ph codeph">Gamut</code> function illustrates more complicated processing of four pixels at a time, sorted by component. The <code class="+ topic/ph pr-d/codeph ph codeph">Zebra</code> function illustrates how to apply logical conditions over four pixels at a time without any branching. </p>
+            <p class="- topic/p p">The forced <span class="keyword">YUV</span> override functions take the same number of instructions to process four pixels as it takes to process one. </p>
+            <p class="- topic/p p">Conventional 4×4 homogenous transform matrices can be applied to the input and compositor images, if desired. Full 3D digital video effects engines can drive these transform matrices. </p>
+            <div class="- topic/p p">There are two compute shader controls for selecting the quad-pixel approach instead of the single-pixel approach: <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_btn_zdt_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_btn_zdt_nwb"><code>// Compute shader configuration options 
+int mComputeShaderQuadFactor    = 4; 
+eShaderEditMode mShaderEditMode = eShaderEditModeFourPixels;</code></pre>
+            </div>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_selecting_approach" data-ofbid="c_editing_gpu_shaders__section_selecting_approach"><h2 class="- topic/title title sectiontitle">Selecting a processing approach</h2>
+            
+            <p class="- topic/p p">The default approach of the compute shader is the quad-pixel approach. </p>
+            <div class="- topic/p p">Setting the shader edit mode as follows instead selects the single-pixel approach: <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_hrv_12t_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_hrv_12t_nwb"><code>eShaderEditMode mShaderEditMode = eShaderEditModeSinglePixel;</code></pre>Changing the pixel factor from 4 to 1 as follows also selects the single-pixel approach: <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_a34_b2t_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_a34_b2t_nwb"><code>int mComputeShaderQuadFactor = 1; </code></pre></div>
+            <p class="- topic/p p">The <code class="+ topic/ph pr-d/codeph ph codeph">mComputeShaderQuadFactor</code> pixel factor configures each <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> core to read and to write either one or four pixels. When <code class="+ topic/ph pr-d/codeph ph codeph">mComputeShaderQuadFactor=1</code>, only the single-pixel edit function can be used. However, when <code class="+ topic/ph pr-d/codeph ph codeph">mComputeShaderQuadFactor=4</code>, either function may be used; the single-pixel edit function can be called four times, or the four-pixel edit function can be called once. </p>
+            <div class="- topic/p p">Because the quad-pixel approach processes four pixels at a time, the call to the <code class="+ topic/ph pr-d/codeph ph codeph">glDispatchCompute</code> function must be modified accordingly, multiplying by the pixel factor <code class="+ topic/ph pr-d/codeph ph codeph">mComputeShaderQuadFactor</code> as in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShaders.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShaders.cpp</span></u></a>: <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_sv4_32t_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_sv4_32t_nwb"><code>glDispatchCompute( DivUp(Width(), mWorkGroupSizeX * mComputeShaderQuadFactor), 
+                   DivUp(Height(), mWorkGroupSizeY), 
+                   1); </code></pre></div>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_using_copy" data-ofbid="c_editing_gpu_shaders__section_using_copy"><h2 class="- topic/title title sectiontitle">Using the copy shader</h2>
+            
+            <p class="- topic/p p">The vertex and fragment copy shader is implemented by methods of the <code class="+ topic/ph pr-d/codeph ph codeph">Renderer</code> class, which inherits from <code class="+ topic/ph pr-d/codeph ph codeph">EditShaders</code> and is defined in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/Renderer.h" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">Renderer.h</span></u></a> and <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/Renderer.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">Renderer.cpp</span></u></a>. 
+            </p>
+            <p class="- topic/p p">The copy shader uses a frame buffer object to communicate necessary control information to the smartphone screen in playback mode, and to the encoder in transcode mode. This frame buffer object communication is the primary reason for having the copy shader. </p>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_using_uniform_blocks" data-ofbid="c_editing_gpu_shaders__section_using_uniform_blocks"><h2 class="- topic/title title sectiontitle">Using uniform blocks and parameters with shaders</h2>
+            
+            <p class="- topic/p p">The block class <code class="+ topic/ph pr-d/codeph ph codeph">EditShadersUniformBlock</code> is defined in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShaders.h" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShaders.h</span></u></a>. The content of a block of this class must exactly match the declaration of the uniform <code class="+ topic/ph pr-d/codeph ph codeph">EditShadersUniformBlock</code> defined in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EditShadersText.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">EditShadersText.cpp</span></u></a> in both size and packing. </p>
+            <p class="- topic/p p">Note that integers are passed as floats, and in accordance with the relevant <a href="g_1930.html" title="Institute of Electrical and Electronics Engineers"><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">IEEE</dfn></a> standard (<a href="g_1930.html" title="Institute of Electrical and Electronics Engineers"><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">IEEE</dfn></a> 754), integers are represented exactly within the range of the mantissa. </p>
+            <p class="- topic/p p">Also, the <code class="+ topic/ph pr-d/codeph ph codeph">EffectParameters</code>
+                <code class="+ topic/ph pr-d/codeph ph codeph">enum</code> declaration must exactly match the order of the parameters in the uniform block. This allows the uniform block data to be treated as a float array and addressed by enumerated value. By using the same <code class="+ topic/ph pr-d/codeph ph codeph">enum</code> declaration, code written in Java can also access these parameters efficiently by index. </p>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_adjusting_texture" data-ofbid="c_editing_gpu_shaders__section_adjusting_texture"><h2 class="- topic/title title sectiontitle">Adjusting image texture dimensions</h2>
+            
+            <p class="- topic/p p">In some cases, the input image texture dimensions may be larger than the active area of the image itself. This can happen when the original input video was encoded with dimensions that were not evenly divisible by the macro block size of the encoder. Because the compute shader uses an input texture sampler that scales the unit interval across the input texture dimensions, not the active image area, an adjustment is made to the sampler input.</p>
+            <div class="- topic/p p">The input texture dimensions can be accessed by instance methods of the <code class="+ topic/ph pr-d/codeph ph codeph">Simulation::HardwareBuffer</code> class, and passed in the call to the renderer <code class="+ topic/ph pr-d/codeph ph codeph">RunEditComputeShader</code> method: <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_d1c_gcp_qwb" data-ofbid="c_editing_gpu_shaders__codeblock_d1c_gcp_qwb"><code>JNI_GLOBAL::renderer-&gt;RunEditComputeShader(inputImage.getBufferTexture(),
+                                           inputImage.getHardwareBufferWidth(),
+                                           inputImage.getHardwareBufferHeight()); </code></pre>These dimensions are used to compute adjustment ratios that are passed in the compute shader uniform block.</div>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_managing_resources" data-ofbid="c_editing_gpu_shaders__section_managing_resources"><h2 class="- topic/title title sectiontitle">Managing resources for shader compilers</h2>
+            
+            <div class="- topic/p p">One of the more difficult details of handling multiple error exits from a shader compiler is releasing the intermediate OpenGL resources that may otherwise accumulate. For this, a lambda function is passed to the constructor of a <code class="+ topic/ph pr-d/codeph ph codeph">ScopeExitFunction</code> declared and implemented in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/Tools.h" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">Tools.h</span></u></a>. The following code from <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/Tools.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">Tools.cpp</span></u></a> is an example of its usage:<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_editing_gpu_shaders__codeblock_azy_rys_nwb" data-ofbid="c_editing_gpu_shaders__codeblock_azy_rys_nwb"><code>// Used by the cleanup lambda
+bool   guilty      = true; // guilty until proven innocent
+GLuint main_shader = GL_INVALID_VALUE, vertex_shader = GL_INVALID_VALUE;
+
+ScopeExitFunction cleanup([&amp;]() 
+{             
+    DeleteShader(main_shader); 
+            
+    DeleteShader(vertex_shader); 
+            
+    if (guilty) DeleteProgram(program); 
+            
+});</code></pre> The <code class="+ topic/ph pr-d/codeph ph codeph">cleanup</code> lambda function is called at any point that the shader goes out of scope, and the lambda capture closure allows the <code class="+ topic/ph pr-d/codeph ph codeph">cleanup</code> function to access the local handles for the OpenGL resources that need to be released. This approach works even for uncaught exceptions when destructors are called as the stack is unwound. </div>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_timing_gpu" data-ofbid="c_editing_gpu_shaders__section_timing_gpu"><h2 class="- topic/title title sectiontitle">Timing <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> execution</h2>
+            
+            <p class="- topic/p p">The class <code class="+ topic/ph pr-d/codeph ph codeph">ScopeTimerGPU</code> defined in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/Tools.h" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">Tools.h</span></u></a> is used for performance measurement of <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> operations on a platform. </p>
+        </section>
+        <section class="- topic/section section" id="c_editing_gpu_shaders__section_compiler_errors" data-ofbid="c_editing_gpu_shaders__section_compiler_errors"><h2 class="- topic/title title sectiontitle">Debugging shader compiler errors</h2>
+            
+            <p class="- topic/p p">The <code class="+ topic/ph pr-d/codeph ph codeph">CompileAndLinkShader</code> function defined in <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/Tools.h" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">Tools.h</span></u></a> is useful for debugging. </p>
+            <p class="- topic/p p">The function quits on any error and outputs the most diagnostic information possible, especially for compiler errors. By default, in debug mode, source code for all shaders is output with line numbers, which is useful for shader source code that is spliced together at run time. </p>
+            <p class="- topic/p p">The error generated by OpenGL usually includes a line number. When working in Android Studio, double-click the line number in <a class="- topic/xref xref" href="https://developer.android.com/tools/logcat" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u">Logcat</u></a>, then type <span class="+ topic/ph ui-d/uicontrol ph uicontrol"><span class="keyword">Crtl-F</span></span>, and an up arrow navigates to the erroneous line. </p>
+        </section>
+    </div>
+</article></main></div>
+
+
+                        
+                        
+                        
+
+                        
+
+                    </div>
+                    
+
+
+
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-3 d-none d-lg-block navbar d-print-none">
+<div id="wh_topic_toc_content">
+
+
+                            <div class=" wh_topic_toc "><div class="wh_topic_label">On this page</div><ul><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_locating" data-tocid="c_editing_gpu_shaders__section_locating">Locating the shaders</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_compute_copy" data-tocid="c_editing_gpu_shaders__section_compute_copy">The compute and copy shaders</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_using_compute" data-tocid="c_editing_gpu_shaders__section_using_compute">Using the compute shader and its processing approaches</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_single_pixel_approach" data-tocid="c_editing_gpu_shaders__section_single_pixel_approach">The single-pixel approach</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_quad_pixel_approach" data-tocid="c_editing_gpu_shaders__section_quad_pixel_approach">The quad-pixel approach</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_selecting_approach" data-tocid="c_editing_gpu_shaders__section_selecting_approach">Selecting a processing approach</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_using_copy" data-tocid="c_editing_gpu_shaders__section_using_copy">Using the copy shader</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_using_uniform_blocks" data-tocid="c_editing_gpu_shaders__section_using_uniform_blocks">Using uniform blocks and parameters with shaders</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_adjusting_texture" data-tocid="c_editing_gpu_shaders__section_adjusting_texture">Adjusting image texture dimensions</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_managing_resources" data-tocid="c_editing_gpu_shaders__section_managing_resources">Managing resources for shader compilers</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_timing_gpu" data-tocid="c_editing_gpu_shaders__section_timing_gpu">Timing GPU execution</a></div></li><li class="section-item"><div class="section-title"><a href="#c_editing_gpu_shaders__section_compiler_errors" data-tocid="c_editing_gpu_shaders__section_compiler_errors">Debugging shader compiler errors</a></div></li></ul></div>
+                        
+
+</div>
+</nav>
+                    
+
+
+
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="wh_footer">
+
+  <div class=" footer-container container-fluid">
+
+   <!-- PUBENG-1263 simplify bootstrap to fix footer stubborness  -->
+    <div class=" wh_footer_tiles container-fluid">
+
+        <div class="wh_tile footer-left">
+          <!-- PUBENG-1492 adding black icon for print, and hiding white icon for screens -->
+          <a href="https://www.dolby.com" target="_blank" class=" wh_logo d-print-none "><img src="../oxygen-webhelp/template/images/Dolby_vertical_White.svg" alt="&#xA;            Dolby Vision&#xA;         "/></a>
+          
+        </div>
+
+        <div class="wh_tile footer-center">
+          <div class="copyright-statement">©2023 Dolby Laboratories. All rights reserved.  Dolby and the double-D symbol are registered trademarks of Dolby Laboratories. All other trademarks remain
+        the property of their respective owners.</div>
+        </div>
+
+        <div class="wh_tile footer-right">
+          <div class="support-links"><div role="support-link"><span class="title"><a href="Chunk1633017108.html#Chunk1633017108">Notices</a></span></div></div>
+          1 May 2023<span class="copyright-date"> </span>
+          <div class="confidential"></div>
+        </div>
+
+    </div>
+
+    <!--    <whc:dolby_footer_title class="d-none d-sm-block"/>-->
+
+    <!--
+    
+    <!-\-    <whc:include_html href="${webhelp.fragment.footer}"/>-\->
+    <div class="permissions_date">
+     
+    </div>-->
+
+  </div>
+</footer>
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        <!-- The modal container for images -->
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <!-- Modal Content (The Image) -->
+            <div id="modal_img_container"></div>
+            <!-- Modal Caption (Image Text) -->
+            <div id="caption"></div>
+        </div>
+        
+
+    </body>
+</html>

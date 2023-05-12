@@ -1,0 +1,3476 @@
+@charset "UTF-8";
+@import url("../fonts/Avenir/Avenir.css");
+@import url("../fonts/material-icons/material-icons.css");
+/* Copying colors from IGX code examples */
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * ------------------------------------------------------------------
+ *  
+ * Breadcrumb
+ *  
+ */
+.topic_breadcrumb_links {
+  position: absolute;
+}
+
+.topic_breadcrumb_link + .topic_breadcrumb_link::before {
+  content: "/";
+  margin-left: 10px;
+  margin-right: 0px;
+}
+
+.topic_breadcrumb_link .expanded-symbol {
+  display: none;
+}
+
+.wh_breadcrumb {
+  margin: 1em 0 2em 0;
+}
+.wh_breadcrumb .topicref {
+  white-space: nowrap;
+  /* PUBENG-2287 to fix webkit's weird handling of word-break */
+}
+.wh_breadcrumb .topicref .wh-tooltip {
+  font-size: 0.9em;
+  line-height: 1em;
+  min-width: 10em;
+  max-width: 25%;
+  max-height: 1em;
+  top: 1px;
+  margin: 0 0 0 5ch;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em;
+  transition: 0.5s opacity 1s;
+}
+.wh_breadcrumb .topicref .wh-tooltip .shortdesc {
+  text-align: center;
+}
+.wh_breadcrumb ol { /* PUBENG-1263 */
+  color: #293033;
+}
+.wh_breadcrumb ol a,
+.wh_breadcrumb ol a:hover {
+  color: #293033;
+}
+.wh_breadcrumb li {
+  display: inline;
+}
+.wh_breadcrumb li.active a {
+  color: #3b48fe;
+}
+
+.wh_right_tools {
+  margin: 1em 0 2em 0;
+}
+.wh_right_tools:focus {
+  outline: none; /* PUBENG-1304 */
+}
+.wh_right_tools button {
+  color: #293033; /* PUBENG-1304 */
+}
+
+.wh_tools {
+  background-color: #ffffff;
+  padding: 0 2em; /* PUBENG-1263 */
+  margin: 0;
+  min-height: 42px; /* PUBENG-1412 */
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 100%);
+  /*margin: 1em 0 1em;*/
+  /*    border-bottom: 2px solid;*/
+  /*    border-bottom-color: $silver300;*/
+}
+.wh_tools span.tools-icon:has(a[href=".html"]) {
+  display: none;
+}
+.wh_tools span.tools-icon a[href=".html"] {
+  display: none;
+}
+
+/* PUBENG-3373 */
+.glyphicon-arrow-left:before, .oxy-icon-arrow-left:before {
+  content: "u";
+  padding-left: 0.3em;
+}
+
+.webhelp_expand_collapse_sections[data-next-state=collapsed]:after {
+  content: "k";
+  padding-left: 0.3em;
+}
+
+.wh_hide_highlight:after {
+  padding-left: 0.3em;
+  font-family: "oXygen WebHelp";
+  content: "j";
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+/* PUBENG-1263 */
+/* PUBENG-1304 */
+.wh_navigation_links {
+  margin-left: -0.2em;
+  margin-right: 0.2em;
+}
+
+/* PUBENG-1304 */
+.wh_navigation_links .navprev,
+.wh_navigation_links .navnext {
+  margin: 0 0 0 0.4em;
+}
+.wh_navigation_links .navprev a:hover:before,
+.wh_navigation_links .navnext a:hover:before {
+  background: #3b48fe;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navparent,
+.navprev,
+.navnext {
+  background-image: none !important;
+  margin-left: 0px;
+  padding-right: 0px;
+  text-indent: 0px;
+}
+
+@media only screen and (max-width: 500px) {
+  .wh_breadcrumb {
+    display: none;
+  }
+  .wh_right_tools {
+    margin-top: 1em !important;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .wh_right_tools {
+    margin-top: 1em;
+    margin-left: -0.5em;
+    margin-right: 0;
+    margin-bottom: 0.5em;
+    padding-bottom: 1.5em;
+  }
+  .wh_breadcrumb {
+    margin: 1em 0 0 0;
+  }
+  .wh_tools {
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 800px) {
+  #breadcrumbLinks {
+    font-size: 14px;
+  }
+  #breadcrumbLinks {
+    font-size: 10px;
+  }
+}
+@media print {
+  .wh_breadcrumb, .wh_breadcrumb > ol {
+    display: block !important;
+  }
+}
+/* https://jira.dolby.net/jira/browse/TCOMMS-3408 */
+/* Added overflow-y handling to remove unnecessary vertical scrollbars in some codeblocks */
+code,
+.filepath,
+.systemoutput,
+.msgph {
+  font-size: 90%;
+}
+
+.title .codeph,
+.title .userinput {
+  background-color: transparent;
+}
+
+pre {
+  background-color: #eff0f1; /* PUBENG-1252 */
+  border: transparent;
+  border-radius: 8pt;
+  color: #293033;
+  display: block;
+  font-family: consolas, monospace;
+  font-size: 90%;
+  line-height: 1.42857143;
+  margin: 5px 0 10px;
+  padding: 10px;
+  word-wrap: anywhere;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: pre-wrap !important;
+  max-height: none !important;
+}
+pre.screen {
+  background-color: #293033;
+  border-right-color: #293033;
+  border-bottom-color: #293033;
+  border-top-color: #293033;
+  border-left-color: #293033;
+  color: #ffffff;
+  font-size: 12px;
+  margin: 5px 0 10px;
+  padding: 9.5px;
+  font-family: consolas, monospace;
+  border-radius: 8pt;
+  border-top-width: 0px;
+  border-bottom-width: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-left-style: solid;
+  border-bottom-style: solid;
+}
+pre code {
+  word-break: break-all;
+}
+
+.msgblock,
+.codeblock {
+  background-color: #eff0f1; /* PUBENG-1252 */
+  border: transparent;
+  border-radius: 8pt;
+  color: #293033;
+  display: block;
+  font-family: consolas, monospace;
+  font-size: 12px;
+  line-height: 1.42857143;
+  margin: 5px 0 10px;
+  padding: 10px;
+  word-wrap: anywhere;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: pre-wrap !important;
+  max-height: none !important;
+  /* Codeblock copy to clipboard action */
+}
+.msgblock code,
+.codeblock code {
+  background-color: #eff0f1; /* PUBENG-1252 */
+  max-height: none !important;
+  font-size: 12px;
+  margin: 0px;
+  padding: 0px;
+  font-family: monospace;
+}
+.msgblock code.code__line,
+.codeblock code.code__line {
+  counter-increment: line;
+  position: relative;
+  padding: 0 0 0 3em;
+  margin: 0;
+  font-size: 12px;
+}
+.msgblock code.code__line::before,
+.codeblock code.code__line::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* PUBENG-1786 align pdf and html notation */
+  content: counter(line, decimal-leading-zero) " ";
+  color: #bec3c6;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.msgblock .copyTooltip,
+.codeblock .copyTooltip {
+  /* background: $ultraviolet url("../img/Copy.png") no-repeat 85% 50%;  PUBENG-1252 */
+  background: #3b48fe no-repeat 85% 50%; /* PUBENG-3086 */
+  background-size: 15px;
+  z-index: 10;
+  width: 3.75em;
+  height: 2.3em;
+  margin-top: -0.6em;
+  color: #eff0f1;
+  border: 1px solid #3b48fe; /* PUBENG-1252 */
+  right: 2em;
+  position: absolute;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 15px;
+  border-radius: 4pt 8pt 4pt 4pt; /* was 5px 5px, PUBENG-1252 */
+}
+.msgblock .copyTooltip:hover,
+.codeblock .copyTooltip:hover {
+  opacity: 1;
+}
+.msgblock .tooltip.top .tooltip-arrow,
+.codeblock .tooltip.top .tooltip-arrow {
+  border-top-color: #293033;
+}
+.msgblock .tooltip-inner,
+.codeblock .tooltip-inner {
+  width: 8em;
+  padding: 0.5em 0.5em;
+  background-color: #293033;
+  font-size: 1.4em;
+}
+
+.screen {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: pre-wrap !important;
+  max-height: none !important;
+}
+
+.dd pre {
+  max-height: none !important;
+}
+
+.filepath {
+  color: #293033 !important;
+}
+
+/* TCOMMS-3061 this breaks long filepaths and codephrases to fit with other content - may break inside words though   */
+/* Aug 28, 2019 Firefox does it good by default (breaks at slash) but Chrome and Safari don't break, thus the setting */
+/* Firefox ignores the setting. To be improved if I find a way to mimic FF behaviour in Chrome and Safari...          */
+samp,
+samp.codeph,
+pre.codeblock {
+  /* PUBENG-2790 PUBENG-3064 break-word was causing issues with TOCs */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+span.filepath {
+  overflow-wrap: anywhere;
+}
+
+/* END OF TCOMMS-3061 */
+.codeph {
+  color: #293033;
+  background-color: #eff0f1; /* PUBENG-1252 */
+  font-family: consolas, monospace;
+  word-break: break-word;
+}
+
+.userinput {
+  background-color: #eff0f1; /* PUBENG-1252 */
+  color: inherit;
+}
+
+.apiname {
+  color: #293033;
+  background-color: #eff0f1; /* PUBENG-1252 */
+  font-family: consolas, monospace;
+}
+
+.varname {
+  font-weight: 600;
+  font-style: italic;
+  color: #293033;
+}
+
+.cmdname {
+  font-weight: 600;
+  font-family: consolas, monospace;
+}
+
+.option {
+  color: #293033;
+  background-color: #eff0f1; /* PUBENG-1252 */
+  font-weight: 600;
+  font-family: consolas, monospace;
+}
+
+.copyTooltip::before {
+  content: " Copy ";
+  line-height: 2.2em;
+  text-indent: 0.5em;
+}
+
+/* This removes the tooltip feature from tables, which misbehaves due to CSS positioning */
+td .copyTooltip {
+  display: none;
+}
+
+/* adding code line numbers with dolby-code-linenumbers.js and @outputclass=show-line-numbers */
+.show-line-numbers {
+  counter-reset: line;
+}
+
+@media (max-width: 500px) {
+  pre codeblock {
+    margin-right: 0px;
+  }
+}
+.fouc {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.wh_main_page {
+  background-color: #293033;
+}
+
+#wh_topic_container {
+  background-color: #ffffff;
+  padding-bottom: 10em;
+}
+
+#wh_content_area {
+  transition: opacity 500ms;
+  min-height: 75vh;
+}
+
+.wh_topic_content,
+.wh_content_area {
+  color: #293033;
+  overflow-wrap: break-word; /* PUBENG-2260 */
+}
+
+.wh_main_page .wh_content_area {
+  background-color: #ffffff;
+  min-height: 80vh;
+}
+
+.wh_topic_content .title.topictitle1 {
+  color: #293033;
+  font-size: 2em;
+  margin-top: 0em; /* PUBENG-1263 */
+  padding-top: 0em !important; /* PUBENG-1263 */
+  line-height: 1.3em;
+  margin-bottom: 0.2em;
+}
+
+/* PUBENG-1331 */
+.topic > .title {
+  padding-left: 0px;
+}
+
+.p {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0);
+  margin-right: 0px;
+  margin-left: 0px;
+  color: #293033;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+/* PUBENG-1331 */
+article {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+main article:first-child {
+  margin-top: 0em;
+}
+
+.section {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.shortdesc {
+  background-color: transparent;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  padding: 0px;
+  margin: 1em 0;
+  color: #293033;
+}
+
+caption {
+  white-space: normal;
+}
+
+h1.title,
+h2.title {
+  color: inherit;
+  background-color: inherit;
+  text-shadow: none;
+  padding: inherit;
+  box-shadow: inherit;
+}
+
+/* Dfn in h1 and h2 should maintain the header colour */
+/* PUBENG-1314 adjusted to current color settings */
+h1 a dfn.term,
+h1 a dfn.term.cap_first_letter {
+  color: #293033 !important;
+  text-decoration-line: none !important;
+}
+
+h2 a dfn.term,
+h2 a dfn.term.cap_first_letter {
+  color: #293033 !important;
+  text-decoration-line: none !important;
+}
+
+.title.topictitle1 {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  background-color: transparent;
+  padding-top: 12px;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  padding-left: 9px;
+  font-size: 28px;
+  text-shadow: transparent 1px 0px 0px;
+  border-right-color: #3b48fe;
+  border-bottom-color: #3b48fe;
+  margin-left: -10px;
+  box-shadow: transparent 0px 1px 2px 0px;
+  border-top-color: #293033;
+  border-left-color: #293033;
+  /*    color: #104680;*/
+  /*    aligned with Responsive */
+  color: #293033;
+  line-height: 1.1em;
+  text-align: initial;
+  text-decoration: none;
+  background-repeat: repeat;
+  background-attachment: scroll;
+  background-position: top left;
+  margin-top: 0px;
+  margin-bottom: 5px;
+  border-top-width: 0px;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-width: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+  border-bottom-style: solid;
+}
+
+.topictitle2,
+h2.sectiontitle,
+h2.sectiontitle:not(.tasklabel) {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  background-color: #ffffff;
+  padding-top: 0px;
+  /*padding-bottom: 0px;*/
+  padding-right: 5px;
+  padding-left: 0px;
+  /*margin-bottom: 5px;*/
+  margin-top: 2em;
+  font-size: 20px;
+  text-shadow: transparent 0px 0px 0px;
+  box-shadow: transparent 0px 1px 0px 0px;
+  color: #293033;
+  line-height: 1.1em;
+  text-align: initial;
+  text-decoration: none;
+  border-bottom: 1px solid #dfe1e3; /*PUBENG-1824*/
+  padding-bottom: 5px !important;
+  margin-bottom: 10px !important;
+}
+
+.topictitle3,
+h3.sectiontitle,
+h3.sectiontitle:not(.tasklabel) {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 5px;
+  margin-top: 1em;
+  padding-left: 0px;
+  text-align: initial;
+  text-decoration: none;
+}
+
+h4.sectiontitle, h4.sectiontitle:not(.tasklabel), h5.sectiontitle, h5.sectiontitle:not(.tasklabel), h6.sectiontitle, h6.sectiontitle:not(.tasklabel) {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 5px;
+  margin-top: 0.5em;
+  padding-left: 0px;
+  text-align: initial;
+  text-decoration: none;
+}
+
+.topictitle4,
+.topictitle5,
+.topictitle6 {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  text-align: initial;
+  text-decoration: none;
+}
+
+@media only screen and (max-width: 767px) {
+  #wh_topic_container {
+    padding-bottom: 12em;
+  }
+}
+@media only screen and (max-width: 500px) {
+  #wh_topic_container {
+    padding-bottom: 15em !important;
+  }
+}
+/*
+ * ------------------------------------------------------------------
+ *
+ * Footer
+ * 
+ */
+.wh_footer {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif; /* the font needs to be properly defined with fallbacks */
+  text-align: center;
+  font-size: 10px;
+  padding: 1em;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  color: #ffffff;
+  background: #293033 none;
+  z-index: 9999;
+  max-height: 220px;
+}
+
+.wh_footer a {
+  color: #ffffff;
+}
+
+.footer-container .wh_tile {
+  background-color: inherit;
+  font-weight: 400;
+  min-height: 20px;
+}
+
+.wh_footer_tiles {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  align-content: stretch;
+  flex-wrap: wrap;
+}
+
+/* PUBENG-1263 */
+.footer-left {
+  margin: 0;
+  flex: 1 2 100px;
+  min-width: 150px;
+}
+
+/* PUBENG-1263 */
+.footer-center {
+  margin: 0;
+  flex: 1 1 50%;
+}
+
+/* PUBENG-1263 */
+.footer-right {
+  text-align: right;
+  margin: 0;
+  flex: 1 2 150px;
+  min-width: 150px;
+}
+
+.support-links a, .support-links a:link, .support-links a:link:visited {
+  color: #ffffff !important;
+}
+.support-links a:hover, .support-links a:link:hover, .support-links a:link:visited:hover {
+  text-decoration: underline !important;
+}
+
+footer .doc_title {
+  margin-top: 5px;
+  font-weight: 800;
+  padding-left: 5px;
+}
+
+/* 3 separate classes to reflect the same footer structure in HTML Classic as HTML Responsive */
+footer .copyright-statement,
+footer .footer-release-date,
+footer .permissions-statement {
+  padding-left: 5px;
+}
+
+footer .navfooter {
+  margin-top: 1em;
+  margin-left: 1em;
+}
+
+.footer a {
+  background-color: transparent;
+  color: #ffffff;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10.8px;
+}
+
+/* PUBENG-1263 */
+@media (max-width: 767px) {
+  .footer-right {
+    padding-top: 0;
+    text-align: right;
+  }
+  .footer-center {
+    text-align: right;
+  }
+  /* footer .wh_tile {
+      width: 100%;
+      display: block;
+  } */
+}
+/* PUBENG-1263 */
+@media (max-width: 500px) {
+  .footer-right {
+    text-align: left;
+  }
+  .footer-center {
+    text-align: left;
+  }
+  .footer-left {
+    padding-bottom: 0;
+  }
+  footer .copyright-statement {
+    padding-left: 0;
+  }
+}
+.wh_header_flex_container {
+  padding: 1em 0;
+}
+
+/* PUBENG-1263 */
+.wh_logo_and_publication_title_container {
+  flex: 3;
+}
+
+/* PUBENG-1263 */
+.wh_logo_and_publication_title {
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.wh_publication_title {
+  color: #ffffff;
+  font-size: 1.5em;
+  text-decoration: none !important;
+  text-align: left;
+  /* margin: .9em .2em .2em; */ /* PUBENG-1263 */
+  line-height: 1em;
+  font-family: "Avenir Next LT Pro Demi", "Open Sans", Calibri, Geneva, sans-serif;
+}
+.wh_publication_title a {
+  display: inline-block;
+  margin: 0;
+}
+.wh_publication_title .subtitle {
+  font-size: 0.8em;
+}
+
+/* PUBENG-1122 separate product version and cinema revision from document title */
+.wh_product_numbers {
+  padding: 0.3em 0.3em 0 0; /* PUBENG-1263 fixing PUBENG-1122 */
+  /*    font-size: 0.8em; */
+}
+
+.wh_top_menu {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  color: #ffffff;
+  padding-top: 1em;
+  /* TCOMMS-3040: Dfn in page header and on tiles should maintain their colour and font */
+}
+.wh_top_menu a,
+.wh_top_menu a:link,
+.wh_top_menu a:link:hover,
+.wh_top_menu a:hover,
+.wh_top_menu a:visited,
+.wh_top_menu a:visited:hover {
+  color: #ffffff;
+  line-height: 1.4em;
+  padding: 0 2em 0 0;
+}
+.wh_top_menu a:hover {
+  text-decoration: underline;
+}
+.wh_top_menu a var,
+.wh_top_menu a span,
+.wh_top_menu a code {
+  color: #ffffff;
+  background-color: inherit;
+}
+.wh_top_menu li {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.wh_top_menu ul ul,
+.wh_top_menu ul li:hover {
+  color: #ffffff;
+  background-color: #293033;
+}
+.wh_top_menu ul ul li {
+  border-top-color: #000000;
+  width: 270px;
+  text-transform: none;
+}
+.wh_top_menu ul ul li a:hover,
+.wh_top_menu ul ul li a:hover:link {
+  color: #ffffff;
+  background: #000000;
+  text-decoration: none;
+}
+.wh_top_menu a dfn.term,
+.wh_top_menu a dfn.term.cap_first_letter {
+  color: #ffffff !important;
+  text-decoration-line: none !important;
+}
+
+@media only screen and (min-width: 767px) {
+  .wh_top_menu ul ul li.has-children:after {
+    content: "»";
+    line-height: 2em;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .wh_top_menu ul ul li.has-children:after {
+    display: none;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .wh_top_menu ul ul li.has-children:before {
+    content: "ˇ";
+    position: relative;
+    top: 1.5em;
+    left: 250px;
+    line-height: 0em;
+    display: block;
+  }
+}
+.wh_top_menu ul li span.header-toc * {
+  display: inline-block !important;
+}
+
+.wh_top_menu ul li span:not(.header-toc) {
+  display: none;
+}
+
+#wh_menu_mobile_button {
+  display: none;
+}
+
+.wh_top_menu_and_indexterms_link {
+  display: block !important;
+}
+
+@media only screen and (max-width: 767px) {
+  .wh_search_textfield {
+    width: 75% !important;
+    margin-left: -0.2em;
+  }
+  .wh_top_menu {
+    display: none;
+  }
+  .wh_header_flex_container {
+    padding: 1em 0 0 0;
+  }
+}
+#wh_topic_body .material-icons {
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#wh_topic_body h1 .material-icons {
+  padding-right: 0.2em;
+  vertical-align: text-bottom;
+  font-size: 1.3em;
+}
+#wh_topic_body .header-toc-children div.topicref {
+  display: flex;
+}
+#wh_topic_body .header-toc-children div.title {
+  display: inline-block;
+  color: #293033;
+}
+#wh_topic_body .header-toc-children div.title a {
+  color: #293033;
+  font-weight: bolder;
+}
+#wh_topic_body .header-toc-children .material-icons {
+  font-size: 2em;
+  padding-right: 0.5em;
+}
+#wh_topic_body .header-toc-children li {
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #dfe1e3;
+  margin-bottom: 0.5em;
+}
+#wh_topic_body .header-toc-children li:hover .material-icons {
+  background: #3b48fe;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#wh_topic_body .header-toc-children li:hover a {
+  color: #3b48fe;
+}
+#wh_topic_body article article:not(:first-child) h1 i {
+  display: none;
+}
+
+.xml .hljs-meta {
+  color: silver;
+}
+
+.hljs-comment, .hljs-quote {
+  color: #007400;
+}
+
+.hljs-attribute, .hljs-keyword, .hljs-literal, .hljs-name, .hljs-selector-tag, .hljs-tag {
+  color: #aa0d91;
+}
+
+.hljs-template-variable, .hljs-variable {
+  color: #3f6e74;
+}
+
+.hljs-code, .hljs-meta .hljs-string, .hljs-string {
+  color: #c41a16;
+}
+
+.hljs-link, .hljs-regexp {
+  color: #3b48fe;
+}
+
+.hljs-bullet, .hljs-number, .hljs-symbol, .hljs-title {
+  color: #1c00cf;
+}
+
+.hljs-meta, .hljs-section {
+  color: #643820;
+}
+
+.hljs-built_in, .hljs-class .hljs-title, .hljs-params, .hljs-title.class_, .hljs-type {
+  color: #5c2699;
+}
+
+.hljs-attr {
+  color: #836c28;
+}
+
+.hljs-subst {
+  color: #000;
+}
+
+.hljs-formula {
+  background-color: #eee;
+  font-style: italic;
+}
+
+.hljs-addition {
+  background-color: #baeeba;
+}
+
+.hljs-deletion {
+  background-color: #ffc8bd;
+}
+
+.hljs-selector-class, .hljs-selector-id {
+  color: #9b703f;
+}
+
+.hljs-doctag, .hljs-strong {
+  font-weight: 700;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+object,
+img,
+video {
+  max-width: 100%;
+}
+
+object[data^="https://web.microsoftstream.com"],
+object[data^="https://dolby.sharepoint.com"] {
+  width: 100%;
+  min-height: 360px;
+}
+
+img.inline, .image:not(img[height]).inline {
+  height: 18px;
+  margin-top: -3px;
+}
+
+object.inline {
+  height: 18px;
+  vertical-align: text-bottom;
+  margin-bottom: 0px;
+}
+
+.image {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.p .image {
+  background-color: transparent;
+}
+
+:not(p) > .image {
+  background-color: transparent;
+  vertical-align: text-bottom; /* PUBENG-1961 */
+}
+
+p :not(figure) > .image,
+p :not(figure).image,
+li :not(figure) > .image,
+li :not(figure).image,
+span :not(figure).image {
+  /* height: 1.2em; PUBENG-1961, disabled because inline/break logic more nuanced than originally thought */
+  border-radius: 0px !important; /* PUBENG-1961 */
+}
+
+.fig.fignone {
+  background-color: transparent;
+}
+
+.figcap,
+.figcapcenter,
+.figcapright {
+  background-color: transparent;
+  color: #293033;
+  font-style: italic;
+  margin-top: 0.5em; /* TCOMMS-1263, was 1em */
+  margin-bottom: 0.5em;
+  /* margin-bottom: -1em; TCOMMS-2157 */
+}
+
+.figdesc {
+  display: block;
+}
+
+.close {
+  opacity: 1;
+  color: #3b48fe;
+}
+.close:hover, .close:focus {
+  color: #fb3e79;
+  opacity: 1 !important;
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: border-box;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+img.break + br {
+  display: none;
+}
+
+br + img.break {
+  margin-top: 0.5em;
+}
+
+br + object {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+div.p object {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+p video {
+  margin-top: 0.5em;
+}
+
+div.embed-responsive {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.mermaid-embed svg {
+  max-width: 100%;
+}
+
+.ul {
+  background-color: transparent;
+  margin-right: 0px;
+  margin-left: 1em;
+  color: #293033;
+  list-style-type: disc;
+  padding-left: 0.5em;
+}
+
+li {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+article li p.p:first-of-type { /* PUBENG-1331 */
+  margin-top: 0px;
+  margin-bottom: 0.2em;
+}
+article li p.p {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+article li p ~ p:last-of-type { /* PUBENG-1331 */
+  margin-top: 0.2em;
+  margin-bottom: 0.5em;
+}
+
+/* .example, */
+/* .example * { */
+/* background-color: transparent; PUBENG-1263 */
+/* font-style: italic !important; PUBENG-1263 */
+/* font-size: 13.3333px; */
+/* } */
+.table .ul {
+  /* TCOMMS-3383 Remove excessive bulletpoint spacing inside table */
+  margin-left: 0px;
+  padding-left: 1.5em;
+}
+
+.ol {
+  background-color: transparent;
+  margin-right: 0px;
+  margin-left: 1em;
+  color: #293033;
+  padding-left: 0.5em;
+}
+.ol.lower-alpha {
+  list-style-type: lower-alpha;
+}
+.ol.upper-alpha {
+  list-style-type: upper-alpha;
+}
+
+.dl {
+  background-color: transparent;
+  font-size: 15px;
+  margin-right: 0px;
+  margin-left: 0px;
+  color: #293033;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.dt {
+  background-color: transparent;
+  color: #293033;
+  padding-top: 0px;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.dd {
+  background-color: transparent;
+  color: #293033;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 15px;
+  /* TCOMMS-2738 */
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  margin-left: 25px;
+}
+
+/* TCOMMS-2738 */
+.ddexpand {
+  margin-top: 0em;
+}
+
+.directory, .ul.directory {
+  font-family: consolas, monospace;
+  font-size: 12px;
+  background-color: #eff0f1; /* PUBENG-1252 */
+  margin: 5px 0px 10px;
+  padding: 10px;
+  border-radius: 8pt;
+}
+.directory .ul, .ul.directory .ul { /* TCOMMS-3387 */
+  background-color: transparent;
+  margin: 0px;
+  color: #293033;
+  list-style-type: none;
+}
+.directory li, .ul.directory li {
+  list-style: none;
+}
+.directory ul, .ul.directory ul { /* PUBENG-1681 */
+  padding: 0px;
+}
+
+/* PUBENG-1681 */
+.directory-marker {
+  margin-right: 3em;
+}
+
+/* PUBENG-1681 */
+.directory-marker:last-of-type {
+  margin-right: 0px;
+}
+
+/* PUBENG-1681 */
+.directory-marker:last-of-type:after {
+  content: "____";
+}
+
+.wh_tile_text:hover .wh_tile_title a, .wh_tile_text:hover .wh_tile_title a:link {
+  color: #3b48fe;
+}
+.wh_tile_text:hover .wh_tile_image a .material-icons {
+  background: #3b48fe;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.wh_tile[data-id=release-notes] .wh_tile_shortdesc {
+  display: none;
+}
+.wh_tile[data-id=release-notes] .wh_tile_shortdesc a:hover {
+  text-decoration: underline;
+}
+.wh_tile[data-id=release-notes] .wh_tile_text:nth-of-type(2) {
+  margin-top: 1em;
+}
+.wh_tile[data-id=release-notes] .wh_tile_text:nth-of-type(2)::before {
+  content: "Details about this release.";
+}
+
+.wh_tiles {
+  padding-top: 2em;
+  padding-bottom: 10em;
+  min-height: 75vh;
+  justify-content: left; /* PUBENG-1303 */
+}
+.wh_tiles .wh_tile {
+  border-right: 2px solid #dfe1e3; /* PUBENG-1303 */
+}
+.wh_tiles .wh_tile .wh_tile_title a:hover {
+  text-decoration: none !important;
+}
+
+.wh_tile_image {
+  font-size: 40px;
+  padding-right: 0.2em; /* PUBENG-1263 */
+  padding-bottom: 0.2em;
+  float: left;
+  vertical-align: baseline;
+  margin-bottom: -0.4em; /* PUBENG-1263 */
+}
+.wh_tile_image i { /* PUBENG-1263 fixing gradient icons in safari */
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.wh_tile_title {
+  font-size: 20px;
+  font-family: "Avenir Next LT Pro Demi", "Open Sans", Calibri, Geneva, sans-serif;
+  text-align: left;
+  text-decoration: none;
+  width: 90%; /*  PUBENG-1794 */
+  vertical-align: baseline;
+  padding-top: 8px; /* PUBENG-1303 */
+}
+.wh_tile_title a, .wh_tile_title a:link {
+  color: #293033;
+}
+.wh_tile_title a:hover, .wh_tile_title a:link:hover {
+  color: #3b48fe;
+}
+.wh_tile_title span {
+  display: inline;
+}
+
+.wh_tile_shortdesc {
+  margin-top: 1em;
+  text-align: center;
+  color: #293033;
+  font-size: 0.9em;
+  text-align: left;
+  padding-left: 0px; /* PUBENG-1303 */
+}
+.wh_tile_shortdesc a:hover {
+  color: #3b48fe;
+}
+
+.wh_tile_text:after {
+  background: linear-gradient(to bottom, rgba(236, 242, 249, 0), rgb(236, 242, 249) 75%);
+}
+
+.wh_fill_div_tile {
+  display: block;
+  height: 100%;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 
+You can style some of the tiles in a special way. 
+Example:
+.wh_tiles *[data-id='getting_started']{
+ background-color:gray;
+}
+*/
+/* TCOMMS-3475 Table font size should not vary between regular paragraphs and elements like <uicontrol>, <sl>, or <ul> */
+/* Moving this code to dolby-skins.css */
+/*div,
+td {
+ font-size: inherit;
+}*/
+@media only screen and (max-width: 767px) {
+  .wh_tiles {
+    padding-bottom: 12em;
+  }
+  .wh_tile > div {
+    height: auto;
+  }
+  /* PUBENG-1303 */
+  .wh_tiles .wh_tile {
+    border-right: none;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .wh_tiles {
+    padding-bottom: 15em !important;
+  }
+}
+/* PUBENG-1303 */
+@media (min-width: 1200px) {
+  .wh_tiles .wh_tile:nth-of-type(3n) {
+    border-right: none;
+  }
+}
+@media (max-width: 1200px) {
+  /* PUBENG-1303 */
+  .wh_tiles .wh_tile:nth-of-type(2n) {
+    border-right: none;
+  }
+}
+blockquote {
+  padding: 10px 20px;
+  margin: 0 0 20px;
+  font-size: 13.33px;
+  border-left: 5px solid #eff0f1;
+}
+blockquote p:only-child {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+blockquote p:first-child {
+  margin-top: 0px;
+}
+blockquote p:last-child {
+  margin-bottom: 0px;
+}
+
+.note .material-icons {
+  padding-right: 5px;
+}
+
+.note .restriction-symbol {
+  color: #ff0000;
+}
+
+.cautiontitle .caution-symbol {
+  font-size: 20px;
+  color: #FFD000;
+  padding-right: 5px;
+}
+
+.dangertitle .danger-symbol {
+  font-size: 20px;
+  color: #ff0000;
+  padding-right: 5px;
+}
+
+.danger {
+  font-weight: bold;
+}
+
+.note .warning-symbol {
+  color: #ff0000;
+}
+
+.note .important-symbol {
+  color: #FFD000;
+}
+
+/* .closed-symbol, */
+/* .expanded-symbol, */
+/* .node-symbol { */
+/* } */
+.note-icons {
+  height: 1.3em;
+  vertical-align: bottom;
+  padding-right: 3px;
+  padding-bottom: 0px;
+}
+
+.attentiontitle,
+.cautiontitle,
+.dangertitle,
+.importanttitle,
+.notetitle,
+.tiptitle,
+.troubletitle,
+.remembertitle,
+.restrictiontitle,
+.warningtitle,
+.noticetitle,
+.fastpathtitle {
+  background-image: none !important;
+  font-weight: bold; /*PUBENG-1263, fixing and adding fastpathtitle class */
+  padding: 10px 0;
+}
+
+/*    https://jira.dolby.net/jira/browse/TCOMMS-3488
+    Enable <note> element with 'othertype' attribute set to 'electrical'.*/
+.electricaltitle {
+  padding: 0.5em 0 0 0.5em;
+  margin-bottom: -1em;
+  border-top: 1px #293033 solid;
+  font-weight: bold;
+  margin-top: 1em;
+}
+
+/*.electrical-symbol {
+    padding-right: 5px;
+}*/
+.electrical {
+  padding: 0 0 10px;
+  border-bottom: 1px #293033 solid;
+  font-weight: normal;
+  margin-bottom: 1em;
+}
+
+/*    https://jira.dolby.net/jira/browse/PUBENG-1911
+    Enable <note> element with 'othertype' attribute set to 'hightemperature'.*/
+.hightemperaturetitle {
+  padding: 0.5em 0 0 0.5em;
+  margin-bottom: -1em;
+  border-top: 1px #293033 solid;
+  font-weight: bold;
+  margin-top: 1em;
+}
+
+/*.hightemperature-symbol {
+    padding-right: 5px;
+}*/
+.hightemperature {
+  padding: 0 0 10px;
+  border-bottom: 1px #293033 solid;
+  font-weight: normal;
+  margin-bottom: 1em;
+}
+
+.warningtitle {
+  margin-bottom: -1em;
+  padding-bottom: 0px;
+  padding-top: 0.5em;
+}
+
+.warning {
+  border-top: 1px #ff0000 solid;
+  padding: 5px 0 5px;
+  border-bottom: 1px #ff0000 solid;
+}
+
+.cautiontitle {
+  margin-bottom: -1em;
+  border-top: 1px #FFD000 solid;
+  padding: 0.5em 0 0 0.5em;
+  margin-top: 1em;
+}
+
+.caution {
+  padding: 0 0 10px;
+  border-bottom: 1px #FFD000 solid;
+  font-weight: normal;
+}
+
+.dangertitle {
+  margin-bottom: -1em;
+  border-top: 1px #ff0000 solid;
+  padding: 0.5em 0 0 0.5em;
+  margin-top: 1em;
+}
+
+.danger {
+  padding: 0 0 10px;
+  border-bottom: 1px #ff0000 solid;
+  font-weight: normal;
+}
+
+/*  https://jira.dolby.net/jira/browse/PUBENG-1403 
+ *  hide default note icons */
+div.note {
+  background-image: none;
+  padding: 0 0.5em;
+  background-position: inherit;
+}
+
+div.note.danger,
+div.note.caution,
+div.note.warning,
+div.note.electrical,
+div.note.hightemperature {
+  padding-bottom: 0.5em;
+}
+
+div.note.warning {
+  padding-top: 0.5em;
+}
+
+body *:focus {
+  outline: none !important;
+}
+
+a,
+a:link,
+a:link:visited {
+  color: #3b48fe;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #3b48fe;
+}
+
+.wh_logo > img {
+  height: 3em;
+  /* PUBENG-1056 new logo */
+  margin-top: 1em;
+  margin-bottom: 1.1em;
+}
+
+.wh_logo {
+  max-width: inherit;
+  float: left;
+}
+
+#wh_topic_body {
+  max-width: 1000px;
+}
+
+/*
+     * ------------------------------------------------------------------
+     *
+     * Fight with bootstrap
+     *
+     */
+.container-fluid {
+  max-width: 100%;
+  /* display: flex; PUBENG-1263 */
+}
+
+.navbar-brand {
+  height: auto;
+}
+
+.navbar {
+  border: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+.navbar-default .navbar-toggle {
+  border-color: transparent;
+}
+
+.navbar-default .navbar-toggle:hover {
+  background: #3b48fe;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+  background-color: #ffffff;
+}
+
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-form {
+  border-color: #ffffff;
+  padding-top: 0px;
+  /* padding-left: 12%; */
+}
+
+.navbar-toggler {
+  border-color: #293033;
+}
+
+/*  hide navbar toggler button if on the main landing page */
+.wh_main_page .navbar-toggler {
+  display: none;
+}
+
+.nav-list:after {
+  margin-bottom: -1em;
+}
+
+.wh_header {
+  background: #293033 none;
+  color: #ffffff;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.wh_header a,
+.wh_header a:hover,
+.wh_header a:visited {
+  color: #ffffff;
+}
+
+.wh_logo.hidden-xs {
+  display: block !important;
+  margin-top: 0.3em;
+  margin-right: 1em;
+  align-self: baseline;
+}
+
+.wh_header .confidential {
+  float: right;
+  margin-top: 0.3em;
+  margin-right: 1em;
+  font-size: 9pt;
+  font-style: italic;
+}
+
+/*  Hide glossary from top menu */
+.navbar .glossary {
+  display: none;
+}
+
+/*  Hide notices from top menu */
+.navbar .frontmatter {
+  display: none;
+}
+
+/* TCOMMS-3040 */
+/* .footer-container nav { */
+/* display: none !important; */
+/* } */
+.footer-container .wh_top_menu,
+.footer-container .wh_top_menu ul li:hover {
+  /* display: none !important; */
+  text-transform: none;
+  background-color: transparent;
+}
+
+/*
+ * ------------------------------------------------------------------
+ *  
+ * Link to the index.
+ * 
+ */
+.wh_indexterms_link a span {
+  display: none;
+}
+
+.wh_indexterms_link a:before {
+  color: #ffffff;
+}
+
+/*
+ * ------------------------------------------------------------------
+ *  
+ * Tools and navigation
+ * 
+ */
+/* PUBENG-1257: create a sticky menubar. */
+.topbar { /* Safari */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* PUBENG-1263 */
+.wh_hide_highlight {
+  font-size: 16px;
+  margin: 0;
+  padding: 0 1.5em 0.4em;
+  width: 1em;
+  color: #3b48fe !important;
+}
+
+.wh_hide_highlight:hover {
+  color: #fb3e79;
+}
+
+/* PUBENG-1304 */
+.wh_right_tools button:hover {
+  color: #3b48fe;
+}
+
+.tools-icon i {
+  font-size: 15pt;
+  color: #293033;
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding: 0em 0.2em 0em 0.2em; /* PUBENG-1304 */
+}
+
+/* PUBENG-1304 */
+.tools-icon i:hover {
+  background: #3b48fe;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* PUBENG-1263 */
+.tools-icon a {
+  color: #293033;
+}
+
+/* PUBENG-1304 */
+.tools-icon a:hover {
+  color: #fb3e79;
+}
+
+.custom-toggler .toggler-icon {
+  background: none;
+  color: #ffffff;
+  font-size: 1.5em;
+}
+
+.wh_hide_highlight:hover:after {
+  font-family: "oXygen WebHelp";
+  content: "j";
+  display: inline-block;
+  vertical-align: bottom;
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #fb3e79;
+}
+
+/* PUBENG-1304 */
+.webhelp_expand_collapse_sections:after {
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* PUBENG-1304 */
+.webhelp_expand_collapse_sections:hover:after {
+  background: #3b48fe;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glyphicon-arrow-left:before, .oxy-icon-arrow-left:before {
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glyphicon-arrow-right:before, .oxy-icon-arrow-right:before {
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/*.wh_print_link a,
+.wh_print_link a:hover,
+.wh_navigation_links a,
+.wh_navigation_links a:hover,
+.wh_print_link a:before,
+.wh_navigation_links a:before,
+.wh_navigation_links a:hover:before {
+    color: #068DCA;
+    text-decoration: none;
+}*/
+/*.wh_navigation_links a:active,
+.wh_navigation_links a:active:before {
+    color: #068DCA;
+    text-decoration: none;
+    font-weight: 600;
+}*/
+/*.wh_navigation_links a:visited,
+.wh_navigation_links a:visited:before {
+    color: $silver600;
+    text-decoration: none;
+}*/
+/*.wh_navigation_links a:visited,
+.wh_navigation_links a:visited:before,
+.wh_navigation_links a:active
+.wh_navigation_links a:active:before {
+    color: $silver600;
+    text-decoration: none;
+    font-weight: 600;
+}*/
+.wh_navigation_links a {
+  color: #293033 !important;
+  text-decoration: none !important;
+  font-weight: 600;
+}
+
+/* PUBENG-1263 */
+.wh_navigation_links a:hover,
+.wh_navigation_links a:visited:hover {
+  color: #3b48fe !important;
+  text-decoration: none !important;
+  font-weight: 600;
+}
+
+/* PUBENG-1263 */
+.wh_navigation_links a:visited {
+  color: #293033 !important;
+  text-decoration: none !important;
+  font-weight: 600;
+}
+
+/*
+ * ------------------------------------------------------------------
+ *  
+ * Topic content
+ * 
+ */
+/* PUBENG-1794 */
+.page-link:hover {
+  background-color: #eff0f1;
+  text-decoration: none !important;
+}
+
+/* PUBENG-1794 */
+.page-link:focus {
+  box-shadow: none;
+}
+
+/*
+ * ------------------------------------------------------------------
+ *  
+ * Index terms.
+ * 
+ */
+.wh_index_terms span.wh_first_letter {
+  color: #3b48fe;
+}
+
+.wh_index_terms #indexList {
+  padding: 0;
+}
+
+/**
+ *
+ * Styles used for RTL pages
+ *
+ */
+html[dir=rtl] .wh_top_menu ul li:hover > ul {
+  max-width: 270px;
+}
+
+/* Dfn in page header and on tiles should maintain their colour and font */
+.wh_tile_text a dfn.term,
+.wh_tile_text a dfn.term.cap_first_letter {
+  color: #3b48fe !important;
+  text-decoration-line: none !important;
+}
+
+/* END OF TCOMMS-3040 */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* ######################################################################## */
+/* SKINS STARTS HERE */
+html {
+  position: relative;
+  min-height: 100%;
+  min-width: 100%;
+}
+
+body {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  min-height: 100%;
+  min-width: 100%;
+  line-height: normal;
+  margin-bottom: 0; /* TCOMMS-1416, was 15px */
+  /* TCOMMS-3001 */
+  background-color: #ffffff;
+}
+
+/*.wh_logo {
+    max-width: 40px;
+}*/
+/* TCOMMS-3475 Table font size should not vary between regular paragraphs and elements like <uicontrol>, <sl>, or <ul> */
+div,
+td {
+  font-size: inherit;
+}
+
+/*div,
+td {
+    font-size: 15px;
+}*/
+#tree li {
+  border-top: thin dotted #eff0f1;
+}
+
+/*
+span.topicref{
+    margin-left: 10px; 
+}
+*/
+main {
+  /* margin-top: 20pt; */
+  margin-left: 1em;
+  margin-right: 1em;
+  /* TCOMMS-3281 */
+  margin-bottom: 2em;
+}
+
+span.menuItemSelected {
+  background-color: #eff0f1;
+}
+
+#tab_nav_tree {
+  margin: 0px;
+}
+
+#header .navheader_parent_path {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  background-color: transparent;
+  padding-top: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  font-size: 13.3333px;
+  margin-right: 0px;
+  margin-left: 10px;
+  box-shadow: none;
+  color: #ffffff;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.navheader_parent_path {
+  margin-left: 1em;
+}
+
+#splitterContainer .hasSubMenuClosed {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  background-color: transparent;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 21px;
+  padding-right: 5px;
+  font-size: 13.3333px;
+  color: #293033;
+  background-image: none;
+}
+
+#splitterContainer .menuItemSelected {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  border-right-color: #ff0000;
+  border-bottom-color: #ff0000;
+  border-top-color: #ff0000;
+  border-left-color: #ff0000;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-right: 5px;
+  font-size: 13.3333px;
+  color: #293033;
+  border-top-width: 0px;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-width: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+  border-bottom-style: none;
+  background-image: none;
+}
+
+#splitterContainer .topic {
+  background-image: none;
+}
+
+.framesLink {
+  min-width: 0px;
+  padding: 4px;
+  margin-top: -20px;
+  margin-left: -2px;
+}
+
+.highlight {
+  background-color: #FFD000;
+}
+
+#navigationLinks {
+  padding: 0px;
+  margin: 0px;
+  color: #ffffff;
+}
+
+#navigationLinks .navparent {
+  padding: 0px;
+  margin: 0px;
+  color: #ffffff;
+}
+
+#productToolbar * {
+  color: #ffffff;
+}
+
+.fn a,
+a.fn-call {
+  color: #3b48fe;
+  text-decoration: none;
+}
+
+.section-title a:link {
+  color: #293033;
+  text-decoration: none;
+}
+
+.section-title a:link:visited {
+  color: #bec3c6;
+  text-decoration: none;
+}
+
+.section-title a:link:hover,
+a:link:hover {
+  color: #3b48fe;
+  text-decoration: underline;
+}
+
+a.xref {
+  color: #3b48fe;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+a.xref:hover {
+  color: #3b48fe;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+a.xref:visited {
+  color: #3b48fe;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+}
+
+a.xref:active {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* TCOMMS-3040: dfn should appear black with dotted underline, except for headers and CAPTIONS */
+/* WebKit (Safari) does not like composite text-decoration, requires individually defined text-decoration-line, text-decoration-style, text-decoration-color */
+dfn.term,
+dfn.term.cap_first_letter {
+  font-style: normal;
+  color: #293033 !important;
+  text-decoration-line: underline !important;
+  text-decoration-style: dotted !important;
+  text-decoration-color: #293033 !important;
+}
+
+/* Hover dfn should change to blue and look like a link */
+dfn.term:hover,
+dfn.term.cap_first_letter:hover {
+  font-style: normal;
+  color: #3b48fe !important;
+  text-decoration-line: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-color: #3b48fe !important;
+}
+
+/* Dfn in table and figure captions should maintain caption colour and style */
+caption dfn.term,
+caption dfn.term.cap_first_letter,
+figure dfn.term,
+figure dfn.term.cap_first_letter {
+  color: #293033 !important;
+  font-style: italic;
+  text-decoration-line: none !important;
+}
+
+caption dfn.term:hover,
+caption dfn.term.cap_first_letter:hover,
+figure dfn.term:hover,
+figure dfn.term.cap_first_letter:hover {
+  font-style: italic;
+  color: #3b48fe !important;
+  text-decoration-line: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-color: #3b48fe !important;
+}
+
+/* END OF TCOMMS-3040 */
+.navheader_separator {
+  display: none;
+}
+
+#header .navheader_parent_path:hover {
+  text-decoration: none;
+}
+
+#splitterContainer .menuItemSelected:hover {
+  text-decoration: none;
+}
+
+#splitterContainer .hasSubMenuClosed:hover {
+  text-decoration: none;
+}
+
+#header .link:hover {
+  text-decoration: none;
+}
+
+#splitterContainer .topic:not(.menuItemSelected):hover {
+  text-decoration: none;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 13.3333px;
+}
+
+#splitterContainer .hasSubMenuOpened:hover {
+  text-decoration: none;
+  font-weight: 700;
+  font-style: normal;
+  background-color: transparent;
+}
+
+#splitterContainer .hasSubMenuClosed:hover {
+  text-decoration: none;
+  font-weight: 700;
+  font-style: normal;
+  background-color: transparent;
+}
+
+.frmBody {
+  background-color: #293033;
+  overflow-x: hidden;
+}
+
+.q {
+  background-color: transparent;
+}
+
+.choption,
+.chdesc {
+  font-size: 10pt;
+  font-weight: 400;
+  padding: 10px;
+  padding-bottom: 10px;
+}
+
+#webhelp_copyright_information {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  margin-top: 2em;
+  border-top: 1px solid #eff0f1;
+  color: #293033;
+}
+
+/* TCOMMS-1833 define footnotes to be smaller font than regular text */
+.fn {
+  font-size: 12px;
+}
+
+#header #lHeader {
+  background-color: #3b48fe;
+  background-image: linear-gradient(35deg, #011C62, #3b48fe 50%);
+  border-right-color: #293033;
+  border-left-color: #293033;
+  border-bottom-color: #293033;
+  border-top-color: #293033;
+  background-repeat: repeat;
+  background-attachment: scroll;
+  background-position: top left;
+  border-top-width: 0px;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-width: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+  border-bottom-style: none;
+}
+
+#version {
+  float: right;
+  font-size: 12px;
+  color: #ffffff;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  /* margin-left: 5px; */
+  margin-right: 22px;
+  text-transform: none;
+}
+
+#header #productTitle h2 {
+  background-color: transparent;
+  margin-bottom: 10px;
+  font-size: 30px;
+  line-height: 1em;
+  color: #ffffff;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-weight: 100;
+  font-style: normal;
+  margin-left: 110px;
+}
+
+#header #productTitle h3 {
+  font-size: 20px;
+  margin: 0px;
+  color: #ffffff;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-weight: 100;
+  font-style: normal;
+  margin-left: 110px;
+  padding-bottom: 0px;
+}
+
+#header #tocMenu {
+  background-color: transparent;
+  padding-top: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+}
+
+#header .link {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  background-color: transparent;
+  padding-top: 0px;
+  padding-right: 20px;
+  padding-left: 20px;
+  text-shadow: none;
+  line-height: 1em;
+  text-align: inherit;
+  padding-bottom: 0px;
+  font-size: 13.3333px;
+  margin-right: 0px;
+  margin-left: 0px;
+  text-decoration: none;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  text-decoration: none;
+}
+
+#splitterContainer .topic:not(.menuItemSelected) {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  background-color: transparent;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-right: 5px;
+  font-size: 13.3333px;
+  color: #293033;
+}
+
+#splitterContainer .hasSubMenuOpened {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  background-color: transparent;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 21px;
+  padding-right: 5px;
+  font-size: 13.3333px;
+  color: #293033;
+}
+
+#splitterContainer .hasSubMenuOpened.menuItemSelected {
+  font-weight: 700;
+  background-color: #eff0f1;
+}
+
+#splitterContainer .hasSubMenuClosed.menuItemSelected {
+  font-weight: 700;
+  background-color: #eff0f1;
+}
+
+#splitterContainer .splitbuttonV {
+  background-color: #ffffff;
+  background-image: none;
+  height: 33px;
+  outline: 8px dotted #3b48fe;
+  outline-offset: -8px;
+}
+
+#splitterContainer #contentBlock ul,
+#splitterContainer #contentBlock ul > ul {
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
+#splitterContainer #contentBlock li,
+#splitterContainer #contentBlock ul > li {
+  padding-left: 15px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.body section:first-child {
+  margin-top: 0px;
+  padding-top: 5px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+kbd {
+  box-shadow: none;
+}
+
+.draft-comment {
+  background-color: rgb(153, 255, 153);
+  border: 1pt solid #293033;
+}
+
+#header .tab.selectedTab {
+  background-color: #ffffff;
+  padding-top: 9px;
+  padding-right: 25px;
+  padding-bottom: 7px;
+  padding-left: 25px;
+  font-size: 13.5px;
+  margin-right: 5px;
+  box-shadow: transparent 0px 0px 5px 0px;
+  font-weight: 600;
+  margin-top: 1px;
+  border-top-width: 1px;
+  text-shadow: #ffffff 0px 1px 0px;
+  border-right-color: #eff0f1;
+  border-bottom-color: #293033;
+  margin-left: 0px;
+  border-top-color: #eff0f1;
+  border-left-color: #eff0f1;
+  color: #293033;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  line-height: 1em;
+  text-align: initial;
+  text-decoration: none;
+  margin-bottom: 0px;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-width: 5px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 1px;
+  border-left-width: 1px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-left-style: solid;
+  border-bottom-style: none;
+}
+
+#expnd {
+  padding: 0px;
+}
+
+#header #space {
+  background-color: #ffffff;
+  display: inherit;
+}
+
+#splitterContainer #leftPane {
+  /*    background-color: #FFFFFF; */
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+  border-top-color: #ffffff;
+  border-left-color: #ffffff;
+  border-top-width: 0px;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-width: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-left-style: solid;
+  border-bottom-style: solid;
+}
+
+#splitterContainer .splitbarV {
+  /*    background-color: #FFFFFF; */
+  border-right-color: #ffffff;
+  border-bottom-color: #293033;
+  border-top-color: #293033;
+  border-left-color: #ffffff;
+  border-top-width: 0px;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-width: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 1px;
+  border-left-width: 1px;
+  border-top-style: none;
+  border-right-style: solid;
+  border-left-style: solid;
+  border-bottom-style: none;
+}
+
+#header .tab:not(.selectedTab) {
+  /*    background-color: rgb(231, 237, 241);*/
+  text-shadow: #ffffff 0px 1px 0px;
+  border-bottom-color: #3b48fe;
+  padding-top: 9px;
+  padding-right: 25px;
+  padding-bottom: 7px;
+  padding-left: 25px;
+  font-size: 13.5px;
+  margin-right: 5px;
+  box-shadow: transparent 0px 0px 5px 0px;
+  font-weight: 600;
+  margin-top: 1px;
+  border-top-width: 1px;
+  border-right-color: #eff0f1;
+  margin-left: 0px;
+  border-top-color: #eff0f1;
+  border-left-color: #eff0f1;
+  color: #293033;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  line-height: 1em;
+  text-align: initial;
+  text-decoration: none;
+  margin-bottom: 0px;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-width: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-right-width: 1px;
+  border-left-width: 1px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-left-style: solid;
+  border-bottom-style: none;
+}
+
+.hasSubMenuClosed {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  color: #293033;
+}
+
+.hasSubMenuOpened {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  color: #293033;
+  background-image: none;
+}
+
+#header #customLogo {
+  /*    background-image: url("../img/Dolby_vertical_White.svg");*/
+  display: inline-block;
+  margin-left: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  margin-right: 30px;
+  width: 100px;
+  height: 50px;
+}
+
+#oldFrames {
+  background-image: none;
+}
+
+#printlink a {
+  background-image: none;
+}
+
+#permalink a {
+  background-image: none;
+}
+
+.permalink {
+  display: none;
+}
+
+.uicontrol {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  color: #293033;
+  /* font-size: 14px; */
+}
+
+.wintitle {
+  color: #293033;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+} /* PUBENG-1405 - the CSS is here, but the transform is not applying the class*/
+/* .material-icons { */
+/*font-size: 20px;*/
+/*    color: #068DCA;*/
+/*    vertical-align: text-bottom;
+*/
+/* } */
+#collapseAllLink {
+  background-image: none;
+}
+
+#expandAllLink {
+  background-image: none;
+}
+
+#collapseAllLink .material-icons {
+  font-size: 16px;
+}
+
+#expandAllLink .material-icons {
+  font-size: 16px;
+}
+
+.framesLink .material-icons {
+  color: #ffffff;
+  padding-right: 2px;
+  font-size: 22px;
+}
+
+#navigationLinks .material-icons {
+  color: #ffffff;
+}
+
+.navheader_label .material-icons {
+  vertical-align: top;
+  margin: 0px;
+}
+
+/*.navheader {
+    visibility: hidden;
+}*/
+.closed-symbol,
+.expanded-symbol {
+  padding: 0px;
+  margin-left: -5px;
+  vertical-align: middle;
+}
+
+.node-symbol {
+  font-size: 10px;
+  padding: 0px;
+  margin-right: -55px;
+  vertical-align: middle;
+  color: transparent;
+}
+
+.wh-tooltip-container .wh-tooltip,
+.wh_publication_toc .topicref .wh-tooltip {
+  /* background: $magenta; */
+  font-size: 0.9em;
+  line-height: 1em;
+  min-width: 15em;
+  top: -4px;
+  z-index: 9999;
+}
+
+.wh-tooltip-container .wh-tooltip-content,
+.wh_publication_toc .topicref .wh-tooltip .shortdesc {
+  text-align: center;
+}
+
+/*
+ * Go to top button
+ */
+/* PUBENG-1263 adds icon defined in design spec */
+.oxy-icon-up:before {
+  content: "k";
+}
+
+#go2top {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  height: 44px;
+  width: 44px;
+  bottom: 4.5em;
+  right: 2em; /* PUBENG-1263 */
+  /*    border-radius: 0.25em;
+  border: 1px solid #347AB4;*/
+  cursor: pointer;
+  text-align: center;
+  padding: 4px 12px;
+  font-weight: bold;
+  color: #ffffff;
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: text;
+  -webkit-background-clip: text; /* PUBENG-1263 */
+  -moz-background-clip: text; /* PUBENG-1263 */
+  background-clip: text; /* PUBENG-1263 */
+  -webkit-text-fill-color: transparent; /* PUBENG-1263 */
+  border: 0px solid #3b48fe; /* PUBENG-1263 */
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 2em;
+}
+
+@media (max-width: 800px) {
+  .navheader_parent_path {
+    font-size: 14px !important;
+  }
+  #header #productTitle h3 {
+    padding-bottom: 25px;
+  }
+  .navheader_parent_path {
+    font-size: 10px !important;
+  }
+}
+@media (max-width: 500px) {
+  /* This messes up collapsing chevrons */
+  /* main {
+      margin-left: 5px;
+  } */
+  main {
+    margin-right: 0px;
+  }
+  #header #customLogo {
+    margin-left: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-right: 15px;
+    width: 100px;
+    height: 30px;
+  }
+  /* #header .tab.selectedTab{
+      padding-left: 10px;
+      padding-right: 10px;
+  } */
+  #header #productTitle h2 {
+    font-size: 18px;
+    margin-left: 65px;
+  }
+  #header #productTitle h3 {
+    font-size: 15px;
+    padding-bottom: 25px;
+    margin-left: 25px;
+  }
+}
+@media screen {
+  .fig--title-label-number {
+    display: inherit;
+  }
+  .d-print-only {
+    display: none;
+  }
+}
+/* PRINTING FUN STARTS HERE PUBENG-1492 */
+@media print {
+  body, body * {
+    font-family: sans-serif !important;
+  }
+  .header {
+    display: block;
+    background-image: none;
+    font-size: 50% !important; /* was 90% PUBENG-1492 */
+  }
+  .footer {
+    display: block;
+    font-size: 50% !important; /* was 90% PUBENG-1492 */
+  }
+  a[href]:after {
+    content: none !important;
+  }
+  .dolby-print-logo {
+    height: 2em;
+  }
+  .footer-container {
+    position: fixed;
+    bottom: -12px;
+    color: #000 !important;
+  }
+  .footer-left {
+    text-align: left;
+  }
+  .footer-center, .footer-center * {
+    text-align: center;
+    font-size: 6px !important;
+  }
+  .footer-right, .footer-right * {
+    text-align: right;
+    font-size: 6px !important;
+  }
+  .footer-right .title {
+    display: none;
+  }
+  .wh_tools {
+    display: block !important;
+  }
+  .wh_right_tools {
+    display: none;
+  }
+}
+/* Related links */
+.related-links {
+  background-color: transparent;
+  color: #293033;
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  margin: 1em 0 1em 0;
+  padding: 0 !important;
+}
+.related-links a, .related-links a:visited {
+  padding-bottom: 0.3em;
+  display: inline-block;
+  color: #3b48fe;
+}
+.related-links strong {
+  font-weight: 600;
+}
+
+.relinfo {
+  margin: 0 0 1em;
+}
+.relinfo > strong {
+  line-height: 3em;
+}
+
+/* TCOMMS-3230 handling of links blocks */
+.wh_child_links, .wh_related_links {
+  background-color: inherit;
+  margin: 1em 0 1em 0;
+  padding: 0 0 0 1em !important;
+}
+
+.wh_child_links nav {
+  border-left: 1px solid #dfe1e3;
+}
+.wh_child_links li {
+  margin: 1em;
+}
+
+.wh_related_links ul.linklist {
+  border-left: 1px solid #dfe1e3;
+}
+
+@media only screen and (max-width: 767px) {
+  .wh_related_links,
+  .wh_child_links,
+  .wh_topic_content .related-links {
+    border: 1px solid transparent;
+  }
+}
+#results {
+  margin-bottom: 225px;
+}
+#results #searchResults {
+  display: flex;
+  justify-content: center;
+}
+#results #searchResults .wh_search_results_items {
+  max-width: 100ch;
+}
+#results #searchResults #rightDiv {
+  display: none;
+}
+
+.wh_main_page_search {
+  height: 0px;
+  padding: 0px;
+}
+
+.ui-widget.ui-widget-content {
+  z-index: 100000;
+}
+
+.searchresult {
+  list-style: none;
+}
+
+.searchresult .shortdesclink {
+  margin: 0.3em 0.5em 0 0;
+}
+
+.wh_search_expression {
+  font-weight: bold;
+}
+
+/* Search relative path */
+.searchresult .relativePath {
+  display: none;
+}
+
+/* PUBENG-1281 */
+.searchresult li a.foundResult {
+  color: #3b48fe;
+}
+
+/* PUBENG-1281 */
+/* pagination buttons */
+#wh-search-pagination li a.page-link {
+  color: #3b48fe;
+}
+
+#wh-search-pagination li a.showSimilarPages {
+  color: #293033;
+}
+
+/* PUBENG-1281 */
+/* Disabled button */
+#wh-search-pagination li.disabled a.page-link {
+  color: #293033;
+}
+
+/* PUBENG-1794 */
+/* Active tab */
+#wh-search-pagination li.active a.page-link {
+  background-color: #3b48fe;
+  border-color: #3b48fe;
+  color: #fff;
+}
+
+#searchBlock {
+  padding: 0px;
+  padding-left: 40px !important;
+}
+
+.wh_search_input {
+  margin: 1.5em 0.2em 0.2em; /* PUBENG-1263, fixing after PUBENG-1122 */
+  padding: 25px 0;
+}
+
+.wh_welcome:not(:empty) {
+  font-size: 4em;
+  margin: 0 auto;
+  font-family: "Avenir Next LT Pro Demi", "Open Sans", Calibri, Geneva, sans-serif;
+  padding: 0 0 1.5em 0;
+  text-shadow: none;
+}
+
+.wh_search_textfield {
+  border: solid 1px white;
+  border-radius: 5px;
+  padding: 0 0.5em;
+  position: relative;
+  height: 2em;
+  width: 50%;
+  background: #293033 none;
+  color: white;
+}
+
+.wh_search_button {
+  border: solid 1px white;
+  padding-top: 0.4em; /* PUBENG-1263 */
+  color: white;
+  background-color: #3b48fe; /* PUBENG-1794 */
+  height: 2em;
+  width: 2em;
+}
+
+/* PUBENG-1794 */
+.wh_search_button:hover {
+  background-image: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+}
+
+/* PUBENG-1794 */
+.wh_search_button::after {
+  margin-left: -5px;
+}
+
+/* PUBENG-1794 */
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active,
+a.ui-button:active,
+.ui-button:active,
+.ui-button.ui-state-active:hover {
+  background: #3b48fe;
+}
+
+/* PUBENG-1794 */
+.ui-widget {
+  font-family: "Avenir Next LT Pro Regular", "Open Sans", Calibri, Geneva, sans-serif;
+}
+
+.searchItemAdditionalData {
+  padding-top: 0.5em;
+}
+
+/* Search autocomplete icons */
+.search-autocomplete-proposal-type-history a,
+.search-autocomplete-proposal-type-history a:hover,
+.search-autocomplete-proposal-type-history a:visited,
+.search-autocomplete-proposal-type-history a:active {
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.8em;
+}
+
+.ui-state-active .search-autocomplete-proposal-type-history a,
+.ui-state-active .search-autocomplete-proposal-type-history a:hover,
+.ui-state-active .search-autocomplete-proposal-type-history a:visited,
+.ui-state-active .search-autocomplete-proposal-type-history a:active {
+  color: #ffffff;
+}
+
+/* Active search page */
+#wh-search-pagination > ul > li.active > a {
+  background-color: #3b48fe;
+}
+
+#searchForm > div {
+  min-width: 100%; /* PUBENG-1263, overrides wh-search.css */
+  float: right;
+  bottom: 1em; /* PUBENG-1263, was margin-bottom: 5px */
+}
+
+@media (max-width: 500px) {
+  .textToSearch,
+  .textToSearch:focus {
+    width: 230px;
+  }
+  #searchForm {
+    padding-bottom: 10px;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .wh_main_page .wh_search_input,
+  .wh_search_input {
+    padding: 0;
+  }
+}
+input[type=search]::-webkit-search-cancel-button {
+  display: none;
+}
+
+.table {
+  width: 100%;
+}
+.table .uicontrol {
+  font-size: 12px;
+}
+
+table.nav {
+  position: absolute;
+  margin-top: -30px;
+}
+
+th {
+  text-align: left;
+}
+
+@media (max-width: 500px) {
+  table {
+    margin-right: 0px;
+  }
+}
+@media screen {
+  /* PUBENG-1492, moving table definitions to screen-only rendering */
+  table {
+    background-color: #ffffff;
+    /* background-color: rgba(0, 0, 0, 0); */
+    border: 1px solid #bec3c6;
+    margin-right: 0px;
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+  table .wh_expand_btn {
+    display: none; /* PUBENG-3190 */
+  }
+  table > caption {
+    font-size: 15px;
+    font-weight: 400;
+    font-style: italic;
+    text-align: left;
+    padding: 0px;
+    color: #293033;
+    margin-top: 0px;
+    margin-bottom: 0.5em;
+  }
+  table.syntax thead,
+  table.syntax thead > tr > th,
+  table.syntax thead > tr > td {
+    border: 0px !important;
+  }
+  table.syntax tr, table.syntax td,
+  table.syntax tbody > tr > td,
+  table.syntax tbody > tr > th {
+    border: 0px !important;
+    background-color: transparent;
+  }
+  table.syntax td {
+    border-top: 0px !important;
+    border-bottom: 0px !important;
+  }
+  table.syntax .msgblock,
+  table.syntax .codeblock {
+    border-radius: 0px;
+    margin: 0px !important;
+    padding: 0px;
+  }
+  table.syntax pre, table.syntax code {
+    background-color: transparent;
+  }
+  table.choicetable {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    /* PUBENG-1251 */
+  }
+  table.choicetable thead th {
+    padding: 8px;
+  }
+  table.choicetable th {
+    vertical-align: top; /* PUBENG-1384 */
+    border-right: 0px;
+  }
+  table.choicetable p {
+    padding-bottom: 0.5em;
+  }
+  table.choicetable p:last-of-type {
+    padding-bottom: 0;
+  }
+  table.simpletable {
+    width: 100%;
+    border: 0px !important;
+  }
+  table.simpletable thead {
+    border: 0px !important;
+  }
+  table.simpletable tr, table.simpletable td {
+    border: 0px !important;
+    background-color: transparent;
+  }
+  table.dl {
+    border: 0px !important;
+  }
+  table.dl thead,
+  table.dl thead > tr > th,
+  table.dl thead > tr > td {
+    border: 0px !important;
+  }
+  table.dl tr, table.dl td,
+  table.dl tbody > tr > td,
+  table.dl tbody > tr > th {
+    border: 0px !important;
+    background-color: transparent;
+  }
+  table tbody tr:hover {
+    background: #f8f9fa;
+  }
+  .table {
+    border: 1px solid #bec3c6 !important;
+    background-color: #ffffff !important;
+    width: 100%;
+    margin-bottom: 0.5em;
+    color: #293033;
+  }
+  .table > thead > tr > th,
+  .table > thead > tr > td {
+    border: 1px solid #bec3c6 !important;
+    vertical-align: top; /* PUBENG-1384 */
+  }
+  .table > tbody > tr > td,
+  .table > tbody > tr > th {
+    border: 1px solid #bec3c6 !important; /* PUBENG-1251 was 2px*/
+  }
+  .tabledesc {
+    margin: 0px;
+  }
+  main table td, main table th {
+    background-color: #eff0f1; /* PUBENG-1251 */
+  }
+  thead,
+  .firstcol,
+  thead td {
+    background-color: #eff0f1; /* PUBENG-1251 */
+    font-size: 12px;
+    border: 1px solid #bec3c6; /* PUBENG-1251 was 2px*/
+    font-weight: 800;
+  }
+  .row-nocellborder {
+    border: 0px;
+  }
+  .cellrowborder {
+    border: 0px;
+  }
+  .cell-norowborder {
+    border: 0px;
+  }
+  th.entry {
+    font-size: 12px;
+    font-weight: 800;
+  }
+  td.entry,
+  td.stentry {
+    background-color: rgba(0, 0, 0, 0);
+    font-size: 12px;
+  }
+  /* PUBENG-1251 PUBENG-1819*/
+  td pre,
+  td p {
+    margin: 0.5em 0 !important;
+  }
+  td pre:first-child,
+  td p:first-child {
+    margin: 0 0 0.5em 0 !important;
+  }
+  .stentry {
+    border: 1px; /* PUBENG-1251 */
+  }
+  /* https://jira.dolby.net/jira/browse/TCOMMS-3408 */
+  /* Added overflow-y handling to remove unnecessary vertical scrollbars in some tables with footnotes */
+  .tablenoborder,
+  .simpletable-container {
+    margin-bottom: 2em;
+  }
+  .p .tablenoborder:last-child,
+  .p .simpletable-container:last-child {
+    margin-top: 1em;
+  }
+  tbody tr th.entry {
+    vertical-align: top; /* PUBENG-1384 */
+  }
+  .dl-table-dt-col {
+    width: 25%;
+  }
+  .dl-table-dd-col {
+    width: 75%;
+  }
+  .dt-table {
+    font-weight: 800;
+  }
+  /* PUBENG-1384 removes the col elements with inline styles hardcoding the width of the columns*/
+  .simpletable-container colgroup col {
+    display: none;
+  }
+  /* PUBENG-1251 */
+  .dd-table p {
+    margin: 0px;
+  }
+}
+section.ol.steps,
+section.ul.steps-unordered {
+  padding-left: 0em;
+  margin-left: 0em;
+}
+section.ol.steps div.tasklabel + *,
+section.ul.steps-unordered div.tasklabel + * {
+  padding-left: 0.5em;
+}
+
+dt.prereq {
+  margin: 0.5em 0 0.5em 0;
+}
+
+div.tasklabel {
+  margin-top: 1em;
+}
+
+span.cmd {
+  font-weight: 600;
+}
+
+.step-optional + .cmd {
+  font-weight: 400;
+}
+
+.step-required {
+  color: #89032d;
+}
+
+li.step div {
+  padding-bottom: 0.5em;
+}
+
+/* PUBENG-1263, PUBENG-1331 */
+.wh_expand_btn {
+  position: relative;
+  left: 0.4em;
+  color: #bec3c6;
+}
+.wh_expand_btn::before {
+  content: "q";
+  font-family: "oXygen WebHelp", serif;
+  font-style: normal;
+  font-size: 0.8em;
+  font-weight: lighter;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.close-toc-button {
+  display: none !important; /* These buttons aren't part of our design */
+}
+
+.wh_main_page_toc {
+  border: none; /* PUBENG-1246 */
+  padding-top: 2em;
+  padding-bottom: 10em;
+}
+.wh_main_page_toc *,
+.wh_main_page_toc .expanded {
+  background-color: transparent;
+}
+.wh_main_page_toc .wh_main_page_toc_accordion_header.expanded:before,
+.wh_main_page_toc .wh_main_page_toc_accordion_header:before {
+  display: inline-block;
+  font-weight: bold;
+  color: #293033;
+  font-family: "oXygen WebHelp", serif;
+  position: absolute;
+  left: 1em;
+  cursor: pointer;
+  font-size: 15pt;
+  margin-left: -7pt;
+  margin-top: 2pt;
+}
+.wh_main_page_toc a {
+  color: #293033;
+}
+.wh_main_page_toc a:hover {
+  color: #3b48fe;
+}
+.wh_main_page_toc a, .wh_main_page_toc a:link, .wh_main_page_toc a:link:visited {
+  text-decoration: none;
+}
+.wh_main_page_toc .wh_toc_shortdesc a {
+  color: #3b48fe;
+}
+.wh_main_page_toc .wh_toc_shortdesc a:hover {
+  text-decoration: underline;
+}
+.wh_main_page_toc .topicref a,
+.wh_main_page_toc .header-toc a,
+.wh_main_page_toc span[class^=material-icons] a {
+  font-weight: bold;
+}
+.wh_main_page_toc .wh_main_page_toc_accordion_header {
+  border-bottom: 1px solid #bec3c6;
+  padding-left: 2.5em;
+}
+.wh_main_page_toc .wh_main_page_toc_accordion_header:hover {
+  background-color: #f8f9fa;
+}
+.wh_main_page_toc .wh_main_page_toc_accordion_header:hover .wh_toc_image a .material-icons {
+  background: #3b48fe !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -moz-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+.wh_main_page_toc .wh_main_page_toc_entry:hover {
+  background-color: #f8f9fa;
+}
+.wh_main_page_toc .wh_main_page_toc_entry:hover .wh_toc_image a .material-icons {
+  background: #3b48fe !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -moz-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+.wh_main_page_toc .wh_main_page_toc_accordion_entries > * {
+  padding-left: 4em;
+  margin-left: 0px;
+}
+.wh_main_page_toc .wh_main_page_toc_accordion_entries .wh_toc_image {
+  right: 4em;
+}
+.wh_main_page_toc .wh_toc_shortdesc {
+  color: #293033; /* PUBENG-1263 */
+}
+.wh_main_page_toc > .wh_main_page_toc_entry {
+  border-bottom: 1px solid #bec3c6;
+  padding-left: 2.5em;
+}
+.wh_main_page_toc .wh_toc_image {
+  /* width: 10%; */
+  padding-bottom: 0px;
+  float: left;
+  vertical-align: baseline;
+  margin-right: -10em; /* PUBENG-1263 */
+  position: relative; /* PUBENG-1263 */
+  right: 5em; /* PUBENG-1263 */
+  bottom: 0.6em; /* PUBENG-1263 */
+}
+.wh_main_page_toc .wh_toc_image i { /* PUBENG-1263 */
+  margin-top: 5px;
+  font-size: 40px;
+  background-color: #3b48fe;
+  background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%) !important;
+  -webkit-background-clip: text !important;
+  -moz-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent;
+}
+.wh_main_page_toc .header-toc.release-notes::after {
+  content: "Details about this release.";
+  display: block;
+  font-size: 0.9em;
+}
+
+#wh_publication_toc_content .wh_publication_toc {
+  padding-left: 1em;
+  color: #293033;
+  padding-right: 3em;
+}
+#wh_publication_toc_content .wh_publication_toc li {
+  margin: 0.2em 0;
+  color: #293033;
+}
+#wh_publication_toc_content .wh_publication_toc a,
+#wh_publication_toc_content .wh_publication_toc a:link {
+  color: #293033;
+}
+#wh_publication_toc_content .wh_publication_toc li.active a {
+  color: #3b48fe;
+  font-weight: bolder;
+}
+#wh_publication_toc_content .wh_publication_toc li.active li a {
+  /* This differentiates actual active topic vs. entire list */
+  color: #293033;
+  font-weight: normal;
+}
+#wh_publication_toc_content .wh_publication_toc .glossary,
+#wh_publication_toc_content .wh_publication_toc .frontmatter {
+  display: none;
+}
+
+.wh_topic_toc {
+  color: #293033;
+  border-left: 0px solid;
+  padding-left: 3em;
+  padding-right: 1em;
+}
+.wh_topic_toc ul {
+  color: #293033;
+}
+.wh_topic_toc ul li {
+  margin: 0.2em 0;
+}
+.wh_topic_toc ul a,
+.wh_topic_toc ul a:hover {
+  color: #293033;
+}
+.wh_topic_toc ul a.current_node {
+  color: #3b48fe;
+}
+.wh_topic_toc ul > div.topic-title {
+  display: none;
+}
+.wh_topic_toc .active {
+  color: #3b48fe;
+}
+
+#bck_toc {
+  margin-left: -40px;
+  padding: 17px 0 0 0;
+}
+
+#wh_toc_button {
+  align-self: flex-end;
+  margin-bottom: 0.5em;
+  background: #3b48fe;
+}
+
+#wh_toc_button:hover {
+  background: #3b48fe;
+  background-image: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: padding-box;
+}
+
+#wh_toc_button.collapsed {
+  background: transparent;
+}
+#wh_toc_button.collapsed:hover {
+  background: #3b48fe;
+  background-image: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
+  background-clip: padding-box;
+}
+
+@media only screen and (max-width: 1200px) {
+  #wh_publication_toc_content .wh_publication_toc {
+    padding-right: 2em;
+  }
+  .wh_topic_toc {
+    padding-left: 2em;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .wh_toc_image {
+    display: none;
+  }
+}

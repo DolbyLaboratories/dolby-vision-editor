@@ -1,0 +1,398 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" data-whc_version="24.1">
+    <head><link rel="shortcut icon" href="../oxygen-webhelp/template/images/favicon.ico"/><link rel="icon" href="../oxygen-webhelp/template/images/favicon.ico"/><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="generator" content="DITA-OT"/><meta name="description" content="Adding support for Dolby Vision editing involves understanding how to process hybrid log-gamma (hybrid log-gamma) frames correctly so that the preview surface is aware of their format."/><meta name="prodname" content="Dolby Vision"/><meta name="version" content="Version 1.0"/><meta name="rights" content="© 2023 &#xA;                Dolby Laboratories&#xA;            "/>        
+      <title>HLG signaling and previewing</title><!--  Generated with Oxygen version 24.1, build number 2022041410.  --><meta name="wh-path2root" content="../"/><meta name="wh-source-relpath" content="guide/c_signaling_previewing.xml"/><meta name="wh-out-relpath" content="topics/c_signaling_previewing.html"/>
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/lib/bootstrap/css/bootstrap.min.css"/>
+    
+    <link rel="stylesheet" href="../oxygen-webhelp/lib/jquery-ui/jquery-ui.min.css"/>
+    
+    <!-- Template default styles  -->
+    <link rel="stylesheet" type="text/css" href="../oxygen-webhelp/app/topic-page.css?buildId=2022041410"/>
+    
+    
+    <script src="../oxygen-webhelp/lib/jquery/jquery-3.5.1.min.js"></script>
+    
+    <script data-main="../oxygen-webhelp/app/topic-page.js" src="../oxygen-webhelp/lib/requirejs/require.js"></script>
+<link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/SourceSansPro.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/fonts/material-icons/material-icons.css?buildId=2022041410"/><link rel="stylesheet" type="text/css" href="../oxygen-webhelp/template/css/dolby-webhelp.css?buildId=2022041410"/></head>
+
+    <body id="c_signaling_preview" class="wh_topic_page frmBody">
+        <a href="#wh_topic_body" class="sr-only sr-only-focusable">Jump to main content</a>
+        
+        
+        
+
+        <header class="navbar navbar-default wh_header">
+    <div class="container-fluid">
+        
+        
+        
+        <div class="wh_header_flex_container navbar-nav navbar-expand-md navbar-dark">
+            <div class="wh_logo_and_publication_title_container">
+                <div class="wh_logo_and_publication_title">
+                    
+                    <!--
+                            This component will be generated when the next parameters are specified in the transformation scenario:
+                            'webhelp.logo.image' and 'webhelp.logo.image.target.url'.
+                            See: http://oxygenxml.com/doc/versions/17.1/ug-editor/#topics/dita_webhelp_output.html.
+                    -->
+                    <!-- Hide the log in the banner -->
+                    <!--<whc:webhelp_logo class="d-none d-sm-block"/>-->
+                    <a href="../index.html"><div class=" wh_publication_title "><span class="prodname">
+            <span class="keyword">Dolby Vision</span>
+         </span><div><span class="subtitle">Content Editing for Third-Party Developers</span></div></div></a>
+                    
+                    <nav class=" wh_top_menu " aria-label="Menu Container"><ul role="menubar" aria-label="Menu"><li role="menuitem"><span id="c_introduction-d4029e80771-mi" data-tocid="c_introduction-d4029e80771" data-state="leaf" class=" topicref " data-id="c_introduction"><span class="title"><a href="../topics/c_introduction.html">Introduction</a></span></span></li><li role="menuitem"><span id="c_display_management-d4029e80856-mi" data-tocid="c_display_management-d4029e80856" data-state="leaf" class=" topicref " data-id="c_display_management"><span class="title"><a href="../topics/c_display_management.html">Display management</a></span></span></li><li role="menuitem"><span id="c_editing_gpu_shaders-d4029e80932-mi" data-tocid="c_editing_gpu_shaders-d4029e80932" data-state="leaf" class=" topicref " data-id="c_editing_gpu_shaders"><span class="title"><a href="../topics/c_editing_gpu_shaders.html">Editing using the GPU shaders</a></span></span></li><li role="menuitem"><span id="c_signaling_preview-d4029e81009-mi" data-tocid="c_signaling_preview-d4029e81009" data-state="leaf" class=" topicref " data-id="c_signaling_preview"><span class="title"><a href="../topics/c_signaling_previewing.html">HLG signaling and previewing</a></span></span></li><li role="menuitem"><span id="c_chapter3-d4029e81083-mi" data-tocid="c_chapter3-d4029e81083" data-state="leaf" class=" topicref " data-id="c_chapter3"><span class="title"><a href="../topics/c_trimming_remuxing.html">Trimming and remultiplexing</a></span></span></li><li role="menuitem"><span id="r_appendix-d4029e81158-mi" data-tocid="r_appendix-d4029e81158" data-state="leaf" class=" topicref " data-id="r_appendix"><span class="title"><a href="../topics/r_appendix.html">Appendix</a></span></span></li><li role="menuitem"><span id="tocId-d4029e81225-mi" data-tocid="tocId-d4029e81225" data-state="leaf" class=" topicref glossary"><span class="title"><a href="../topics/r_ov_glossary.html">Glossary</a></span></span></li><li role="menuitem"><span id="Chunk1633017108-d4029e80571-mi" data-tocid="Chunk1633017108-d4029e80571" data-state="leaf" class=" topicref frontmatter" data-id="Chunk1633017108"><span class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108">Notices</a></span></span></li></ul></nav>
+                </div>
+
+                <!-- The menu button for mobile devices is copied in the output only when the 'webhelp.show.top.menu' parameter is set to 'yes' -->
+                <button type="button" data-target="#wh_top_menu_and_indexterms_link" id="wh_menu_mobile_button" data-toggle="collapse" class="navbar-toggler collapsed wh_toggle_button" aria-expanded="false" aria-label="Toggle menu" aria-controls="wh_top_menu_and_indexterms_link">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <!-- Expand/Collapse publishing TOC 
+                             The menu button for mobile devices is copied in the output only when the publication TOC is available
+                        -->
+                <button type="button" data-target="#wh_publication_toc" id="wh_toc_button" data-toggle="collapse" class="custom-toggler navbar-toggler collapsed wh_toggle_button navbar-light" aria-expanded="false" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc">
+                    <span class="toggler-icon">
+                        <i class="material-icons">view_headline</i>
+                    </span>
+                </button>
+            </div>
+
+            <div class="wh_top_menu_and_indexterms_link collapse navbar-collapse" id="wh_top_menu_and_indexterms_link">
+                
+                <!--<whc:webhelp_indexterms_link/>-->
+                <!-- Search form -->
+                <div class=" wh_product_numbers "><span class="production-version">Version 1.0</span></div>
+                <div class=" wh_search_input navbar-form wh_main_page_search " role="form">
+                    
+                    <div class="wh_welcome"></div>          
+                    <form id="searchForm" method="get" role="search" action="../search.html"><div><input type="search" placeholder="Search... " class="wh_search_textfield" id="textToSearch" name="searchQuery" aria-label="Search query" required="required"/><button type="submit" class="wh_search_button" aria-label="Search..."><span>Search...</span></button></div></form>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</header>
+
+
+        <div class="container-fluid" id="wh_topic_container">
+            <div class="row">
+
+                <nav class="wh_tools d-print-none navbar-expand-md" aria-label="Tools">
+                    
+<div data-tooltip-position="bottom" class=" wh_breadcrumb "><ol class="d-print-none"><li><span class="home"><a href="../index.html"><span>Home</span></a></span></li><li class="active"><div class="topicref" data-id="c_signaling_preview"><div class="title"><a href="../topics/c_signaling_previewing.html">HLG signaling and previewing</a><div class="wh-tooltip">Adding support for Dolby Vision editing involves understanding how to process hybrid log-gamma (HLG) frames correctly so that the preview surface is aware of their format.</div></div></div></li></ol></div>
+
+
+                    
+<div class="wh_right_tools">
+                        <span class="tools-icon"><button class="wh_hide_highlight" aria-label="Toggle search highlights" title="Toggle search highlights"></button></span>
+                        <button class="webhelp_expand_collapse_sections" data-next-state="collapsed" aria-label="Collapse sections" title="Collapse sections"></button>
+                        <div class=" wh_navigation_links "><span id="topic_navigation_links" class="navheader">
+<span class="navprev"><a class="- topic/link link" href="c_editing_gpu_shaders.html" title="Editing using the GPU shaders" aria-label="Previous topic: Editing using the GPU shaders" rel="prev"></a></span>  
+<span class="navnext"><a class="- topic/link link" href="c_trimming_remuxing.html" title="Trimming and remultiplexing" aria-label="Next topic: Trimming and remultiplexing" rel="next"></a></span>  </span></div>
+<!--External resource link-->
+
+                        <span class="tools-icon"><a onClick="window.print()" href="" title="Print this page"><i class="material-icons">print</i></a></span>
+                        
+
+                        <!-- PUBENG-1261 -->
+                        <span class="tools-icon"><a href="r_ov_glossary.html" title="Review the glossary"><i class="material-icons">sort_by_alpha</i></a></span>
+
+                        <!-- PUBENG-1199 -->
+                        
+
+                        <!-- PUBENG-1207 -->
+                        
+                    </div>
+
+                </nav>
+            </div>
+
+            
+
+            <div class="wh_content_area" id="wh_content_area">
+                <div class="row">
+                    
+
+
+                        <nav id="wh_publication_toc" class="col-lg-3 col-md-3 col-sm-12 d-md-block d-none d-print-none" aria-label="Table of Contents Container">
+<div id="wh_publication_toc_content">
+
+
+                            <div class=" wh_publication_toc " data-tooltip-position="right"><span class="expand-button-action-labels"><span id="button-expand-action" role="button" aria-label="Expand"></span><span id="button-collapse-action" role="button" aria-label="Collapse"></span><span id="button-pending-action" role="button" aria-label="Pending"></span></span><ul role="tree" aria-label="Table of Contents"><li role="treeitem"><div data-tocid="c_introduction-d4029e80771" class="topicref" data-id="c_introduction" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_introduction.html" id="c_introduction-d4029e80771-link">Introduction</a><div class="wh-tooltip">This documentation focuses on video editing of Dolby Vision files in an Android application, and covers support provided in a sample application for critical aspects on both graphics processing unit (GPU) and display processing unit (DPU)  platforms and corresponding Dolby Vision versions.</div></div></div></li><li role="treeitem"><div data-tocid="c_display_management-d4029e80856" class="topicref" data-id="c_display_management" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_display_management.html" id="c_display_management-d4029e80856-link">Display management</a><div class="wh-tooltip">There are two versions of Dolby Vision capture; the version present on a device depends on the display management processing unit or platform used for Dolby Vision. It is critical that an application can determine which version is present, and can run correctly on both versions. Determining the version reliably involves examining the Dolby Vision codecs present on the device.</div></div></div></li><li role="treeitem"><div data-tocid="c_editing_gpu_shaders-d4029e80932" class="topicref" data-id="c_editing_gpu_shaders" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_editing_gpu_shaders.html" id="c_editing_gpu_shaders-d4029e80932-link">Editing using the GPU shaders</a><div class="wh-tooltip">The sample application provides two GPU (graphics processing unit) shaders for editing.  The DPU (display processing unit) is not used for editing, but is used for display.</div></div></div></li><li role="treeitem" class="active"><div data-tocid="c_signaling_preview-d4029e81009" class="topicref" data-id="c_signaling_preview" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_signaling_previewing.html" id="c_signaling_preview-d4029e81009-link">HLG signaling and previewing</a><div class="wh-tooltip">Adding support for Dolby Vision editing involves understanding how to process hybrid log-gamma (HLG) frames correctly so that the preview surface is aware of their format.</div></div></div></li><li role="treeitem"><div data-tocid="c_chapter3-d4029e81083" class="topicref" data-id="c_chapter3" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/c_trimming_remuxing.html" id="c_chapter3-d4029e81083-link">Trimming and remultiplexing</a><div class="wh-tooltip">When trimming directly on an encoded video bitstream to preserve video quality, Dolby Vision multiplexer information must be added to the MP4 file. Dolby provides a tool to do this that can be integrated into an application.</div></div></div></li><li role="treeitem"><div data-tocid="r_appendix-d4029e81158" class="topicref" data-id="r_appendix" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/r_appendix.html" id="r_appendix-d4029e81158-link">Appendix</a></div></div></li><li role="treeitem"><div data-tocid="tocId-d4029e81225" class="topicref glossary" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/r_ov_glossary.html" id="tocId-d4029e81225-link">Glossary</a></div></div></li><li role="treeitem"><div data-tocid="Chunk1633017108-d4029e80571" class="topicref frontmatter" data-id="Chunk1633017108" data-state="leaf"><span role="button" class="wh-expand-btn"></span><div class="title"><a href="../topics/Chunk1633017108.html#Chunk1633017108" id="Chunk1633017108-d4029e80571-link">Notices</a></div></div></li></ul></div>
+                        
+
+</div>
+</nav>
+                    
+
+
+
+                    <div class="col-lg-6 col-md-9 col-sm-12" id="wh_topic_body">
+<script type="text/javascript">document.getElementById('wh_topic_body').className += ' fouc';</script>
+<button id="wh_close_publication_toc_button" class="close-toc-button d-none" aria-label="Toggle publishing table of content" aria-controls="wh_publication_toc" aria-expanded="true"><span class="close-toc-icon-container"><span class="close-toc-icon"></span></span></button><button id="wh_close_topic_toc_button" class="close-toc-button d-none" aria-label="Toggle topic table of content" aria-controls="wh_topic_toc" aria-expanded="true"><span class="close-toc-icon-container"><span class="close-toc-icon"></span></span></button>
+
+                        
+<div class=" wh_topic_content body "><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+    
+    <h1 class="- topic/title title topictitle1" id="ariaid-title1">HLG signaling and previewing</h1>
+
+    
+    <div class="- topic/body concept/conbody body conbody"><p class="- topic/shortdesc shortdesc">Adding support for <span class="keyword">Dolby Vision</span> editing involves understanding how to process <span class="keyword">hybrid log-gamma</span> (<a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a>) frames correctly so that the preview surface is aware of their format.</p>
+        <section class="- topic/section section" id="c_signaling_preview__section_hlg_signaling" data-ofbid="c_signaling_preview__section_hlg_signaling"><h2 class="- topic/title title sectiontitle">Overview of <span class="keyword">hybrid log-gamma</span> signaling</h2>
+            
+            <p class="- topic/p p"><span class="keyword">Hybrid log-gamma</span> (<a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a>) image signaling is potentially one of the greatest obstacles in adding support for <span class="keyword">Dolby Vision</span> editing to an existing application. Rather than making additions to existing code, this involves what could be a major alteration to the implementation of a pipeline. </p>
+        <p class="- topic/p p">To ensure correct operation for preview, the processing framework presented here must be used. The same processing framework can be used for transcoding, but this is not required for correct operation. In the sample application, the same processing framework is used for both preview and transcoding to make the application easier to manage. </p>
+        <div class="- topic/p p">Regardless of whether frames are sent to the screen to be previewed or to an encoder during transcoding or editing, the same processing framework applies: <ul class="- topic/ul ul" id="c_signaling_preview__ul_o4r_dgm_wwb" data-ofbid="c_signaling_preview__ul_o4r_dgm_wwb">
+                    <li class="- topic/li li">The video decoder produces frames onto a <a class="- topic/xref xref" href="https://developer.android.com/reference/android/view/Surface" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">Surface</code></u></a>.</li>
+
+                    <li class="- topic/li li">The surface is used as input to a set of OpenGL shaders that apply effects.</li>
+
+                    <li class="- topic/li li">The output from the shaders is rendered onto another surface, which could be either a screen or a video encoder.</li>
+
+                </ul></div>
+            <p class="- topic/p p">The traditional approach to applying effects to a video frame in Android is to use <a class="- topic/xref xref" href="https://developer.android.com/reference/android/graphics/SurfaceTexture" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">SurfaceTexture</code></u></a>, which allows use of the <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/MediaCodec" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">MediaCodec</code></u></a> decoder instance to output a texture directly. A vertex and fragment shader can then be used to render the modified frame directly onto the screen or the encoder input surface. The issue with this approach is that OpenGL is the interface between the decoder and the screen, but is incapable of communicating to the screen that the pixels are in <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a>, which is necessary to take advantage of <a href="g_6650.html" title="display processing unit: A hardware component of a Qualcomm system-on-chip (SoC) designed for accelerated processing of visual data represented as pixels."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">DPU</dfn></a> hardware.</p>
+            <p class="- topic/p p">The solution in the sample application decouples the decoding procedure from subsequent procedures as much as possible. The <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/MediaCodec" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">MediaCodec</code></u></a> callback class has restrictions. The methods for input and output buffer handling must not perform thread blocking or waiting. This means not placing any kind of flow control in these calls. The decoder has access to a limited pool of buffers, and once these are filled, the decoder will stop processing. </p>
+            <p class="- topic/p p">The decoder implements an isolated producer and consumer pattern. The decoder callbacks are assigned to a single thread. When the decoder produces a buffer, it is placed into a queue. In order to avoid any blocking, the decoder uses an instance of the Java utility class <a class="- topic/xref xref" href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">ConcurrentLinkedQueue</code></u></a>, which can guarantee thread safety without need for locks or semaphores. Adding the buffer to the queue is the only operation performed on output buffers in the decoder or the producer thread. </p>
+            <p class="- topic/p p">The video decoder class file <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/java/com/dolby/capture/filtersimultion/VideoDecoder.java" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">VideoDecoder.java</span></u></a> also defines a small inner static class <code class="+ topic/ph pr-d/codeph ph codeph">BufferProcessor</code>, which handles the consumer part of the pattern. This class starts another thread that is independent of the decoder so that the speed at which frames go to the screen can be throttled according to the frame rate of the input video. This is where some of the key changes to support <span class="keyword">Dolby Vision</span> start to occur. The render target of the video decoder is not the screen or the encoder directly. Instead, the output is piped to an <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/ImageReader" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">ImageReader</code></u></a>. </p>
+            <p class="- topic/p p">The consumer thread loops to poll the queue for buffers. If the queue is not empty, it removes the lead element and asks the <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/MediaCodec" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">MediaCodec</code></u></a> instance to render the buffer to the image reader. The callback that is triggered upon the image reader receiving a frame operates in a different thread than the decoder or the buffer consumer. This thread is set up as an OpenGL context, which is important for the next step. </p>
+            <p class="- topic/p p">Because the decoder output is decorated with the image reader, the output is seen as a series of image objects. The next step involves getting an OpenGL texture that can be used as input to the shader system. There is no <a href="g_1707.html" title="application programming interface: A set of functions that can be used to access the functions of an operating system or other type of software."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">API</dfn></a> that can directly map an <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/Image" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">Image</code></u></a> to an OpenGL resource. However, the image can be converted to a <a class="- topic/xref xref" href="https://developer.android.com/reference/android/hardware/HardwareBuffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">HardwareBuffer</code></u></a>, which can be mapped to a texture. The sample application does this <em class="+ topic/ph hi-d/i ph i">via</em>
+                <a href="g_1958.html" title="Java Native Interface"><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">JNI</dfn></a> (the <span class="keyword">Java Native Interface</span>), the calls for which are made in  the <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/java/com/dolby/capture/filtersimulation/FrameHandler.java" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">FrameHandler</code></u></a> class. The next issue is that the output image from the decoder is read only, so an empty buffer is required to draw the result of the edits. </p>
+            <p class="- topic/p p">Obtaining an empty image that can be used for this purpose involves the <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/ImageWriter" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">ImageWriter</code></u></a>. This utility is extremely useful. It allows for dataspace assignment that fixes the <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a> issue, and it can render directly to any resource that uses a <a class="- topic/xref xref" href="https://developer.android.com/reference/android/view/Surface" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">Surface</code></u></a> object to accept input. Once an empty image is obtained from the writer, it can be mapped to a texture in the same way as the input image. As for the texture generation process, the following code from <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/native-lib.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">editor/app/src/main/cpp/native-lib.cpp</span></u></a> shows how to use the provided libraries. </p>
+        <div class="- topic/p p">
+            <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_signaling_preview__codeblock_b5d_pbc_rwb" data-ofbid="c_signaling_preview__codeblock_b5d_pbc_rwb"><code>AHardwareBuffer* inAHB  = AHardwareBuffer_fromHardwareBuffer(env,inbuf);
+AHardwareBuffer* outAHB = AHardwareBuffer_fromHardwareBuffer(env,opbuf);
+
+JNI_GLOBAL::context-&gt;makeCurrent();
+
+Simulation::HardwareBuffer inputBuffer(inAHB);
+Simulation::HardwareBuffer outputBuffer(outAHB);
+Simulation::EGLMap         inputImage(inputBuffer,   JNI_GLOBAL::context-&gt;getDisplay());
+Simulation::EGLMap         outputImage(outputBuffer, JNI_GLOBAL::context-&gt;getDisplay());
+
+outputImage.bindFBO();</code></pre>
+        </div>
+            <p class="- topic/p p">The <a class="- topic/xref xref" href="https://developer.android.com/reference/android/hardware/HardwareBuffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">HardwareBuffer</code></u></a> objects from the <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/ImageReader" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">ImageReader</code></u></a> and <a class="- topic/xref xref" href="https://developer.android.com/reference/android/media/ImageWriter" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">ImageWriter</code></u></a> must first be converted to their native counterpart <a class="- topic/xref xref" href="https://developer.android.com/ndk/reference/group/a-hardware-buffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">AHardwareBuffer</code></u></a>. Android provides a <a href="g_1958.html" title="Java Native Interface"><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">JNI</dfn></a> conversion tool that allows this to be done easily. </p>
+            <p class="- topic/p p">From there, <a href="g_1707.html" title="application programming interface: A set of functions that can be used to access the functions of an operating system or other type of software."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">API</dfn></a> calls provided by the sample application are used. </p>
+            <p class="- topic/p p">The first step is to pass an <a class="- topic/xref xref" href="https://developer.android.com/ndk/reference/group/a-hardware-buffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">AHardwareBuffer</code></u></a> to a <a class="- topic/xref xref" href="https://developer.android.com/reference/android/hardware/HardwareBuffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">HardwareBuffer</code></u></a> wrapper. Internally, this extracts a large amount of metadata from the buffer and makes that metadata available. </p>
+            <p class="- topic/p p">The next step is to pass the Android <a class="- topic/xref xref" href="https://developer.android.com/reference/android/hardware/HardwareBuffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">HardwareBuffer</code></u></a> to an <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/src/main/cpp/EGLMap.cpp" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">EGLMap</code></u></a> of the sample application, which maps the buffer to an OpenGL texture. These steps are each done twice, for both input and output buffers. </p>
+            <p class="- topic/p p">The final step is to bind a frame buffer object for the output buffer so that the renderer can draw into the buffer with a fragment shader. </p>
+        <div class="- topic/p p">At this point, all of the necessary buffers are mapped, and the shader pipeline can be run to apply the edits to the frame. This edit application process has two steps. The first step runs the compute shader that applies the effects to the pixels and renders the output into a transfer texture. The compute shader cannot be used to render into the output buffer; therefore, a second step is required. This step involves a fragment shader that takes the output from the compute shader and renders it into the output <a class="- topic/xref xref" href="https://developer.android.com/ndk/reference/group/a-hardware-buffer" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">AHardwareBuffer</code></u></a>. The following code demonstrates how to do this. <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_signaling_preview__codeblock_zck_nbc_rwb" data-ofbid="c_signaling_preview__codeblock_zck_nbc_rwb"><code>JNI_GLOBAL::renderer-&gt;RunEditComputeShader(inputImage.getBufferTexture(),
+                                           inputImage.getHardwareBufferWidth(),
+                                           inputImage.getHardwareBufferHeight());
+
+JNI_GLOBAL::renderer-&gt;render(JNI_GLOBAL::renderer-&gt;GetTransferTextureID(),
+                             outputImage.getLutTexture(),
+                             false,
+                             false);</code></pre></div>
+
+        <div class="- topic/p p">After this, the output data is in the target buffer. Calls for this procedure using the <a href="g_1958.html" title="Java Native Interface"><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">JNI</dfn></a> are made in the <code class="+ topic/ph pr-d/codeph ph codeph">onFrameAvailable</code> method of the <code class="+ topic/ph pr-d/codeph ph codeph">FrameHandler</code> class. First, <code class="+ topic/ph pr-d/codeph ph codeph">onFrameAvailable</code> creates the two hardware buffers, as follows. <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_signaling_preview__codeblock_v3d_mbc_rwb" data-ofbid="c_signaling_preview__codeblock_v3d_mbc_rwb"><code>HardwareBuffer input  = inputImage.getHardwareBuffer();
+Image outputImage     = writer.dequeueInputImage();
+HardwareBuffer output = outputImage.getHardwareBuffer();</code></pre></div>
+        
+        <p class="- topic/p p">Next, <code class="+ topic/ph pr-d/codeph ph codeph">onFrameAvailable</code> calls the <code class="+ topic/ph pr-d/codeph ph codeph">processFrame</code> function. This function runs the C++ rendering code. After calling this function, the output image has data. </p>
+            <p class="- topic/p p">Finally, <code class="+ topic/ph pr-d/codeph ph codeph">onFrameAvailable</code> configures the dataspace and the time stamp. The parameter passed to <code class="+ topic/ph pr-d/codeph ph codeph">setDataspace</code> is the pipeline output dataspace, which varies for each piece of content. </p>
+            <p class="- topic/p p">For <span class="keyword">Dolby Vision</span> profile 8.4 output, the specific settings to be applied are: </p>
+        <ul class="- topic/ul ul" id="c_signaling_preview__ul_rbr_zxb_rwb" data-ofbid="c_signaling_preview__ul_rbr_zxb_rwb">
+            <li class="- topic/li li">
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">STANDARD_BT2020</code>
+                </p>
+            </li>
+
+            <li class="- topic/li li">
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">TRANSFER_<a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a></code>
+                </p>
+            </li>
+
+            <li class="- topic/li li">
+                <p class="- topic/p p"><code class="+ topic/ph pr-d/codeph ph codeph">RANGE_LIMITED</code>
+                </p>
+            </li>
+
+        </ul>
+        </section>
+        <section class="- topic/section section" id="c_signaling_preview__section_decoder_selection" data-ofbid="c_signaling_preview__section_decoder_selection"><h2 class="- topic/title title sectiontitle">Setting up a decoder</h2>
+            
+        <p class="- topic/p p">To ensure an accurate preview experience for the user, the preview format needs to be adjusted depending on the target format. <span class="keyword">Dolby Vision</span> is decoded differently if the target format for transcoding or editing is not <span class="keyword">Dolby Vision</span>. Your platform will have its own mechanism for indicating which output format the user has requested. <span class="keyword">Dolby</span> decoders must be set up differently depending on whether the output is in standard or high dynamic range. The steps to take depend on which platform the device is running. Refer to <cite class="- topic/cite cite">Display management</cite>. </p>
+            <div class="- topic/p p">For the <a href="g_6650.html" title="display processing unit: A hardware component of a Qualcomm system-on-chip (SoC) designed for accelerated processing of visual data represented as pixels."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">DPU</dfn></a> solution, the procedure is straightforward. The decoder outputs <a href="g_4499.html" title="high-dynamic-range imaging: A technique used in imaging and photography to reproduce a greater dynamic range of luminosity than what is possible with standard digital imaging or photographic techniques. The aim is to present a similar range of luminance to that experienced through the human eye."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HDR</dfn></a> by default, assuming that the output is <span class="keyword">Dolby Vision</span>. For other cases like the <a href="g_6651.html" title="graphics processing unit: A specialized electronic circuit designed for optimal use of memory and accelerated processing to create images in a frame buffer for output to a display device."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">GPU</dfn></a> solution, the following code should be used.  This code is an excerpt from <span class="- topic/ph ph">the <code class="+ topic/ph pr-d/codeph ph codeph">CodecSelector</code> utility class, and delivered with the sample application in the Android archive file <span class="+ topic/ph sw-d/filepath ph filepath">codecSelection.aar</span> in the <a class="- topic/xref xref" href="https://github.com/DolbyLaboratories/dolby-vision-editor/blob/master/editor/app/libs/CodecSelection" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><span class="+ topic/ph sw-d/filepath ph filepath">editor/app/libs/CodecSelection</span></u></a> directory</span>.<pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_signaling_preview__codeblock_e1l_jbc_rwb" data-ofbid="c_signaling_preview__codeblock_e1l_jbc_rwb"><code>if ((decoderFormat.getString(MediaFormat.KEY_MIME).equals(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION)) 
+    &amp;&amp;
+    (decoderFormat.getInteger(MediaFormat.KEY_PROFILE) ==
+     MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt) 
+    &amp;&amp;
+    (outputFormat.equals(HEVC) || outputFormat.equals(AVC))) 
+{
+    Log.e("CodecSelection", "configure: <span class="keyword">Dolby Vision</span> Decoder Filter Enabled");
+    
+    // DPU
+    <strong class="+ topic/ph hi-d/b ph b">format.setInteger(MediaFormat.KEY_COLOR_TRANSFER_REQUEST, 
+                       MediaFormat.COLOR_TRANSFER_SDR_VIDEO);</strong>
+} else {
+    Log.e("CodecSelection", "configure: Not enabling <span class="keyword">Dolby Vision</span> Filter");
+}
+
+// GPU / NON-DPU
+<strong class="+ topic/ph hi-d/b ph b">if (mime.equals(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION)) {
+    c.setTransfer(BuilderCodecTemplate.TRANSFER_PARAMS[transfer]);
+}</strong></code></pre></div>
+            <p class="- topic/p p">This code first checks whether the video selected by the user is a <span class="keyword">Dolby Vision</span> 8.4 file. </p>
+            <p class="- topic/p p">Next, the requested output format is determined. If the request is for a <a href="g_2141.html" title="standard dynamic range: An ITU-R BT.709 signal with peak luminance of 100 cd/m²."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">SDR</dfn></a> codec, then the decoder is instructed to downconvert to <a href="g_2141.html" title="standard dynamic range: An ITU-R BT.709 signal with peak luminance of 100 cd/m²."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">SDR</dfn></a> before proceeding with editing. The bold code below the '<code class="+ topic/ph pr-d/codeph ph codeph">DPU</code>' comment makes this request to the decoder. If the request is for <span class="keyword">Dolby Vision</span> output, this step is not necessary. </p>
+            <p class="- topic/p p">For the non-<a href="g_6650.html" title="display processing unit: A hardware component of a Qualcomm system-on-chip (SoC) designed for accelerated processing of visual data represented as pixels."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">DPU</dfn></a> solution, a transfer parameter must be passed, for both <a href="g_2141.html" title="standard dynamic range: An ITU-R BT.709 signal with peak luminance of 100 cd/m²."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">SDR</dfn></a> and <a href="g_4499.html" title="high-dynamic-range imaging: A technique used in imaging and photography to reproduce a greater dynamic range of luminosity than what is possible with standard digital imaging or photographic techniques. The aim is to present a similar range of luminance to that experienced through the human eye."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HDR</dfn></a> output scenarios. The string value is ‘<code class="+ topic/ph pr-d/codeph ph codeph">TRANSFER_SDR</code>' for <a href="g_2141.html" title="standard dynamic range: An ITU-R BT.709 signal with peak luminance of 100 cd/m²."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">SDR</dfn></a> output, and ‘<code class="+ topic/ph pr-d/codeph ph codeph">TRANSFER_DOLBY</code>' for <span class="keyword">Dolby Vision</span> output. The bold code under the <code class="+ topic/ph pr-d/codeph ph codeph">GPU / NON-DPU</code> comment applies this. </p>
+        </section>
+        <section class="- topic/section section" id="c_signaling_preview__section_testing" data-ofbid="c_signaling_preview__section_testing"><h2 class="- topic/title title sectiontitle">Testing</h2>
+            
+        <p class="- topic/p p">At this point, the <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a> preview system should be working, and should be able to switch modes on the <span class="keyword">Dolby Vision</span> decoders to get the desired output type. There is a simple test to verify that steps have been carried out correctly and that preview is running in <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a>. </p>
+            <p class="- topic/p p">First, open the application and make sure a <span class="keyword">Dolby Vision</span> video is playing. Also ensure that the output format is set to <span class="keyword">Dolby Vision</span>. This is the only output format setting with which <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a> output should be used. If the output is <a href="g_2141.html" title="standard dynamic range: An ITU-R BT.709 signal with peak luminance of 100 cd/m²."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">SDR</dfn></a>, then do not label the frames as <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a>. </p>
+            <p class="- topic/p p">To check the type of frame on the screen, follow these steps: </p>
+        <ol class="- topic/ol ol">
+            <li class="- topic/li li">Ensure that the device is connected to a Windows computer by a USB cable.</li>
+
+            <li class="- topic/li li">Ensure that Android Debug Bridge (ADB) is installed on the machine.</li>
+
+            <li class="- topic/li li">Open PowerShell, and run the following command: <pre class="+ topic/pre pr-d/codeblock pre codeblock"><code> adb shell dumpsys SurfaceFlinger | findstr 'layer:'</code></pre></li>
+
+        </ol>
+            <div class="- topic/p p">Running this command instructs <a class="- topic/xref xref" href="https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager" target="_blank" rel="external noopener"><u class="+ topic/ph hi-d/u ph u"><code class="+ topic/ph pr-d/codeph ph codeph">SurfaceFlinger</code></u></a> to report the format of all the layers currently on the screen, one of which will be the preview. The following output is produced by the sample application: <pre class="+ topic/pre pr-d/codeblock pre codeblock" id="c_signaling_preview__codeblock_hx5_wbc_rwb" data-ofbid="c_signaling_preview__codeblock_hx5_wbc_rwb"><code>layer: 1575 
+name: MediaSync 
+z: 0 
+composition: Device/Device 
+alpha: 255 
+format: Y_CBCR_420_P010 
+dataspace:0x12060000 
+transform: 0/0/0 
+buffer_id: 0xb400007c27bb18d0 
+secure: 0
+
+layer: 1572 
+name: VRI[MainActivity]#2(BLAST Consumer)2 
+z: 1 
+composition: Device/Device 
+alpha: 255 
+format:         RGBA_8888_UBWC 
+dataspace:0x00000000 
+transform: 0/0/0 
+buffer_id: 0xb400007c27bb5d70 
+secure: 0
+
+layer: 1557 
+name: VRI[NavigationBar0]#3(BLAST Consumer)3 
+z: 2 
+composition: Device/Device 
+alpha: 255 
+format: RGBA_8888_UBWC 
+dataspace:0x088a0000 
+transform: 0/0/0 
+buffer_id: 0xb400007c27bb2a40 
+secure: 0
+
+layer:  132 
+name: VRI[ScreenDecorOverlay]#0(BLAST Consumer)0 
+z: 3 
+composition: Device/Device 
+alpha: 255 
+format: RGBA_8888 
+dataspace:0x088a0000 
+transform: 0/0/0 
+buffer_id: 0xb400007c27bb5980 
+secure: 0
+
+layer:  131 
+name: VRI[ScreenDecorOverlayBottom]#1(BLAST Consumer)1 
+z: 4 
+composition: Device/Device 
+alpha: 255 
+format: RGBA_8888 
+dataspace:0x088a0000 
+transform: 0/0/0 
+buffer_id: 0xb400007c27bb3970 
+secure: 0</code></pre></div>
+        
+       <p class="- topic/p p">In the sample application, the preview is the first layer displayed. It is critical to check that the dataspace value is <code class="+ topic/ph pr-d/codeph ph codeph">0x12060000</code>. This indicates that the frames are labeled as BT.2020 <a href="g_1906.html" title="hybrid log-gamma: High-dynamic range standard format developed jointly by the British Broadcasting Corporation (BBC) and Nippon Hoso Kyokai (Japan Broadcasting Corporation), and defined in ARIB STD‑B67 and ETSI TS 101 154."><dfn class="+ topic/term abbrev-d/abbreviated-form term abbreviated-form">HLG</dfn></a> limited range, which is needed for <span class="keyword">Dolby Vision</span> 8.4 playback. </p> 
+        </section>
+    </div>
+</article></main></div>
+
+
+                        
+                        
+                        
+
+                        
+
+                    </div>
+                    
+
+
+
+                        <nav role="navigation" id="wh_topic_toc" aria-label="On this page" class="col-lg-3 d-none d-lg-block navbar d-print-none">
+<div id="wh_topic_toc_content">
+
+
+                            <div class=" wh_topic_toc "><div class="wh_topic_label">On this page</div><ul><li class="section-item"><div class="section-title"><a href="#c_signaling_preview__section_hlg_signaling" data-tocid="c_signaling_preview__section_hlg_signaling">Overview of hybrid log-gamma signaling</a></div></li><li class="section-item"><div class="section-title"><a href="#c_signaling_preview__section_decoder_selection" data-tocid="c_signaling_preview__section_decoder_selection">Setting up a decoder</a></div></li><li class="section-item"><div class="section-title"><a href="#c_signaling_preview__section_testing" data-tocid="c_signaling_preview__section_testing">Testing</a></div></li></ul></div>
+                        
+
+</div>
+</nav>
+                    
+
+
+
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="wh_footer">
+
+  <div class=" footer-container container-fluid">
+
+   <!-- PUBENG-1263 simplify bootstrap to fix footer stubborness  -->
+    <div class=" wh_footer_tiles container-fluid">
+
+        <div class="wh_tile footer-left">
+          <!-- PUBENG-1492 adding black icon for print, and hiding white icon for screens -->
+          <a href="https://www.dolby.com" target="_blank" class=" wh_logo d-print-none "><img src="../oxygen-webhelp/template/images/Dolby_vertical_White.svg" alt="&#xA;            Dolby Vision&#xA;         "/></a>
+          
+        </div>
+
+        <div class="wh_tile footer-center">
+          <div class="copyright-statement">©2023 Dolby Laboratories. All rights reserved.  Dolby and the double-D symbol are registered trademarks of Dolby Laboratories. All other trademarks remain
+        the property of their respective owners.</div>
+        </div>
+
+        <div class="wh_tile footer-right">
+          <div class="support-links"><div role="support-link"><span class="title"><a href="Chunk1633017108.html#Chunk1633017108">Notices</a></span></div></div>
+          1 May 2023<span class="copyright-date"> </span>
+          <div class="confidential"></div>
+        </div>
+
+    </div>
+
+    <!--    <whc:dolby_footer_title class="d-none d-sm-block"/>-->
+
+    <!--
+    
+    <!-\-    <whc:include_html href="${webhelp.fragment.footer}"/>-\->
+    <div class="permissions_date">
+     
+    </div>-->
+
+  </div>
+</footer>
+        <div id="go2top" class="d-print-none">
+            <span class="oxy-icon oxy-icon-up"></span>
+        </div>
+        <!-- The modal container for images -->
+        <div id="modal_img_large" class="modal">
+            <span class="close oxy-icon oxy-icon-remove"></span>
+            <!-- Modal Content (The Image) -->
+            <div id="modal_img_container"></div>
+            <!-- Modal Caption (Image Text) -->
+            <div id="caption"></div>
+        </div>
+        
+
+    </body>
+</html>
