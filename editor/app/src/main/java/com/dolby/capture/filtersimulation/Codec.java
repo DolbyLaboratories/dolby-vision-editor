@@ -34,6 +34,7 @@ package com.dolby.capture.filtersimulation;
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.util.Log;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ import java.util.concurrent.Semaphore;
 
 public abstract class Codec extends BuilderCodecTemplate implements Runnable {
 
+    private final String TAG = "Codec";
     private Surface inputSurface;
 
     private final Context appContext;
@@ -55,9 +57,21 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
 
     public static final long TWO_SECONDS_US = 2000000;
 
+    private int codecState;
+
+    public final int STATE_STARTING = 0;
+    public final int STATE_STARTED = 1;
+    public final int STATE_STOPING = 2;
+    public final int STATE_STOPED = 3;
+
+    public final int STATE_CREATED = 4;
+    public final int STATE_IDLE = 5;
+
+
     public Codec(boolean trim, Context appContext) {
         this.trim = trim;
         this.appContext = appContext;
+        codecState = STATE_IDLE;
     }
 
     public void setInputSurface(Surface inputSurface) {
@@ -69,6 +83,7 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
     public void createByCodecName(String codecName) {
         try {
             this.createCodec(MediaCodec.createByCodecName(codecName));
+            codecState = STATE_CREATED;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,7 +97,20 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
 
     private void start()
     {
+        Log.d(TAG, "start");
+        codecState = STATE_STARTING;
         this.getCodec().start();
+        onStart();
+    }
+
+    public void onStart() {
+        Log.d(TAG, "started");
+        codecState = STATE_STARTED;
+    }
+
+    public void onStop() {
+        Log.d(TAG, "stopped");
+        codecState = STATE_STOPED;
     }
 
 
@@ -102,6 +130,8 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
     }
 
     void stop() {
+        Log.d(TAG, "stop");
+        codecState = STATE_STOPING;
         if(this.getCodec() != null) {
             try {
                 this.getCodec().flush();
@@ -113,7 +143,13 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
             finally {
                 this.getCodec().release();
             }
+
+            onStop();
         }
+    }
+
+    public int getCodecState() {
+        return codecState;
     }
 
     private static final Semaphore audioDoneSemaphore = new Semaphore(0);

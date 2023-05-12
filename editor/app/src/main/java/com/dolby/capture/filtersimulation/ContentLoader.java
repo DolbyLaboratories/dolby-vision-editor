@@ -217,7 +217,6 @@ public class ContentLoader {
     public void stop()
     {
         if(decoder != null) {
-            decoder.setPaused();
             decoder.stop();
             decoder = null;
         }
@@ -227,7 +226,6 @@ public class ContentLoader {
             encoder = null;
         }
 
-        // stop decoder first, then release frameHandler
         if(frameHandler != null) {
             frameHandler.release();
             frameHandler = null;

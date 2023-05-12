@@ -84,6 +84,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private static final int REQUEST_FOR_VIDEO_FILE = 1000;
 
     private static final int TRANSFER_DOLBY = 3;
+    private static final int TRANSFER_HLG = 2;
     private static final int TRANSFER_SDR = 0;
 
     private ContentLoader p = null;
@@ -442,10 +443,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         // add a button
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                MainActivity.this.runOnUiThread(() -> {
-                    recreate();
-//                    spinnerEncoderFormat.setSelection(0);
-                });
+                onEditDone(false);
             }
         });
 
@@ -552,8 +550,12 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                         break;
                 }
                 if (this.p != null) {
+                    /**
+                     * transocding to DV_ME, need to set to TRANSFER_HLG
+                     * transcoding to SDR, need to set to TRANSFER_SDR
+                     */
                     if (encoderFormat.equals(Constants.DV_ME)) {
-                        transfer = TRANSFER_DOLBY;
+                        transfer = TRANSFER_HLG;
                     } else {
                         transfer = TRANSFER_SDR;
                     }
@@ -586,7 +588,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume: ");
+        Log.d(TAG, "onResume: ");
     }
 
     @Override
@@ -598,7 +600,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
         this.inputPath = null;
 
-        Log.e(TAG, "onPause: ");
+        Log.d(TAG, "onPause: ");
     }
 
     public Size setVideoSize(Size videoDimensions, int rotation) {
@@ -733,21 +735,20 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
         else if (message.getPayload() instanceof MediaFormatNotFoundInFileException) {
             Log.e(TAG, "acceptMessage: " + message.getTitle());
-            onEditDone(false);
+//            onEditDone(false);
             MediaFormatNotFoundInFileException e = (MediaFormatNotFoundInFileException) message.getPayload();
             e.printStackTrace();
             errorDialog(message.getTitle(), e.getMessage());
         }
         else if (message.getPayload() instanceof NullPointerException) {
             Log.e(TAG, "acceptMessage: " + message.getTitle());
-            onEditDone(false);
+//            onEditDone(false);
             NullPointerException e = (NullPointerException) message.getPayload();
             e.printStackTrace();
             errorDialog(message.getTitle(), "Unable to load codec for this file");
         }
         else if (message.getPayload() instanceof MediaCodec.CodecException) {
             Log.e(TAG, "acceptMessage: " + message.getTitle());
-            onEditDone(false);
             MediaCodec.CodecException e = (MediaCodec.CodecException) message.getPayload();
             e.printStackTrace();
             errorDialog(message.getTitle(), "Codec error: " + e.getErrorCode());
@@ -755,20 +756,21 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     }
 
     public void onEditDone(boolean success) {
+        // don't do this in UI thread
+        if (p != null) {
+            Log.d(TAG, "onEditDone, stop contentLoader");
+            p.stop();
+            p = null;
+        }
+
         this.runOnUiThread(() -> {
             // Hide the overlay
             animateView(progressOverlayView, View.GONE, 0, 200);
             resetEffects();
             resetTextOverlay();
 
-            if (p != null) {
-                Log.d(TAG, "onEditDone, stop contentLoader");
-                p.stop();
-                p = null;
-            }
-
+            recreate();
             if (success) {
-                recreate();
                 Toast.makeText(this, "Video export completed", Toast.LENGTH_SHORT).show();
             }
         });

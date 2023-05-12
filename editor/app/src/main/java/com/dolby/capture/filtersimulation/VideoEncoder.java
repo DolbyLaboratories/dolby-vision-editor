@@ -43,6 +43,7 @@ import androidx.annotation.NonNull;
 
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Semaphore;
 
 public class VideoEncoder extends Codec implements BroadcastClient{
 
@@ -56,12 +57,15 @@ public class VideoEncoder extends Codec implements BroadcastClient{
 
     private OnFrameEncoded callback;
 
+    private long endFramePts = -1;
+    private Semaphore encodingDone;
+
     private final String TAG = "VideoEncoder";
 
     public VideoEncoder(Context appContext, BroadcastAction cb, AudioTransferCallback audioHandler, Size resolution, String encoderFormat, int bitrate, int fps, int rotation, int iFrameInterval)  {
         super(false, appContext);
 
-        Log.e("VideoEncoder", "resolution="+resolution + "  encoderFormat="+encoderFormat + "  bitrate="+bitrate + "  fps="+fps);
+        Log.d(TAG, "resolution="+resolution + "  encoderFormat="+encoderFormat + "  bitrate="+bitrate + "  fps="+fps);
 
         this.audioHandler = audioHandler;
         encoderComms = cb;
@@ -95,10 +99,9 @@ public class VideoEncoder extends Codec implements BroadcastClient{
                 format.setInteger(MediaFormat.KEY_COLOR_RANGE, MediaFormat.COLOR_RANGE_LIMITED);
                 int level = getDolbyVisionLevel(fps, resolution);
                 format.setInteger(MediaFormat.KEY_LEVEL, level);
-                Log.e("VideoEncoder", "Dolby Vision P8.4 level = " + level);
+                Log.d("VideoEncoder", "Dolby Vision P8.4 level = " + level);
                 break;
         }
-
 
         format.setInteger(MediaFormat.KEY_WIDTH, resolution.getWidth());
         format.setInteger(MediaFormat.KEY_HEIGHT, resolution.getHeight());
@@ -115,8 +118,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
         format.setInteger(MediaFormat.KEY_PRIORITY, 0);
 
         String codecName = list.findEncoderForFormat(format);
-
-        Log.e("Encoder", "VideoEncoder: " + codecName );
+        Log.d(TAG, "VideoEncoder: " + codecName );
 
         this.createByCodecName(codecName);
 
@@ -126,7 +128,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
 
         this.setInputSurface(this.getCodec().createInputSurface());
 
-        Log.e("VideoEncoder", "VideoEncoder CodecSel: " + codecName);
+        Log.d(TAG, "VideoEncoder CodecSel: " + codecName);
 
         m = new Muxer(rotation);
 
@@ -177,7 +179,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
 
-        Log.e("Encoder", "onOutputBufferAvailable: " + info.presentationTimeUs + " " + info.flags );
+        Log.d(TAG, "onOutputBufferAvailable: " + info.presentationTimeUs + " " + info.flags );
 
 
         ByteBuffer x = codec.getOutputBuffer(index);
@@ -190,14 +192,22 @@ public class VideoEncoder extends Codec implements BroadcastClient{
             callback.onFrameEncoded(info);
         }
 
-
+        if (encodingDone != null && endFramePts != -1 && endFramePts <= info.presentationTimeUs ) {
+            Log.d(TAG, "get EOS");
+            if (encodingDone.availablePermits() == 0) {
+                encodingDone.release();
+            }
+        }
     }
 
 
 
     @Override
     public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
-        Log.e(TAG, "onError - " + e.getErrorCode());
+        Log.d(TAG, "onError - " + e.getErrorCode());
+        if (encodingDone != null && encodingDone.availablePermits() == 0) {
+            encodingDone.release();
+        }
         encoderComms.broadcast(new Message<MediaCodec.CodecException>("Codec error", e) {
         });
     }
@@ -205,9 +215,9 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
 
-        Log.e("VideoEncoder", "onOutputFormatChanged: TRANSFER " + format.getInteger(MediaFormat.KEY_COLOR_TRANSFER) );
-        Log.e("VideoEncoder", "onOutputFormatChanged: STANDARD " + format.getInteger(MediaFormat.KEY_COLOR_STANDARD) );
-        Log.e("VideoEncoder", "onOutputFormatChanged: RANGE " + format.getInteger(MediaFormat.KEY_COLOR_RANGE) );
+        Log.d(TAG, "onOutputFormatChanged: TRANSFER " + format.getInteger(MediaFormat.KEY_COLOR_TRANSFER) );
+        Log.d(TAG, "onOutputFormatChanged: STANDARD " + format.getInteger(MediaFormat.KEY_COLOR_STANDARD) );
+        Log.d(TAG, "onOutputFormatChanged: RANGE " + format.getInteger(MediaFormat.KEY_COLOR_RANGE) );
 
         int audioTrack = audioHandler.addTrack(m);
         muxID = m.addTrack(format);
@@ -218,7 +228,35 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     }
 
     @Override
+    public void onStart() {
+        Log.d(TAG, "codec started");
+        if (encodingDone == null) {
+            encodingDone = new Semaphore(0);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(TAG, "codec stopped");
+        this.m.stopMuxer();
+    }
+
+    @Override
     void stop() {
+        Log.d(TAG, "stop");
+
+        if (encodingDone != null) {
+            try {
+                // wait for encoding to finish
+                Log.d(TAG, "waiting for encoding to finish");
+                encodingDone.acquire();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }finally {
+                encodingDone = null;
+            }
+        }
+
         super.stop();
     }
 
@@ -227,25 +265,26 @@ public class VideoEncoder extends Codec implements BroadcastClient{
 
         if(message.getPayload() instanceof VideoDecoder && message.getTitle().equals("Done")) {
 
-            Log.e("TAG", "acceptMessage: " + message.getTitle());
+//            Log.d(TAG, "acceptMessage: " + message.getTitle());
+//
+//            MediaCodec decoder =  ((VideoDecoder) message.getPayload()).getCodec();
+//            decoder.flush();
+//            decoder.stop();
+//            decoder.release();
+//
+//            Log.d(TAG, "onOutputBufferAvailable: Flushing Encoder" );
+//            this.getCodec().flush();
+//            Log.d(TAG, "onOutputBufferAvailable: Stopping Encoder" );
+//            this.getCodec().stop();
+//            Log.d(TAG, "onOutputBufferAvailable: Releasing Encoder" );
+//            this.getCodec().release();
+//
+//            Log.d("VideoEncoder", "onOutputBufferAvailable: Stopping Muxer" );
+//            this.m.stopMuxer();
+        } else if (message.getPayload() instanceof Long && message.getTitle().equals("endFramePts")) {
+            Log.d(TAG, "acceptMessage: " + message.getTitle());
 
-            MediaCodec decoder =  ((VideoDecoder) message.getPayload()).getCodec();
-            decoder.flush();
-            decoder.stop();
-            decoder.release();
-
-
-            Log.e("VideoEncoder", "onOutputBufferAvailable: Flushing Encoder" );
-            this.getCodec().flush();
-            Log.e("VideoEncoder", "onOutputBufferAvailable: Stopping Encoder" );
-            this.getCodec().stop();
-            Log.e("VideoEncoder", "onOutputBufferAvailable: Releasing Encoder" );
-            this.getCodec().release();
-
-            Log.e("VideoEncoder", "onOutputBufferAvailable: Stopping Muxer" );
-            this.m.stopMuxer();
-
-
+            endFramePts = ((Long) message.getPayload()).longValue();
         }
     }
 }

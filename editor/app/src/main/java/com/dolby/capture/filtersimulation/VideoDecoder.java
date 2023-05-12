@@ -128,8 +128,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
             builder = new CodecBuilderImpl(appContext, encoderFormat, inputUri);
 
             String codecName = builder.getCodecName();
-
-            Log.e("Decoder", "VideoDecoder codecSel: " + codecName);
+            Log.e(TAG, "VideoDecoder codecSel: " + codecName);
 
             this.createByCodecName(codecName);
 
@@ -143,7 +142,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
             this.fr = (long) ((1.0f / (float) builder.getFrameRate()) * 1000);
 
-            Log.e("Decoder", "VideoDecoder: FRAME RATE " + fr);
+            Log.d(TAG, "VideoDecoder: FRAME RATE " + fr);
 
 
             try {
@@ -178,7 +177,15 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
     @Override
     void stop() {
+        Log.d(TAG, "stop");
+        setPaused();
         super.stop();
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(TAG, "codec stopped");
+
         if(bufferProcessor != null) {
             bufferProcessor.setStopped();
         }
@@ -188,15 +195,24 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
             up.release(queueLen);
         }
         if(down != null && down.getQueueLength() != 0) {
-            int queueLen = up.getQueueLength();
+            int queueLen = down.getQueueLength();
             down.release(queueLen);
         }
     }
 
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
+        if (getCodecState() > STATE_STARTED) {
+            Log.d(TAG, "decoderState: " + getCodecState() + ", just return");
+            return;
+        }
 
         ByteBuffer inputBuffer = null;
+
+        if (paused) {
+            codec.queueInputBuffer(index, 0, 0, 0, 0);
+            return;
+        }
 
         try {
             inputBuffer = codec.getInputBuffer(index);
@@ -211,7 +227,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
         try {
             if ((ex.getSampleFlags() & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
-                codec.queueInputBuffer(index, 0, 0, ex.getSampleTime(), ex.getSampleFlags());
+                codec.queueInputBuffer(index, 0, 0, 0, ex.getSampleFlags());
             } else {
                 codec.queueInputBuffer(index, 0, size, ex.getSampleTime(), ex.getSampleFlags());
             }
@@ -230,6 +246,11 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
     public void setPlay() {
         this.paused = false;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -254,7 +275,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
     @Override
     public void onImageAvailable(ImageReader reader) {
 
-        Log.e("Decoder", "onImageAvailable: ");
+        Log.e(TAG, "onImageAvailable: ");
 
         Image in = reader.acquireLatestImage();
 
@@ -294,6 +315,8 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
         private boolean isStarted = false;
 
+        private long lastFramePts = -1;
+
         private final long frDelay;
 
         private final boolean preview;
@@ -328,6 +351,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
         public void setStarted()
         {
+            Log.d(TAG, "setStarted");
             if(!isStarted)
             {
                 this.isStarted = true;
@@ -337,12 +361,13 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
         public void setStopped()
         {
+            Log.d(TAG, "setStopped");
             this.isStarted = false;
         }
 
         private void renderBuffer(DecoderInputInfo x)
         {
-            Log.e("Decoder", "renderBuffer: " + x.sampleTime );
+            Log.e(TAG, "renderBuffer: " + x.sampleTime );
 
             try {
                 x.getCodec().releaseOutputBuffer(x.getIndex(), true);
@@ -358,7 +383,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
                 long frameDelay  = frDelay-renderTime;
 
-                Log.e("Decoder", "frameRateDelay: " + frameDelay );
+                Log.e(TAG, "frameRateDelay: " + frameDelay );
 
                 try {
                     Thread.sleep(Math.max(0, frDelay-renderTime));
@@ -373,18 +398,22 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
         private boolean EOS(DecoderInputInfo x)
         {
             if (((x.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == MediaCodec.BUFFER_FLAG_END_OF_STREAM)) {
-                Log.e("BufferProcessor", "run: EOS Buffer Processor queue size " + bufferList.get().size() );
+                Log.d(TAG, "run: EOS Buffer Processor queue size " + bufferList.get().size() );
 
                 if(preview)
                 {
                     this.ex.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
                     x.codec.flush();
+                    bufferList.get().clear();
                     x.getCodec().start();
                 }
                 else
                 {
-                    this.callback.broadcast(this.toSend);
+                    Message<Long> endFramePtsMsg = new Message<Long>("endFramePts", lastFramePts) {
+                    };
                     this.setStopped();
+                    this.callback.broadcast(endFramePtsMsg);
+                    this.callback.broadcast(this.toSend);
                 }
 
                 return true;
@@ -416,6 +445,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
                     
                     long start = System.currentTimeMillis();
 
+                    lastFramePts = lastFramePts > x.sampleTime ? lastFramePts : x.sampleTime;
                     renderBuffer(x);
 
                     if(!EOS(x)) {

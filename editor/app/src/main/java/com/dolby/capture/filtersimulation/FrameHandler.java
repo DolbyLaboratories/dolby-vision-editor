@@ -92,11 +92,13 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         if (bufferLock != null && bufferLock.getQueueLength() > 0) {
             int queueLen = bufferLock.getQueueLength();
             bufferLock.release(queueLen);
+            bufferLock = null;
         }
 
         if (dowait != null && dowait.getQueueLength() > 0) {
             int queueLen = dowait.getQueueLength();
             dowait.release(queueLen);
+            dowait = null;
         }
     }
 
