@@ -1,6 +1,5 @@
 # Release notes
 
-
 ## What's new in this release
 
 This is the first release of the Dolby Vision editor sample application.
@@ -8,12 +7,12 @@ This is the first release of the Dolby Vision editor sample application.
 ## Supported features
 
 This version of the sample application supports features including:
+
 - GPU or DPU implementations for display management
 - Applying filters for saturation, contrast, text overlays, etc.
 - Previewing and HLG signaling.
 - Decoding, encoding, and transcoding to or from formats including HEVC, AVC, and Dolby Vision 8.4.
 - Trimming and re-multiplexing.
-
 
 ## Known limitations/issues
 
