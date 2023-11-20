@@ -31,6 +31,7 @@
 
 package com.dolby.capture.filtersimulation;
 
+import android.graphics.ImageFormat;
 import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
 import android.media.ImageReader;
@@ -52,8 +53,6 @@ public class ImagePipeline {
 
     public static final String TAG = ImagePipeline.class.getSimpleName();
     public static final int MAX_IMAGES = 10;
-    public static final String DV_ME = "DV-ME";
-
     private ImageReader reader;
     private ImageWriter writer;
     private int dataspace;
@@ -75,24 +74,29 @@ public class ImagePipeline {
 
         // Configure dataspace
         if (previewMode && inputProfile != MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt) {
-            this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_GAMMA2_2, DataSpace.RANGE_LIMITED);
+            this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_SMPTE_170M, DataSpace.RANGE_LIMITED);
         } else {
-            if (encoderFormat.equals(DV_ME)) {
+            if (encoderFormat.equals(Constants.DV_ME)) {
                 this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT2020, DataSpace.TRANSFER_HLG, DataSpace.RANGE_LIMITED);
             } else {
-                this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_GAMMA2_2, DataSpace.RANGE_LIMITED);
+                this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_SMPTE_170M, DataSpace.RANGE_LIMITED);
             }
         }
 
         // Build ImageReader
-        this.reader = new ImageReader.Builder(inputSize.getWidth(), inputSize.getHeight())
+        long usage = HardwareBuffer.USAGE_CPU_READ_OFTEN | HardwareBuffer.USAGE_CPU_WRITE_OFTEN;
+//        long usage = HardwareBuffer.USAGE_GPU_COLOR_OUTPUT;
+        reader = new ImageReader.Builder(inputSize.getWidth(), inputSize.getHeight())
                 .setMaxImages(MAX_IMAGES)
-                .setUsage(HardwareBuffer.USAGE_GPU_COLOR_OUTPUT)
+                .setUsage(usage)
+                .setImageFormat(ImageFormat.PRIVATE)
                 .build();
 
         // Build ImageWriter
         int hwBufferFormat;
-        if (previewMode || encoderFormat.equals(DV_ME)) {
+        if (previewMode || encoderFormat.equals(Constants.DV_ME)) {
+            hwBufferFormat = HardwareBuffer.YCBCR_P010;
+        } else if (encoderFormat.equals(Constants.HEVC)) {
             hwBufferFormat = HardwareBuffer.YCBCR_P010;
         } else {
             hwBufferFormat = HardwareBuffer.YCBCR_420_888;

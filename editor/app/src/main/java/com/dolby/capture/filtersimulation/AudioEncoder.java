@@ -71,12 +71,14 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     private final Object lock = new Object();
 
+    private static final String TAG = "AudioEncoder";
+
     public AudioEncoder(MediaFormat format, long videoLen, boolean trim, Context appContext) {
         super(trim, appContext);
 
-        this.setCodecByMime(mime);
+        this.createByType(mime);
 
-        Log.e("AudioEncoder", "FORMAT: " + format.toString());
+        Log.d("AudioEncoder", "FORMAT: " + format.toString());
 
         MediaFormat mediaFormat = MediaFormat.createAudioFormat(mime, format.getInteger(MediaFormat.KEY_SAMPLE_RATE), AudioFormat.CHANNEL_OUT_STEREO);
 
@@ -90,14 +92,14 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
         this.videoLen = videoLen;
 
-        Log.e("Audio Encoder", "AudioEncoder: Configured");
+        Log.d(TAG, "AudioEncoder: Configured");
     }
 
 
 
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
-        Log.e("AudioEncoder", "onInputBufferAvailable");
+        Log.d("AudioEncoder", "onInputBufferAvailable");
         synchronized (lock) {
 
             if (this.bufferQueue == null) {
@@ -144,7 +146,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
                     // Check the number of samples left is less than -> (10s (trim period at the end of video) + each sample takes (PTS - PrevPTS) * number of samples to fade
                     else if(this.videoLen -  data.getInfo().presentationTimeUs < (TEN_SECONDS_US + ((data.getInfo().presentationTimeUs - PrevpresentationTimeUs) * NUM_SAMPLES_FADEOUT)))
                     {
-                        Log.e("AudioEncoder", "applyFadeCurveEnd: ");
+                        Log.d(TAG, "applyFadeCurveEnd: ");
                         this.applyFadeCurveEnd(b);
                     }
 
@@ -161,7 +163,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
     public void applyFadeCurve(ByteBuffer b) {
         int len = b.remaining() / 4;
 
-        Log.e("AudioEncoder", "applyFadeCurve: " + len);
+        Log.d(TAG, "applyFadeCurve: " + len);
 
         b.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -210,7 +212,6 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
 
-        Log.e("AudioEncoder", "onOutputBufferAvailable");
         synchronized (lock) {
 
             if (!EOS) {
@@ -225,7 +226,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
                 if(bufferInfo.presentationTimeUs > 0) {
 
-                    Log.e("AudioEncoder", "onOutputBufferAvailable: " + bufferInfo.presentationTimeUs );
+                    Log.d(TAG, "onOutputBufferAvailable, pts: " + bufferInfo.presentationTimeUs );
                     this.getMuxer().writeSampleData(this.getTrackID(), encodedData, bufferInfo);
                 }
 
@@ -242,7 +243,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     @Override
     public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-        Log.e("AudioEncoder", "onOutputFormatChanged");
+        Log.d(TAG, "onOutputFormatChanged");
 
         this.setTrackId(this.getMuxer().addTrack(mediaFormat));
         this.getMuxer().setMuxerStarted();
@@ -257,7 +258,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-        Log.e("AudioEncoder", "propertyChange");
+        Log.d(TAG, "propertyChange");
         synchronized (lock) {
 
             if (propertyChangeEvent.getPropertyName().equals("AudioUp")) {
@@ -287,11 +288,11 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
         if (propertyChangeEvent.getPropertyName().equals("EOS")) {
 
-            Log.e("AudioEncoder", "propertyChange: EOS FIRED" );
+            Log.d(TAG, "propertyChange: EOS FIRED" );
 
             while (bufferQueue.get().size() != 0) {
                 try {
-                    Log.e("Encoder", "propertyChange: " + bufferQueue.get().size());
+                    Log.d("Encoder", "propertyChange: " + bufferQueue.get().size());
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -306,7 +307,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
             this.getAudioDoneSemaphore().release();
 
-            Log.e("AudioEncoder", "propertyChange: Audio finished, Video signaled.");
+            Log.d(TAG, "propertyChange: Audio finished, Video signaled.");
 
         }
     }

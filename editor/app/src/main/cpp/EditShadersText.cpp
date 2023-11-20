@@ -783,7 +783,7 @@ precision mediump int;
 precision mediump float;
 uniform mat4 inputTextureTransform;
 uniform mat4 compositorTextureTransform;
-uniform sampler2D inputTexture;
+uniform __samplerExternal2DY2YEXT inputTexture;
 uniform highp sampler3D lut3dtex;
 #ifdef COMPOSITING_SAMPLER
 uniform sampler2D compositingTexture;

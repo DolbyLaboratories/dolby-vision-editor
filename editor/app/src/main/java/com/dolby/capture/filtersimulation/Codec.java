@@ -63,7 +63,6 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
     public final int STATE_STARTED = 1;
     public final int STATE_STOPING = 2;
     public final int STATE_STOPED = 3;
-
     public final int STATE_CREATED = 4;
     public final int STATE_IDLE = 5;
 
@@ -87,7 +86,13 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void createByType(String mime) {
+        /**
+         * not sure about the codec type, just leave subclass to create the codec
+         */
+        codecState = STATE_CREATED;
     }
 
     public void run()

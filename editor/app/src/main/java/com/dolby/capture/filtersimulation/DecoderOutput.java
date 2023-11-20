@@ -61,7 +61,7 @@ public abstract class DecoderOutput extends Codec {
 
         this.sourceLengthUS = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION))*1000;
 
-        Log.e("Decoder output", "DecoderOutput: Duration " + sourceLengthUS);
+        Log.d("Decoder output", "DecoderOutput: Duration " + sourceLengthUS);
     }
 
     public long getVideoLength()
@@ -74,13 +74,14 @@ public abstract class DecoderOutput extends Codec {
         return this.inputUri;
     }
 
-    public void setCodec(String mime)
-    {
+    @Override
+    public void createByType(String mime) {
         try {
             this.createCodec(MediaCodec.createDecoderByType(mime));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        super.createByType(mime);
     }
 
     public boolean includePacket(MediaCodec.BufferInfo b) {

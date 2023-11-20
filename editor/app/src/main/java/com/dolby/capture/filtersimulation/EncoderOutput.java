@@ -69,13 +69,14 @@ public abstract class EncoderOutput extends Codec implements PropertyChangeListe
         return this.trackID;
     }
 
-    public void setCodecByMime(String mime)
-    {
+    @Override
+    public void createByType(String mime) {
         try {
             this.createCodec(MediaCodec.createEncoderByType(mime));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        super.createByType(mime);
     }
 
     @Override

@@ -62,6 +62,7 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
 
     private Semaphore audioUp = new Semaphore(0);
     private Semaphore audioDown = new Semaphore(QUEUE_SIZE);
+    private long mVideoStartPosi = -1;
 
 
     public AudioDecoder(Uri inputUri, boolean shouldTrim, Context appContext) throws MediaFormatNotFoundInFileException {
@@ -71,11 +72,11 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
 
         this.ex = new AudioExtractor(inputUri, appContext, shouldTrim);
 
-        this.setCodec(ex.getAudioFormat().getString(MediaFormat.KEY_MIME));
+        this.createByType(ex.getAudioFormat().getString(MediaFormat.KEY_MIME));
 
-        Log.e(TAG, "AudioDecoder: " + ex.getAudioFormat());
+        Log.d(TAG, "AudioDecoder: " + ex.getAudioFormat());
 
-        Log.e(TAG, "AudioDecoder: CHANNELS " + ex.getAudioFormat().getInteger(MediaFormat.KEY_CHANNEL_COUNT));
+        Log.d(TAG, "AudioDecoder: CHANNELS " + ex.getAudioFormat().getInteger(MediaFormat.KEY_CHANNEL_COUNT));
         this.getCodec().configure(ex.getAudioFormat(), null, null, 0);
 
     }
@@ -83,16 +84,16 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
         MediaCodec.BufferInfo info = this.ex.getChunk(this.getCodec().getInputBuffer(i));
-        Log.e(TAG, "onInputBufferAvailable: started");
+        Log.d(TAG, "onInputBufferAvailable: started");
 
         if(info.size >= 0) {
 
-            Log.e(TAG, "onInputBufferAvailable: Valid Buffer " + info.presentationTimeUs);
+            Log.d(TAG, "onInputBufferAvailable: Valid Buffer " + info.presentationTimeUs);
             this.getCodec().queueInputBuffer(i, 0, info.size, info.presentationTimeUs, info.flags);
         }
         else
         {
-            Log.e(TAG, "onInputBufferAvailable: Empty Buffer");
+            Log.w(TAG, "onInputBufferAvailable: Empty Buffer");
             this.getCodec().queueInputBuffer(i, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
         }
 
@@ -109,7 +110,7 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
     @Override
     public void onOutputBufferAvailable(MediaCodec decoder, int index, MediaCodec.BufferInfo info) {
 
-        Log.e(TAG, "onOutputBufferAvailable: started");
+        Log.d(TAG, "onOutputBufferAvailable: started");
         synchronized (format)
         {
             if(!format.isPresent())
@@ -160,15 +161,12 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
         }
 
 
-        this.getNotifier().firePropertyChange("AudioUp", null, this.audioUp);
-        this.getNotifier().firePropertyChange("AudioDown", null, this.audioDown);
-        this.getNotifier().firePropertyChange("AudioData", null, this.bufferQueue);
 
         decoder.releaseOutputBuffer(index, false);
 
         if( (MediaCodec.BUFFER_FLAG_END_OF_STREAM & audioPacket.getInfo().flags) == MediaCodec.BUFFER_FLAG_END_OF_STREAM)
         {
-            Log.e(TAG, "onOutputBufferAvailable: EOS");
+            Log.d(TAG, "onOutputBufferAvailable: EOS");
             this.getNotifier().firePropertyChange("EOS", null, null);
             stop();
         }
@@ -182,14 +180,29 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
     @Override
     public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
 
-        Log.e(TAG, "onOutputFormatChanged: " + mediaFormat);
+        Log.d(TAG, "onOutputFormatChanged: " + mediaFormat);
 
         synchronized (format) {
             this.format = Optional.of(mediaFormat);
             encoder = new AudioEncoder(this.format.get(), this.getVideoLength(), this.shouldTrim(), this.getAppContext());
             this.getNotifier().addPropertyChangeListener(encoder);
             new Thread(encoder).start();
+
+            this.getNotifier().firePropertyChange("AudioUp", null, this.audioUp);
+            this.getNotifier().firePropertyChange("AudioDown", null, this.audioDown);
+            this.getNotifier().firePropertyChange("AudioData", null, this.bufferQueue);
         }
+    }
+
+    public void setVideoStartPosi(long posi) {
+        mVideoStartPosi = posi;
+    }
+
+
+    @Override
+    public boolean includePacket(MediaCodec.BufferInfo b) {
+        boolean include = b.presentationTimeUs >= mVideoStartPosi;
+        return include && super.includePacket(b);
     }
 
     public void run() {

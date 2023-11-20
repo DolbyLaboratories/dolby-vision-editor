@@ -64,7 +64,7 @@ public class CodecSynchro extends MediaSync.Callback implements MediaSync.OnErro
 
         SyncParams sync = new SyncParams().allowDefaults();
 
-        Log.e("Synchro", "CodecSynchro: " + sync.getSyncSource() );
+        Log.d("Synchro", "CodecSynchro: " + sync.getSyncSource() );
 
         synchro.setSyncParams(sync);
 

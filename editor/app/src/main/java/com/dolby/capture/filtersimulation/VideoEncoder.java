@@ -36,12 +36,15 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.util.Size;
 
 import androidx.annotation.NonNull;
 
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Semaphore;
 
@@ -71,13 +74,16 @@ public class VideoEncoder extends Codec implements BroadcastClient{
         encoderComms = cb;
 
         MediaCodecList list = new MediaCodecList(MediaCodecList.ALL_CODECS);
+        HandlerThread decoderCallbacks = new HandlerThread("decoderCallbacks");
+        decoderCallbacks.start();
+        Handler main = new Handler(decoderCallbacks.getLooper());
 
         MediaFormat format = new MediaFormat();
 
         switch (encoderFormat) {
             case Constants.HEVC:
                 format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_HEVC);
-                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain);
+                format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10);
                 format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCMainTierLevel51);
                 format.setInteger(MediaFormat.KEY_COLOR_TRANSFER, MediaFormat.COLOR_TRANSFER_SDR_VIDEO);
                 format.setInteger(MediaFormat.KEY_COLOR_STANDARD, MediaFormat.COLOR_STANDARD_BT709);
@@ -105,34 +111,51 @@ public class VideoEncoder extends Codec implements BroadcastClient{
 
         format.setInteger(MediaFormat.KEY_WIDTH, resolution.getWidth());
         format.setInteger(MediaFormat.KEY_HEIGHT, resolution.getHeight());
-
         format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
-
         format.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
-
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-
-
         format.setFloat(MediaFormat.KEY_I_FRAME_INTERVAL, iFrameInterval);
-
         format.setInteger(MediaFormat.KEY_PRIORITY, 0);
 
         String codecName = list.findEncoderForFormat(format);
-        Log.d(TAG, "VideoEncoder: " + codecName );
+        if (codecName != null && codecName != "") {
+            createByCodecName(codecName);
+        } else {
+            Log.w(TAG, "Could not find the codec for the specified output video file format.");
+            switch (encoderFormat) {
+                case Constants.DV_ME:
+                    createByCodecName(Constants.DOLBY_HEVC_ENCODER);
+                    break;
+                case Constants.HEVC:
+                    createByType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+                    break;
+                case Constants.AVC:
+                    createByType(MediaFormat.MIMETYPE_VIDEO_AVC);
+                    break;
+                default:
+                    Log.e(TAG, "Unknown encoder format");
+            }
+        }
 
-        this.createByCodecName(codecName);
-
-        this.getCodec().setCallback(this, null);
+        this.getCodec().setCallback(this, main);
 
         this.getCodec().configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 
         this.setInputSurface(this.getCodec().createInputSurface());
 
-        Log.d(TAG, "VideoEncoder CodecSel: " + codecName);
+        Log.d(TAG, "VideoEncoder CodecSel: " + getCodec().getName() );
 
         m = new Muxer(rotation);
+    }
 
-
+    @Override
+    public void createByType(String mime) {
+        try {
+            this.createCodec(MediaCodec.createEncoderByType(mime));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        super.createByType(mime);
     }
 
     private int getDolbyVisionLevel(int fps, Size videoSize) {
@@ -192,15 +215,20 @@ public class VideoEncoder extends Codec implements BroadcastClient{
             callback.onFrameEncoded(info);
         }
 
-        if (encodingDone != null && endFramePts != -1 && endFramePts <= info.presentationTimeUs ) {
+        if (endFramePts != -1 && endFramePts <= info.presentationTimeUs ) {
             Log.d(TAG, "get EOS");
-            if (encodingDone.availablePermits() == 0) {
+            if (encodingDone != null && encodingDone.availablePermits() == 0) {
                 encodingDone.release();
             }
+            sendEncodeDone();
         }
     }
 
 
+    private void sendEncodeDone() {
+        DecoderDoneMessage<VideoEncoder> encodeDoneMsg = new DecoderDoneMessage<>("Done", this);
+        encoderComms.broadcast(encodeDoneMsg);
+    }
 
     @Override
     public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
@@ -230,9 +258,9 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onStart() {
         Log.d(TAG, "codec started");
-        if (encodingDone == null) {
-            encodingDone = new Semaphore(0);
-        }
+//        if (encodingDone == null) {
+//            encodingDone = new Semaphore(0);
+//        }
     }
 
     @Override

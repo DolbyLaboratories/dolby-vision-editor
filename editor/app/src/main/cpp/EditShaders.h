@@ -51,6 +51,7 @@
 #include <android/log.h>
 
 #include "Tools.h"
+#include "HardwareBuffer.h"
 
 #ifndef LOG_TAG
 #define LOG_TAG "EditShaders"

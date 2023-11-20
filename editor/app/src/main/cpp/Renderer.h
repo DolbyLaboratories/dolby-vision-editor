@@ -35,6 +35,7 @@
 #include <GLES3/gl32.h>
 
 #include "EditShaders.h"
+#include "HardwareBuffer.h"
 
 namespace Simulation
 {

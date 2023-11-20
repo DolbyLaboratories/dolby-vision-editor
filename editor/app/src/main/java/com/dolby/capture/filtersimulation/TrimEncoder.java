@@ -67,6 +67,7 @@ public class TrimEncoder extends EncoderOutput {
     private boolean trim;
 
     private BroadcastAction UIComms;
+    private long mVideoStartPosi = -1;
 
     /**
      * Sets up the muxer, and muxes the audio. This should not need to be
@@ -115,7 +116,10 @@ public class TrimEncoder extends EncoderOutput {
 
         EncoderOutput.refreshMuxer(rotation);
         this.setTrackId(this.getMuxer().addTrack(format));
-        muxAudio();
+    }
+
+    public void setVideoStartPosi(long posi) {
+        mVideoStartPosi = posi;
     }
 
     /**
@@ -128,7 +132,7 @@ public class TrimEncoder extends EncoderOutput {
             this.clipAdjustTS(info);
         }
         this.getMuxer().writeSampleData(this.getTrackID(), buffer, info);
-        Log.e(TAG, "Sent buffer with timestamp " + info.presentationTimeUs);
+        Log.d(TAG, "Sent buffer with timestamp " + info.presentationTimeUs);
     }
 
     /**
@@ -145,19 +149,22 @@ public class TrimEncoder extends EncoderOutput {
             remuxFile(inputPath, outputPath, dvProfile, dvLevel, dvBackCompatibility);
             deleteMuxedFile(inputPath);
         }
-        Log.e(TAG, "Muxer stopped");
+        Log.d(TAG, "Muxer stopped");
     }
 
-    private void muxAudio() {
+    public void muxAudio() {
         if (trim) {
             Thread audioThread = new Thread(audioDecoder);
+            if (mVideoStartPosi != -1) {
+                audioDecoder.setVideoStartPosi(mVideoStartPosi);
+            }
             audioThread.start();
-            Log.e(TAG, "Audio thread started");
+            Log.d(TAG, "Audio thread started");
         } else {
             int trackID = this.getMuxer().addTrack(extractor.getAudioFormat());
             this.getMuxer().setMuxerStarted();
             extractor.copyAudio(this.getMuxer(), trackID);
-            Log.e(TAG, "Finished copying audio");
+            Log.d(TAG, "Finished copying audio");
         }
     }
 
@@ -210,28 +217,28 @@ public class TrimEncoder extends EncoderOutput {
     private int fr2lv(int fr, Size dim) {
         if (fr <= 30) {
             if (dim.getWidth() == Constants.RESOLUTION_2K_WIDTH && dim.getHeight() == Constants.RESOLUTION_2K_HEIGHT) {
-                Log.e(TAG, "fr2lv: 4");
+                Log.d(TAG, "fr2lv: 4");
                 return 4;
             } else if (dim.getWidth() == Constants.RESOLUTION_4K_WIDTH && dim.getHeight() == Constants.RESOLUTION_4K_HEIGHT) {
-                Log.e(TAG, "fr2lv: 7");
+                Log.d(TAG, "fr2lv: 7");
                 return 7;
             } else {
-                Log.e(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 7");
+                Log.w(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 7");
                 return 7;
             }
         } else if (fr <= 60) {
             if (dim.getWidth() == Constants.RESOLUTION_2K_WIDTH && dim.getHeight() == Constants.RESOLUTION_2K_HEIGHT) {
-                Log.e(TAG, "fr2lv: 5");
+                Log.d(TAG, "fr2lv: 5");
                 return 5;
             } else if (dim.getWidth() == Constants.RESOLUTION_4K_WIDTH && dim.getHeight() == Constants.RESOLUTION_4K_HEIGHT) {
-                Log.e(TAG, "fr2lv: 9");
+                Log.d(TAG, "fr2lv: 9");
                 return 9;
             } else {
-                Log.e(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 9");
+                Log.w(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 9");
                 return 9;
             }
         } else {
-            Log.e(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 9");
+            Log.w(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 9");
             return 9;
         }
     }

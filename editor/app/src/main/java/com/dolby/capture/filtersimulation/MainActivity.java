@@ -45,6 +45,8 @@ import android.graphics.Rect;
 import android.media.MediaCodec;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -73,6 +75,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.slider.Slider;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
@@ -106,7 +109,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private SurfaceView preview;
     private View clSelectVideoBar, progressOverlayView, dimControlsView, dimScreenView, exportOverlayView;
     private String resolution;
-    private String encoderFormat;
+    private String encoderFormat = Constants.HEVC;
     private int iFrameInterval;
     //If the default output format is changed be sure to update this variable accordingly!
     private int transfer = TRANSFER_SDR;
@@ -116,6 +119,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     private String inputPath;
     private Uri inputUri;
 
+    private static final int APP_STORAGE_ACCESS_REQUEST_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +131,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         setContentView(R.layout.activity_main);
 
         requestPermissions();
+        maybeUseExtraVideoClip();
 
         // Initializing all xml elements
         btnStartExport = findViewById(R.id.btn_start_video_export);
@@ -330,6 +335,46 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
     }
 
+    private void maybeUseExtraVideoClip() {
+        String extraFileName = "";
+        String extraMiMeType = "";
+
+        Intent it = getIntent();
+        if (it != null && it.getData() != null) {
+            extraFileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) + "/" + it.getData().toString();
+            extraMiMeType = it.getType();
+            Log.d(TAG, "get extra: name - " + extraFileName + " type - " + extraMiMeType);
+        }
+
+        if(extraFileName == "") {
+            // no extra clip specified
+            return;
+        }
+
+        File file = new File(extraFileName);
+        if (file.canRead()) {
+            Log.d(TAG, "get auto test streams: " + extraFileName);
+            inputUri = Uri.parse(extraFileName);
+            inputPath = extraFileName;
+        }
+    }
+
+    private void loadVideoEffects() {
+        if (p != null) {
+            p.EditShadersSetParameter(EffectParameters.GAIN.ordinal(), sliderGainValue.getValue() * 0.01f);
+            p.EditShadersSetParameter(EffectParameters.OFFSET.ordinal(), sliderOffsetValue.getValue() * 0.01f);
+            p.EditShadersSetParameter(EffectParameters.CONTRAST.ordinal(), sliderContrastValue.getValue() * 0.01f);
+            p.EditShadersSetParameter(EffectParameters.SATURATION.ordinal(), sliderSaturationValue.getValue() * 0.01f);
+            p.EditShadersSetParameter(EffectParameters.WIPER_LEFT.ordinal(), sliderWiperValue.getValue() * 0.01f);
+            p.EditShadersSetParameter(EffectParameters.ZEBRA_ENABLE.ordinal(), switchZebra.isChecked() ? 1.0f : 0.0f);
+            p.EditShadersSetParameter(EffectParameters.GAMUT_ENABLE.ordinal(), switchGamut.isChecked() ? 1.0f : 0.0f);
+        }
+    }
+
+    private void loadVideoFilter() {
+        setFilter(spinnerFilterType.getSelectedItem().toString());
+    }
+
     private void resetEffects() {
         sliderGainValue.setValue(100.0f);
         sliderOffsetValue.setValue(0.0f);
@@ -407,7 +452,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     }
 
     private void setFilter(String filter) {
-        Log.e(TAG, "setFilter()");
         if (p == null) {
             return;
         }
@@ -520,7 +564,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                 inputUri = data.getData();
                 inputPath = data.getData().toString();
                 Log.i(TAG, "Video file selected Input path:" + inputPath);
-                enableControls();
+
+                maybeStartPreview();
+            }
+        } else if (requestCode == APP_STORAGE_ACCESS_REQUEST_CODE && resultCode == RESULT_OK) {
+            if (Environment.isExternalStorageManager()) {
+                Log.d(TAG, "external storeage granted");
+            } else {
+                Log.e(TAG, "external storage permission not granted!!!");
             }
         }
     }
@@ -538,6 +589,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                 break;
 
             case R.id.spinner_encoder_format:
+                String previousEncodeFormat = encoderFormat;
                 switch (item) {
                     case Constants.ENCODER_HEVC:
                         encoderFormat = Constants.HEVC;
@@ -549,7 +601,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                         encoderFormat = Constants.DV_ME;
                         break;
                 }
-                if (this.p != null) {
+                if (this.p != null && !previousEncodeFormat.equals(encoderFormat)) {
                     /**
                      * transocding to DV_ME, need to set to TRANSFER_HLG
                      * transcoding to SDR, need to set to TRANSFER_SDR
@@ -561,7 +613,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                     }
 
                     try {
-                        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, transfer, true);
+                        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, transfer, false);
                     } catch (MediaFormatNotFoundInFileException | IOException e) {
                         e.printStackTrace();
                     }
@@ -598,7 +650,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         if (p != null) {
             p.stop();
         }
-        this.inputPath = null;
 
         Log.d(TAG, "onPause: ");
     }
@@ -607,7 +658,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         // Get the dimensions of the video
         int videoWidth = videoDimensions.getWidth();
         int videoHeight = videoDimensions.getHeight();
-        Log.e(TAG, "setVideoSize: " + rotation + " " + videoWidth  + " " + videoHeight);
+        Log.d(TAG, "setVideoSize: " + rotation + " " + videoWidth  + " " + videoHeight);
 
         float videoProportion = 0;
         if (rotation == 0 || rotation == 180) {
@@ -624,7 +675,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         final Rect bounds = metrics.getBounds();
         int screenHeight = bounds.height();
         int screenWidth = bounds.width();
-        Log.e(TAG, "setVideoSize: " +  + screenWidth  + " " + screenHeight);
+        Log.d(TAG, "setVideoSize: " +  + screenWidth  + " " + screenHeight);
 
         float screenProportion = 0;
         if (rotation == 0 || rotation == 180) {
@@ -638,15 +689,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         // Get the SurfaceView layout parameters
         android.view.ViewGroup.LayoutParams lp = preview.getLayoutParams();
-        Log.e(TAG, "setVideoSize: Change in params " + lp.width + " " + lp.height);
+        Log.d(TAG, "setVideoSize: Change in params " + lp.width + " " + lp.height);
 
         if (videoProportion > screenProportion) {
-            Log.e(TAG, "setVideoSize: BRANCH 1 " + lp.width + " " + lp.height);
+            Log.d(TAG, "setVideoSize: BRANCH 1 " + lp.width + " " + lp.height);
             lp.width = screenWidth;
             lp.height = (int) ((float) screenWidth / videoProportion);
 
         } else {
-            Log.e(TAG, "setVideoSize: BRANCH 2"  );
+            Log.d(TAG, "setVideoSize: BRANCH 2"  );
             lp.width = (int) (videoProportion * (float) screenHeight);
             lp.height = screenHeight;
         }
@@ -664,16 +715,16 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
 
         p.stop();
-        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, transfer, false);
+        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, TRANSFER_SDR, false);
     }
 
     private boolean requestPermissions() {
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        if (!Environment.isExternalStorageManager()) {
+            Intent it = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,  Uri.parse("package:" + BuildConfig.APPLICATION_ID));
+            startActivityForResult(it, APP_STORAGE_ACCESS_REQUEST_CODE);
             return false;
         }
+        return true;
     }
 
     @Override
@@ -698,18 +749,20 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "surfaceChanged");
-        try {
-            if (this.inputUri != null) {
-                render(this.inputUri);
-            }
-        } catch (MediaFormatNotFoundInFileException | IOException e) {
-            e.printStackTrace();
-        }
+        maybeStartPreview();
     }
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         Log.v(TAG, "surfaceDestroyed");
+        if(p != null) {
+            p.stop();
+        }
+
+        if (screenSurface != null) {
+            screenSurface.release();
+            screenSurface = null;
+        }
     }
 
     @Override
@@ -723,14 +776,46 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         return Integer.valueOf(s1).compareTo(Integer.valueOf(s2));
     }
 
+    private boolean maybeStartPreview() {
+        boolean ret = false;
+        if (screenSurface == null || !screenSurface.isValid()) {
+            Log.w(TAG,"preview surface invalid");
+            return ret;
+        }
+
+        if (inputUri == null) {
+            Log.w(TAG, "input uri invalid");
+            return ret;
+        }
+
+        try {
+            enableControls();
+            render(this.inputUri);
+            ret = true;
+        } catch (MediaFormatNotFoundInFileException | IOException e) {
+            e.printStackTrace();
+            ret = false;
+        }
+
+        return ret;
+    }
+
     @Override
     public void acceptMessage(Message<?> message) {
-        if (message.getPayload() instanceof VideoDecoder && message.getTitle().equals("Done")) {
-            Log.e(TAG, "VideoDecoder acceptMessage: " + message.getTitle());
+        if (message.getPayload() instanceof VideoDecoder && message.getTitle().equals("EditShaderInitDone")) {
+            Log.d(TAG, "EditShaderInitDone, load video effects");
+            loadVideoEffects();
+            loadVideoFilter();
+            applyTextCompositing();
+        } else if (message.getPayload() instanceof VideoDecoder && message.getTitle().equals("Done")) {
+            Log.d(TAG, "VideoDecoder acceptMessage: " + message.getTitle());
+            onEditDone(true);
+        }  else if (message.getPayload() instanceof VideoEncoder && message.getTitle().equals("Done")) {
+            Log.d(TAG, "VideoEncoder acceptMessage: " + message.getTitle());
             onEditDone(true);
         }
         else if (message.getPayload() instanceof TrimDecoder && message.getTitle().equals("Done")) {
-            Log.e(TAG, "TrimDecoder acceptMessage: " + message.getTitle());
+            Log.d(TAG, "TrimDecoder acceptMessage: " + message.getTitle());
             onEditDone(true);
         }
         else if (message.getPayload() instanceof MediaFormatNotFoundInFileException) {
@@ -801,6 +886,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
 
         String text = simpleEditText.getText().toString();
+        if (text.length() == 0) {
+            // no text added
+            return;
+        }
+
         String color = (String) spinnerTextColor.getSelectedItem();
         float opacity = sliderOpacityValue.getValue();
 

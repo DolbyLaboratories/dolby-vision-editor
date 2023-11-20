@@ -70,17 +70,17 @@ public class AudioExtractor {
             if (actualMime.startsWith(AudioExtractor.requestedMime)) {
                 extractor.selectTrack(i);
                 this.format = format;
-                Log.e("DECODER", "Decoder: initialized on AAC track.");
+                Log.d("DECODER", "Decoder: initialized on AAC track.");
                 break;
             }
         }
 
-        Log.e("AudioExtractor", "AudioExtractor: " + this.format);
+        Log.d("AudioExtractor", "AudioExtractor: " + this.format);
 
         if (!trimOnly) {
             if(this.format == null) {
                 // Allow transcode with no audio channel
-                Log.e("AudioExtractor", "File did not contain AAC audio channel");
+                Log.d("AudioExtractor", "File did not contain AAC audio channel");
             }
         }
 
@@ -94,7 +94,7 @@ public class AudioExtractor {
                 throw new MediaFormatNotFoundInFileException("File did not contain specified audio codec AAC.");
             } else {
                 int count = this.format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-                Log.e("AudioExtractor", "Trim only: number of audio channels = " + count);
+                Log.d("AudioExtractor", "Trim only: number of audio channels = " + count);
                 if (count > NUM_AUD_CHANNELS) {
                     throw new MediaFormatNotFoundInFileException("File contains more than 2 audio channels");
                 }

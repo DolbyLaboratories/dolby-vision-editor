@@ -93,7 +93,7 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
         this.trim = this.getVideoLength() >= TEN_SECONDS_US * 3;
         try {
             if (!trim) {
-                Log.e(TAG, "Video is less than 30 seconds long, not trimming");
+                Log.w(TAG, "Video is less than 30 seconds long, not trimming");
             }
         } catch (IllegalStateException e) {
             Log.e(TAG, "TrimDecoder: STATE EXCEPTION");
@@ -135,7 +135,7 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
                             Arrays.stream(codec.getCapabilitiesForType(mime).colorFormats).
                                     filter(x -> x == MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface).count() > 0)) {
                 extractor.selectTrack(i);
-                Log.e(TAG, "Track \"" + mime + "\" selected");
+                Log.d(TAG, "Track \"" + mime + "\" selected");
                 this.format = format;
                 return true;
             }
@@ -163,6 +163,9 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
 
         if (trim) {
             this.extractor.seekTo(TEN_SECONDS_US, MediaExtractor.SEEK_TO_NEXT_SYNC);
+            long videoStartPosi = extractor.getSampleTime();
+            encoder.setVideoStartPosi(videoStartPosi);
+            encoder.muxAudio();
 
             // Wait for the audio to finish processing
             // This only needs to be done in trim cases, because when not trimming,
@@ -172,7 +175,7 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.e(TAG, "Audio ready");
+            Log.d(TAG, "Audio ready");
         }
 
         boolean extract = true;
@@ -192,7 +195,7 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
                 encoder.sendBuffer(buffer, info);
                 extract = extractor.advance();
             } else {
-                Log.e(TAG, "Reached last 10 seconds of data, exiting");
+                Log.w(TAG, "Reached last 10 seconds of data, exiting");
                 break;
             }
         }
@@ -200,7 +203,7 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
         extractor.release();
 
         long end = System.currentTimeMillis();
-        Log.e(TAG, "Edit pass done in " + (end - start)/1000.0 + " seconds.");
+        Log.d(TAG, "Edit pass done in " + (end - start)/1000.0 + " seconds.");
 
         DecoderDoneMessage<TrimDecoder> m = new DecoderDoneMessage<>("Done",this);
 

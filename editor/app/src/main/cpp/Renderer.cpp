@@ -43,8 +43,8 @@
 // SHADERS: vertex shader
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const GLchar* VERTEX_SHADER_SOURCE = R"glsl(
-#version 320 es
+static const GLchar* VERTEX_SHADER_SOURCE =
+        R"glsl(#version 320 es
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec4 aTextureCoord;
@@ -62,8 +62,8 @@ void main()
 // FRAGMENT SHADER: output buffer YUV layout
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const GLchar* FRAGMENT_SHADER_SOURCE_YUV_OUT = R"glsl(
-#version 320 es
+static const GLchar* FRAGMENT_SHADER_SOURCE_YUV_OUT =
+        R"glsl(#version 320 es
 
 #extension GL_OES_EGL_image_external_essl3 : require
 #extension GL_OES_EGL_image_external       : require
@@ -194,6 +194,7 @@ void main()
 //
 //pixel = vec4(1.0, 0.0, 0.0, 0.0);
 //
+//    pixel = fixedValue(pixel);
 //pixel.xyz = RGB2YCC_REC2020(pixel.rgb).xyz;
 
     // RGB TO YUV COLOR SPACE CONVERSION
@@ -212,8 +213,8 @@ void main()
 // COPY FRAGMENT SHADER: output buffer RGB layout, simulation only
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const char* COPY_SHADER_SOURCE_RGB = R"glsl(
-#version 320 es
+static const char* COPY_SHADER_SOURCE_RGB =
+        R"glsl(#version 320 es
 
 #extension GL_OES_EGL_image_external_essl3  : require
 #extension GL_OES_EGL_image_external        : require
@@ -236,8 +237,8 @@ void main()
 // COPY FRAGMENT SHADER: output buffer YUV layout, simulation only
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const char* COPY_SHADER_SOURCE_YUV = R"glsl(
-#version 320 es
+static const char* COPY_SHADER_SOURCE_YUV =
+        R"glsl(#version 320 es
 
 #extension GL_OES_EGL_image_external_essl3  : require
 #extension GL_OES_EGL_image_external        : require
@@ -310,50 +311,60 @@ void Simulation::Renderer::render(GLuint textureId, GLuint lutTextureId, bool co
     __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "render");
 
     glUseProgram(program);
+    CHECK_GL_ERROR;
 
     // Position VBO specification
     GLuint vboPosition;
     glGenBuffers(1, &vboPosition);
     glBindBuffer(GL_ARRAY_BUFFER, vboPosition);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX_POSITIONS), VERTEX_POSITIONS, GL_STATIC_DRAW);
+    CHECK_GL_ERROR;
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
+    CHECK_GL_ERROR;
 
     // Texture coordinate VBO specification
     GLuint vboTextureCoord;
     glGenBuffers(1, &vboTextureCoord);
     glBindBuffer(GL_ARRAY_BUFFER, vboTextureCoord);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX_TEXTURE_COORDINATES), VERTEX_TEXTURE_COORDINATES, GL_STATIC_DRAW);
+    CHECK_GL_ERROR;
 
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
+    CHECK_GL_ERROR;
 
     // EBO binding
     GLuint ebo;
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(VERTEX_INDICES), VERTEX_INDICES, GL_STATIC_DRAW);
+    CHECK_GL_ERROR;
 
     // Texture uniform
     GLint uTextureLoc = glGetUniformLocation(program, "uTexture");
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glUniform1i(uTextureLoc, 2);
+    CHECK_GL_ERROR;
 
     // LUT texture uniform
     GLint uLutTextureLoc = glGetUniformLocation(program, "uLutTexture");
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_3D, lutTextureId);
     glUniform1i(uLutTextureLoc, 3);
+    CHECK_GL_ERROR;
 
     // Use LUT spec uniform
     GLint uLutSpecLoc = glGetUniformLocation(program, "uLutSpec");
     glUniform1i(uLutSpecLoc, useLUT ? 1 : 0);
+    CHECK_GL_ERROR;
 
     // Color space conversion uniform
     GLint uConvertLoc = glGetUniformLocation(program, "uConvert");
     glUniform1i(uConvertLoc, convert ? 1 : 0);
+    CHECK_GL_ERROR;
 
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "opengl: (program: %d, position vbo: %d, texture coord vbo: %d, ebo: %d, uniforms: (texture: %d, lut texture: %d, lut spec: %d, convert: %d))",
                         program,
@@ -395,12 +406,12 @@ void Simulation::Renderer::render(GLuint textureId, GLuint lutTextureId, bool co
 Simulation::CopyRenderer::CopyRenderer()
         : program(0)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "CTOR");
+    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "CTOR");
 }
 
 Simulation::CopyRenderer::~CopyRenderer()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "DTOR");
+    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "DTOR");
 
     if (program)
     {
@@ -411,7 +422,7 @@ Simulation::CopyRenderer::~CopyRenderer()
 
 void Simulation::CopyRenderer::init(bool destBufferIsYUV)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "init");
+    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "init");
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &VERTEX_SHADER_SOURCE, nullptr);
@@ -433,7 +444,7 @@ void Simulation::CopyRenderer::init(bool destBufferIsYUV)
 
 void Simulation::CopyRenderer::render(GLuint textureId) const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "render");
+    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "render");
 
     glUseProgram(program);
 

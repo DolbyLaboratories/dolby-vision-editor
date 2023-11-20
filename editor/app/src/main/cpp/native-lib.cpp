@@ -94,9 +94,9 @@ Java_com_dolby_capture_filtersimulation_FrameHandler_processFrame(JNIEnv *env, j
 
     Simulation::HardwareBuffer outputBuffer(outAHB);
 
-    Simulation::EGLMap inputImage(inputBuffer, JNI_GLOBAL::context->getDisplay());
+    Simulation::EGLMap inputImage(inputBuffer, JNI_GLOBAL::context->getDisplay(), GL_TEXTURE_EXTERNAL_OES);
 
-    Simulation::EGLMap outputImage(outputBuffer, JNI_GLOBAL::context->getDisplay());
+    Simulation::EGLMap outputImage(outputBuffer, JNI_GLOBAL::context->getDisplay(), GL_TEXTURE_EXTERNAL_OES);
 
     outputImage.bindFBO();
 
@@ -149,7 +149,7 @@ Java_com_dolby_capture_filtersimulation_VideoDecoder_EditShadersRelease(JNIEnv *
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_dolby_capture_filtersimulation_FrameHandler_EditShadersEnableLut(JNIEnv *env, jobject thiz, jint enable) {
+Java_com_dolby_capture_filtersimulation_VideoDecoder_EditShadersEnableLut(JNIEnv *env, jobject thiz, jint enable) {
     JNI_GLOBAL::renderer->EnableLut(enable);
     return 0;
 }

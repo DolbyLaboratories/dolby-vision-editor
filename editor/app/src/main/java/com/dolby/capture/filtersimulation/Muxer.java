@@ -59,11 +59,11 @@ public class Muxer {
 
         try {
 
-            Log.e("MUXER", "Muxer: initializing" );
+            Log.d("MUXER", "Muxer: initializing" );
             this.outputPath = "/sdcard" + "/DCIM/" + System.currentTimeMillis() + ".mp4";
             this.mMuxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
             this.mMuxer.setOrientationHint(rotation);
-            Log.e("MUXER", "Muxer: initialized" );
+            Log.d("MUXER", "Muxer: initialized" );
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,11 +83,11 @@ public class Muxer {
 
             this.mMuxer.start();
 
-            Log.e("MUXER", "startMuxer: Lifting access gate...");
+            Log.d("MUXER", "startMuxer: Lifting access gate...");
 
             running = true;
 
-            Log.e("MUXER", "startMuxer: Lifted access gate...");
+            Log.d("MUXER", "startMuxer: Lifted access gate...");
         }
     }
 
@@ -104,11 +104,11 @@ public class Muxer {
     public synchronized void stopMuxer()
     {
         if(running) {
-            Log.e("MUXER", "stopMuxer: Attempting to replace access gate...");
+            Log.d("MUXER", "stopMuxer: Attempting to replace access gate...");
 
             running = false;
 
-            Log.e("MUXER", "stopMuxer: Replaced access gate...");
+            Log.d("MUXER", "stopMuxer: Replaced access gate...");
 
             this.mMuxer.stop();
 

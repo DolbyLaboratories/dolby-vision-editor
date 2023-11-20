@@ -33,6 +33,7 @@
 
 #include <android/log.h>
 #include <string>
+#include "Tools.h"
 
 #define LOG_TAG "EGLMap"
 
@@ -116,13 +117,19 @@ unsigned int Simulation::EGLMap::createEGLImage()
 
     glGenTextures(1, &bufferTexture);
     glBindTexture(textureType, bufferTexture);
+    CHECK_GL_ERROR;
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CHECK_GL_ERROR;
+    glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CHECK_GL_ERROR;
+    glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR;
+    glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR;
     float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+    glTexParameterfv(textureType, GL_TEXTURE_BORDER_COLOR, color);
+    CHECK_GL_ERROR;
 
     //glTexParameteri(textureType, GL_TEXTURE_PROTECTED_EXT, GL_TRUE);
 
@@ -158,9 +165,12 @@ unsigned int Simulation::EGLMap::createEGLImage()
     }
 
     glEGLImageTargetTexture2DOES(textureType, static_cast<GLeglImageOES>(image));
+    CHECK_GL_ERROR;
     glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType, bufferTexture, 0);
+    CHECK_GL_ERROR;
 
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    CHECK_GL_ERROR;
     switch (framebufferStatus)
     {
         case GL_FRAMEBUFFER_COMPLETE:
@@ -316,6 +326,7 @@ void Simulation::EGLMap::bindFBO() const
     __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "bindFBO");
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    CHECK_GL_ERROR;
 }
 
 

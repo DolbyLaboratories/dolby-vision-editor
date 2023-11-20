@@ -37,8 +37,6 @@ import android.media.ImageWriter;
 import android.media.MediaCodec;
 import android.util.Log;
 
-import com.dolby.vision.codecselection.CodecBuilderImpl;
-
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
@@ -107,8 +105,6 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
     }
 
     public native int processFrame(HardwareBuffer inbuf, HardwareBuffer opbuf);
-    public native int EditShadersEnableLut(int enable);
-
 
     @Override
     public void onFrameAvailable(Image inputImage, String codecName, Constants.ColorStandard standard) {
@@ -124,13 +120,9 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
 
         HardwareBuffer output = outputImage.getHardwareBuffer();
 
-        Log.e(TAG, "codecName=" + codecName);
-        if (CodecBuilderImpl.isDolbyGPUDecoder(codecName) && preview && standard == Constants.ColorStandard.eColorStandard10BitRec2020) {
-            Log.e(TAG, "Enable LUT");
-            EditShadersEnableLut(1);
-        } else {
-            Log.e(TAG, "Do not enable LUT");
-            EditShadersEnableLut(0);
+        if (input.isClosed() || output.isClosed()) {
+            Log.w(TAG, "input or output hardware buffer is closed");
+            return;
         }
 
         processFrame(input, output);
@@ -145,10 +137,10 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.e(TAG, "onFrameAvailable: " + buffers );
-            Log.e(TAG, "onFrameAvailable: QUEUED FRAME TS: " + outputImage.getTimestamp() );
+            Log.d(TAG, "onFrameAvailable: " + buffers );
+            Log.d(TAG, "onFrameAvailable: QUEUED FRAME TS: " + outputImage.getTimestamp() );
             buffers.add(outputImage.getTimestamp());
-            Log.e(TAG, "onFrameAvailable: QUEUED FRAME Size: " + buffers.size());
+            Log.d(TAG, "onFrameAvailable: QUEUED FRAME Size: " + buffers.size());
 
             bufferLock.release();
 
@@ -162,7 +154,7 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         if (!preview) {
 
             try {
-                Log.e(TAG, "onFrameAvailable: WAITING ON ENCODER...");
+                Log.d(TAG, "onFrameAvailable: WAITING ON ENCODER...");
 
                 dowait.acquire();
 
@@ -176,7 +168,7 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
 
             totalEncodeTime += encodeTime;
 
-            Log.e(TAG, "onFrameAvailable: Encode time " +  encodeTime + " " + totalEncodeTime);
+            Log.d(TAG, "onFrameAvailable: Encode time " +  encodeTime + " " + totalEncodeTime);
         }
 
         inputImage.close();
@@ -184,15 +176,14 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         output.close();
         input.close();
 
-
-        Log.e(TAG, "onFrameAvailable: FINISHED" );
+        Log.d(TAG, "onFrameAvailable: FINISHED" );
     }
 
 
     @Override
     public void onFrameEncoded(MediaCodec.BufferInfo info) {
 
-        Log.e(TAG, "onFrameEncoded: " );
+        Log.d(TAG, "onFrameEncoded: " );
 
         try {
             bufferLock.acquire();
@@ -205,7 +196,7 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         if(ts != null) {
 
             if (ts == (info.presentationTimeUs * 1000)) {
-                Log.e(TAG, "onFrameEncoded: Frame check okay " + info.presentationTimeUs);
+                Log.d(TAG, "onFrameEncoded: Frame check okay " + info.presentationTimeUs);
                 dowait.release();
             }
             else
@@ -215,7 +206,7 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         }
         else
         {
-            Log.e(TAG, "onFrameEncoded: Queue empty, likely CSD buffer. Ignoring." );
+            Log.w(TAG, "onFrameEncoded: Queue empty, likely CSD buffer. Ignoring." );
         }
 
         bufferLock.release();

@@ -64,6 +64,8 @@ public class Constants {
     public static final String ENCODER_P84 = "Profile 8.4";
     public static final String IFRAME_LOSSLESS = "Lossless";
     public static final String IFRAME_1_SEC = "1 second";
+    public static final String DOLBY_HEVC_ENCODER = "c2.dolby.encoder.hevc";
+    public static final String DOLBY_HEVC_DECODER = "c2.dolby.decoder.hevc";
 
     // Arrays to populate all the spinners in MainActivity
     public static final String[] FILTER_OPTIONS = {FILTER_NONE, FILTER_BW, FILTER_SEPIA};

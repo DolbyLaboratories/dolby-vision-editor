@@ -646,7 +646,7 @@ bool EditShaders::LoadUniforms(GLuint program, GLuint input_texture_id)
     // Input texture
     glActiveTexture(TEX_NUM_INPUT);
     if (CHECK_GL_ERROR) return true;
-    glBindTexture(GL_TEXTURE_2D, input_texture_id);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, input_texture_id);
     if (CHECK_GL_ERROR) return true;
     glUniform1i(mInputTextureHandle, TEX_BINDING_INPUT);
     if (CHECK_GL_ERROR) return true;

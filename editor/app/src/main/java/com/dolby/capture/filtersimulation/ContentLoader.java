@@ -101,19 +101,20 @@ public class ContentLoader {
 
         this.inputUri = inputUri;
 
-
         int profile = getProfile(appContext, inputUri);
-        Log.e(TAG, "profile = " + profile);
+        Log.d(TAG, "profile = " + profile);
 
         Size inputSize = getResolution(appContext, inputUri);
 
-        CodecSynchro sync = new CodecSynchro(screen);
-        this.pipeline = new ImagePipeline(inputSize, screenDim, sync.getInputSurface(), true, profile, encoderFormat);
+//        CodecSynchro sync = new CodecSynchro(screen);
+//        this.pipeline = new ImagePipeline(inputSize, screenDim, sync.getInputSurface(), true, profile, encoderFormat);
+//        this.frameHandler = new FrameHandler(true, sync, pipeline);
+        this.pipeline = new ImagePipeline(inputSize, screenDim, screen, true, profile, encoderFormat);
+        this.frameHandler = new FrameHandler(true, null, pipeline);
 
-        this.frameHandler = new FrameHandler(true, sync, pipeline);
-
+        server = new BroadcastServer(this.activity);
         try {
-            decoder = new VideoDecoder(inputUri, appContext, this.frameHandler, server, pipeline, true, transfer, encoderFormat, outputFormatChange);
+            decoder = new VideoDecoder(inputUri, appContext, this.frameHandler, server, pipeline, true, transfer, profile, encoderFormat, outputFormatChange);
         } catch (NullPointerException e) {
             activity.acceptMessage(new Message<NullPointerException>("Codec error", e) {
             });
@@ -155,19 +156,19 @@ public class ContentLoader {
                 outputSize = getResolution(appContext, inputUri);
                 break;
         }
-        Log.e(TAG, "outputSize = " + outputSize.toString());
+        Log.d(TAG, "outputSize = " + outputSize.toString());
 
         int bitrate = getBitrate(appContext, inputUri);
-        Log.e(TAG, "bitrate = " + bitrate);
+        Log.d(TAG, "bitrate = " + bitrate);
 
         int inputFPS = getFPS(appContext, inputUri);
-        Log.e(TAG, "inputFPS = " + inputFPS);
+        Log.d(TAG, "inputFPS = " + inputFPS);
 
         int profile = getProfile(appContext, inputUri);
-        Log.e(TAG, "profile = " + profile);
+        Log.d(TAG, "profile = " + profile);
 
         int rotation = getRotation(appContext, inputUri);
-        Log.e(TAG, "rotation = " + rotation);
+        Log.d(TAG, "rotation = " + rotation);
 
         BroadcastServer callback = new BroadcastServer(this.activity);
 
@@ -193,7 +194,7 @@ public class ContentLoader {
 
 
         try {
-            decoder = new VideoDecoder(inputUri, appContext, this.frameHandler, server, pipeline, false, transfer, encoderFormat, false);
+            decoder = new VideoDecoder(inputUri, appContext, this.frameHandler, server, pipeline, false, transfer, profile, encoderFormat, false);
         } catch (NullPointerException e) {
             activity.acceptMessage(new Message<NullPointerException>("Codec error", e) {
             });
@@ -221,6 +222,12 @@ public class ContentLoader {
             decoder = null;
         }
 
+        if (pipeline != null) {
+            Log.d(TAG, "close pipline");
+            pipeline.closePipline();
+            pipeline = null;
+        }
+
         if(encoder != null) {
             encoder.stop();
             encoder = null;
@@ -229,12 +236,6 @@ public class ContentLoader {
         if(frameHandler != null) {
             frameHandler.release();
             frameHandler = null;
-        }
-
-        if (pipeline != null) {
-            Log.d(TAG, "close pipline");
-            pipeline.closePipline();
-            pipeline = null;
         }
     }
 
@@ -309,7 +310,9 @@ public class ContentLoader {
         int profile = -1;
         for (int i = 0; i < extractor.getTrackCount(); i++) {
             MediaFormat format = extractor.getTrackFormat(i);
-            if (format.containsKey(MediaFormat.KEY_PROFILE)) {
+            String mimeType = format.getString(MediaFormat.KEY_MIME);
+            if (mimeType.startsWith("video/") &&
+                    format.containsKey(MediaFormat.KEY_PROFILE)) {
                 profile = format.getInteger(MediaFormat.KEY_PROFILE);
                 break;
             }
