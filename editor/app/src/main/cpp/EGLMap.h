@@ -44,7 +44,7 @@ namespace Simulation
 class EGLMap
 {
 public:
-    EGLMap(HardwareBuffer &hwBuffer, EGLDisplay display, GLenum texSource = GL_TEXTURE_2D);
+    EGLMap(bool isInput, HardwareBuffer &hwBuffer, EGLDisplay display, GLenum texSource = GL_TEXTURE_2D);
 
     virtual ~EGLMap();
 
@@ -68,7 +68,7 @@ public:
     int getHardwareBufferHeight() {return (int)static_cast<GLsizei>(buffer->getHardwareBufferHeight());}
 
 private:
-    GLuint createEGLImage();
+    GLuint createEGLImage(bool isInput);
 
 private:
     // GL_TEXTURE_EXTERNAL_OES GL_TEXTURE_2D

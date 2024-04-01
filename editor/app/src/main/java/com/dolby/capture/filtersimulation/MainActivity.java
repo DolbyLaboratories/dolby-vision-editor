@@ -43,6 +43,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -357,6 +358,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             inputUri = Uri.parse(extraFileName);
             inputPath = extraFileName;
         }
+
+        // only support dolby vision profile 8.4 input
+        if (!isContentSupport()) {
+            Log.w(TAG, "external file format not support");
+            inputUri = null;
+            inputPath = null;
+            alertDialog("Wrong input file format", "Only support Dolby Vision profile 8.4 ");
+        }
     }
 
     private void loadVideoEffects() {
@@ -496,9 +505,25 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         dialog.show();
     }
 
+    private void alertDialog(String title, String message) {
+        // setup the alert builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        // add a button
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public void onClick(View v) {
-        Log.d(TAG, "Click!");
         int id = v.getId();
         if (id == R.id.cl_select_video_bar || id == R.id.btn_select_new_video) {
 
@@ -555,6 +580,24 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
     }
 
+    private boolean isContentSupport() {
+        boolean ret = false;
+
+        if (inputUri == null) {
+            return ret;
+        }
+
+        int ccid = -1;
+        int dvProfile = -1;
+        dvProfile = ContentLoader.getProfile(this, inputUri);
+        ccid = ContentLoader.getCCID(this, inputUri);
+        // only support dolby vision profile 8.4 input
+        if (dvProfile == MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt && ccid == 4) {
+            ret = true;
+        }
+        return ret;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "OnActivityResult!");
@@ -564,6 +607,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
                 inputUri = data.getData();
                 inputPath = data.getData().toString();
                 Log.i(TAG, "Video file selected Input path:" + inputPath);
+
+                if(!isContentSupport()) {
+                    Log.w(TAG, "not support input file format");
+                    inputUri = null;
+                    inputPath = null;
+                    alertDialog("Wrong input file format", "Only support Dolby Vision profile 8.4 ");
+                    return;
+                }
 
                 maybeStartPreview();
             }
@@ -649,6 +700,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         if (p != null) {
             p.stop();
+            p = null;
+        }
+
+        if(progressOverlayView != null && progressOverlayView.getVisibility() == View.VISIBLE) {
+            animateView(progressOverlayView, View.GONE, 0, 200);
         }
 
         Log.d(TAG, "onPause: ");
@@ -715,7 +771,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
 
         p.stop();
-        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, TRANSFER_SDR, false);
+
+        if (encoderFormat.equals(Constants.DV_ME)) {
+            transfer = TRANSFER_HLG;
+        } else {
+            transfer = TRANSFER_SDR;
+        }
+
+        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, transfer, false);
     }
 
     private boolean requestPermissions() {
@@ -788,8 +851,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             return ret;
         }
 
+        enableControls();
         try {
-            enableControls();
             render(this.inputUri);
             ret = true;
         } catch (MediaFormatNotFoundInFileException | IOException e) {

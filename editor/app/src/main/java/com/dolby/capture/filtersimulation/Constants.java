@@ -79,4 +79,6 @@ public class Constants {
     public static final int RESOLUTION_4K_WIDTH = 3840;
     public static final int RESOLUTION_4K_HEIGHT = 2160;
 
+    public static final boolean usingImageWriter = false;
+
 }

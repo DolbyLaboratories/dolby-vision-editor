@@ -36,6 +36,7 @@
 
 #include "EditShaders.h"
 #include "HardwareBuffer.h"
+#include "EGLContext.h"
 
 namespace Simulation
 {
@@ -47,19 +48,25 @@ public:
 
     ~Renderer();
 
-    void init();
+    void init(bool preview = false);
+
+    void render(GLuint textureId, bool convert = false, bool useLUT = false) const;
 
     void render(GLuint textureId, GLuint lutTextureId, bool convert = false, bool useLUT = false) const;
 
+    void setScreenSize(int width, int height);
 private:
-    GLuint program;
+    GLuint program = GL_INVALID_VALUE;
+    std::shared_ptr<Context> eglContext = nullptr;
+    int mScreenWidth;
+    int mScreenHeight;
 };
 
 class CopyRenderer
 {
 public:
     CopyRenderer();
-
+    CopyRenderer(std::shared_ptr<Context> ctx);
     ~CopyRenderer();
 
     void init(bool destBufferIsYUV);
@@ -68,6 +75,7 @@ public:
 
 private:
     GLuint program;
+    std::shared_ptr<Context> eglContext = nullptr;
 };
 
 }

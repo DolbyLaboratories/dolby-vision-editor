@@ -29,17 +29,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#include "EGLMap.h"
+#define LOG_TAG "EGLMap"
+//#define LOG_NDEBUG 0
 
-#include <android/log.h>
+#include "EGLMap.h"
 #include <string>
 #include "Tools.h"
 
-#define LOG_TAG "EGLMap"
 
-Simulation::EGLMap::EGLMap(Simulation::HardwareBuffer &hwBuffer, EGLDisplay display, GLenum texSource)
+
+Simulation::EGLMap::EGLMap(bool isInput, Simulation::HardwareBuffer &hwBuffer, EGLDisplay display, GLenum texSource)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "CTOR");
+    LOGI("CTOR");
 
     if (texSource == GL_TEXTURE_2D || texSource == GL_TEXTURE_EXTERNAL_OES)
     {
@@ -48,27 +49,27 @@ Simulation::EGLMap::EGLMap(Simulation::HardwareBuffer &hwBuffer, EGLDisplay disp
     else
     {
         this->textureType = GL_TEXTURE_2D;
-        __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "invalid texture type. Only GL_TEXTURE_2D and GL_TEXTURE_EXTERNAL_OES supported. Default to GL_TEXTURE_2D.");
+        LOGE("invalid texture type. Only GL_TEXTURE_2D and GL_TEXTURE_EXTERNAL_OES supported. Default to GL_TEXTURE_2D.");
     }
 
     this->buffer  = &hwBuffer;
     this->display = display;
 
-    createEGLImage();
+    createEGLImage(isInput);
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "opengl bindings: (buffer texture: %d, lut texture: %d, input texture: %d, fbo: %d)", bufferTexture, lutTexture, inputTexture, fbo);
+    LOGI("opengl bindings: (buffer texture: %d, lut texture: %d, input texture: %d, fbo: %d)", bufferTexture, lutTexture, inputTexture, fbo);
 }
 
 std::vector<int> Simulation::EGLMap::getTexValue()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "getTexValue");
+    LOGI("getTexValue");
 
     glReadBuffer(GL_COLOR_ATTACHMENT0);
 
     auto bw = static_cast<GLsizei>(buffer->getHardwareBufferWidth());
     auto bh = static_cast<GLsizei>(buffer->getHardwareBufferHeight());
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "hardware buffer parameters: (width: %d, height: %d)", bw, bh);
+    LOGI("hardware buffer parameters: (width: %d, height: %d)", bw, bh);
 
     // Pre-allocate vector on the heap so we can free before MDGen
     std::vector<int> bufferOut(bw * bh, 0);
@@ -80,7 +81,7 @@ std::vector<int> Simulation::EGLMap::getTexValue()
 
 Simulation::EGLMap::~EGLMap()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "DTOR");
+    LOGI("DTOR");
 
     eglDestroyImageKHR(display, image);
     glDeleteTextures(1, &inputTexture);
@@ -89,7 +90,7 @@ Simulation::EGLMap::~EGLMap()
     glDeleteFramebuffers(1, &fbo);
 }
 
-unsigned int Simulation::EGLMap::createEGLImage()
+unsigned int Simulation::EGLMap::createEGLImage(bool isInput)
 {
     __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "createEGLImage");
 
@@ -133,9 +134,6 @@ unsigned int Simulation::EGLMap::createEGLImage()
 
     //glTexParameteri(textureType, GL_TEXTURE_PROTECTED_EXT, GL_TRUE);
 
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-
     int imageAttribs[] = {
             //EGL_PROTECTED_CONTENT_EXT, EGL_TRUE,
             EGL_NONE
@@ -166,6 +164,14 @@ unsigned int Simulation::EGLMap::createEGLImage()
 
     glEGLImageTargetTexture2DOES(textureType, static_cast<GLeglImageOES>(image));
     CHECK_GL_ERROR;
+
+    if (isInput) {
+        return bufferTexture;
+    }
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
     glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType, bufferTexture, 0);
     CHECK_GL_ERROR;
 
@@ -197,14 +203,97 @@ unsigned int Simulation::EGLMap::createEGLImage()
 
     return bufferTexture;
 }
+/*
+unsigned int Simulation::EGLMap::createInputEGLImage()
+{
+    LOGI("createEGLImage");
 
+    clientBuffer = eglGetNativeClientBufferANDROID(buffer->getHardwareBuffer());
+
+    if (clientBuffer == nullptr)
+    {
+        LOGE("native client buffer acquisition: FAIL");
+
+        if (valid)
+        {
+            error = Simulation::EGLMapError::NATIVE_CLIENT_BUFFER_ACQUISITION_FAILED;
+            valid = false;
+        }
+    }
+    else
+    {
+        LOGI("native client buffer acquisition: PASS");
+    }
+
+    glGenTextures(1, &inputTexture);
+
+    // Output lut for conversions on input.
+    glGenTextures(1, &lutTexture);
+
+    glGenTextures(1, &bufferTexture);
+    glBindTexture(textureType, bufferTexture);
+    CHECK_GL_ERROR;
+
+    glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CHECK_GL_ERROR;
+    glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CHECK_GL_ERROR;
+    glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR;
+    glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR;
+    float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexParameterfv(textureType, GL_TEXTURE_BORDER_COLOR, color);
+    CHECK_GL_ERROR;
+
+    //glTexParameteri(textureType, GL_TEXTURE_PROTECTED_EXT, GL_TRUE);
+
+   // glGenFramebuffers(1, &fbo);
+   // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+    int imageAttribs[] = {
+            //EGL_PROTECTED_CONTENT_EXT, EGL_TRUE,
+            EGL_NONE
+    };
+
+    image = eglCreateImageKHR(
+            display,
+            EGL_NO_CONTEXT,
+            EGL_NATIVE_BUFFER_ANDROID,
+            clientBuffer,
+            imageAttribs);
+
+    if (image == EGL_NO_IMAGE_KHR)
+    {
+        EGLint eglError = eglGetError();
+        LOGE("image creation: FAIL (egl error: %d)", eglError);
+
+        if (valid)
+        {
+            error = Simulation::EGLMapError::IMAGE_CREATION_FAILED;
+            valid = false;
+        }
+    }
+    else
+    {
+        LOGI("image creation: PASS");
+    }
+
+    glEGLImageTargetTexture2DOES(textureType, static_cast<GLeglImageOES>(image));
+    CHECK_GL_ERROR;
+
+    glViewport(0, 0, buffer->getHardwareBufferWidth(), buffer->getHardwareBufferHeight());
+    LOGE("createimage success");
+    return bufferTexture;
+}
+*/
 void Simulation::EGLMap::loadInputTexture(const unsigned char* textureData, int width, int height)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "loadInputTexture");
+    LOGI(LOG_TAG,  "loadInputTexture");
 
     if (textureData == nullptr)
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "load input texture: %s", "FAIL");
+        LOGE("load input texture: %s", "FAIL");
 
         if (valid)
         {
@@ -214,7 +303,7 @@ void Simulation::EGLMap::loadInputTexture(const unsigned char* textureData, int 
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, "EGLMap", "load input texture: PASS");
+        LOGI("EGLMap", "load input texture: PASS");
     }
 
     glActiveTexture(GL_TEXTURE1);
@@ -227,7 +316,7 @@ void Simulation::EGLMap::loadInputTexture(const unsigned char* textureData, int 
 
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PROTECTED_EXT, GL_TRUE);
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "load texture input parameters: (width: %d, height: %d)", width, height);
+    LOGI("load texture input parameters: (width: %d, height: %d)", width, height);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
 
@@ -236,11 +325,11 @@ void Simulation::EGLMap::loadInputTexture(const unsigned char* textureData, int 
 
 void Simulation::EGLMap::loadInputRaw(const unsigned char* textureData, int width, int height, int length)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "loadInputRaw");
+    LOGI("loadInputRaw");
 
     if (textureData == nullptr)
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "load input RAW: %s", "FAIL");
+        LOGI("load input RAW: %s", "FAIL");
 
         if (valid)
         {
@@ -250,7 +339,7 @@ void Simulation::EGLMap::loadInputRaw(const unsigned char* textureData, int widt
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, "EGLMap", "load input RAW: PASS");
+        LOGI("EGLMap", "load input RAW: PASS");
     }
 
     glActiveTexture(GL_TEXTURE1);
@@ -266,7 +355,7 @@ void Simulation::EGLMap::loadInputRaw(const unsigned char* textureData, int widt
     std::vector<uint32_t> data;
     data.reserve(width * height);
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "load RAW input parameters: (width: %d, height: %d, length: %d)", width, height, length);
+    LOGI("load RAW input parameters: (width: %d, height: %d, length: %d)", width, height, length);
 
     for (int i = 0; i < length; i+=6)
     {
@@ -288,12 +377,10 @@ void Simulation::EGLMap::loadInputRaw(const unsigned char* textureData, int widt
 
         uint32_t pixel = rMask | gMask | bMask;
 
-        //__android_log_print(ANDROID_LOG_INFO, "FRAME BUFFER DRAW BUFFERS:", "%x %x %x %x", r, g, b, pixel);
-
         data.push_back(pixel);
     }
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "RAW parameters: (width: %d, height: %d, length: %d, colors: %lu)", width, height, length, data.size());
+    LOGI("RAW parameters: (width: %d, height: %d, length: %d, colors: %lu)", width, height, length, data.size());
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, data.data());
 
@@ -302,28 +389,28 @@ void Simulation::EGLMap::loadInputRaw(const unsigned char* textureData, int widt
 
 GLuint Simulation::EGLMap::getBufferTexture() const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "getBufferTexture");
+    LOGI("getBufferTexture");
 
     return bufferTexture;
 }
 
 GLuint Simulation::EGLMap::getLutTexture() const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "getLutTexture");
+    LOGI("getLutTexture");
 
     return lutTexture;
 }
 
 GLuint Simulation::EGLMap::getInputTexture() const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "getInputTexture");
+    LOGI("getInputTexture");
 
     return inputTexture;
 }
 
 void Simulation::EGLMap::bindFBO() const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "bindFBO");
+    LOGI("bindFBO");
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     CHECK_GL_ERROR;
@@ -332,7 +419,7 @@ void Simulation::EGLMap::bindFBO() const
 
 bool Simulation::EGLMap::isMappingValid(Simulation::EGLMapError* rete) const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "isMappingValid");
+    LOGI("isMappingValid");
 
     if (rete)
     {

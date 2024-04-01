@@ -99,7 +99,10 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
-        Log.d("AudioEncoder", "onInputBufferAvailable");
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
+
         synchronized (lock) {
 
             if (this.bufferQueue == null) {
@@ -131,13 +134,16 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
                     }
                 }
 
+                // need to check codec state again
+                if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+                    return;
+                }
+
                 if (data != null) {
                     b.put(data.getData());
-
                     b.flip();
 
-                    if(firstSample)
-                    {
+                    if(firstSample) {
                         this.applyFadeCurve(b);
                         this.firstSample = false;
                     }
@@ -211,6 +217,9 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
 
         synchronized (lock) {
 
@@ -230,6 +239,9 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
                     this.getMuxer().writeSampleData(this.getTrackID(), encodedData, bufferInfo);
                 }
 
+                if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+                    return;
+                }
                 mediaCodec.releaseOutputBuffer(i, false);
             }
 
@@ -248,6 +260,20 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
         this.setTrackId(this.getMuxer().addTrack(mediaFormat));
         this.getMuxer().setMuxerStarted();
 
+    }
+
+    @Override
+    void stop() {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
+
+        super.stop();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     public void run() {
@@ -320,7 +346,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
             super(looper);
             this.encoder = new WeakReference<AudioEncoder>(audioEncoder);
             this.encoder.get().getCodec().setCallback(this.encoder.get(), this);
-            this.encoder.get().getCodec().start();
+            this.encoder.get().start();
         }
     }
 }

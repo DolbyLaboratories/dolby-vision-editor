@@ -41,108 +41,71 @@
 
 using namespace std;
 
-namespace Simulation
-{
+namespace Simulation {
 ///////////////////////////////////////////////////////////////////////////////
 // ScopeTimer & ScopeTimerGPU
 
-atomic_flag ScopeTimer::mBusy = ATOMIC_FLAG_INIT;
+    atomic_flag ScopeTimer::mBusy = ATOMIC_FLAG_INIT;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Some OpenGL tools
 
 #ifdef _DEBUG
-bool mDumpShaderErrors = true;
+    bool mDumpShaderErrors = true;
 #else  // ! _DEBUG
-bool mDumpShaderErrors = true; // Normally false for release
+    bool mDumpShaderErrors = true; // Normally false for release
 #endif // ! _DEBUG
 
-bool CompileAndLinkShader(GLuint &program, char const *fragment_or_compute_text, char const *vertex_text)
-{
-    DeleteProgram(program); // Nuke any existing program
+    bool CompileAndLinkShader(GLuint &program, char const *fragment_or_compute_text,
+                              char const *vertex_text) {
+        DeleteProgram(program); // Nuke any existing program
+        CHECK_GL_ERROR;
+        // Used by the cleanup Lambda
+        bool guilty = true; // Guilty until proven innocent
+        GLuint main_shader = GL_INVALID_VALUE, vertex_shader = GL_INVALID_VALUE;
 
-    // Used by the cleanup Lambda
-    bool guilty = true; // Guilty until proven innocent
-    GLuint main_shader = GL_INVALID_VALUE, vertex_shader = GL_INVALID_VALUE;
+        // Lambda cleanup function to sweep up the floor after the party is over no matter how we leave
+        ScopeExitFunction cleanup([&]() {
+            DeleteShader(main_shader);
+            DeleteShader(vertex_shader);
+            if (guilty) DeleteProgram(program);
+        });
 
-    // Lambda cleanup function to sweep up the floor after the party is over no matter how we leave
-    ScopeExitFunction cleanup([&]()
-    {
-        DeleteShader(main_shader);
-        DeleteShader(vertex_shader);
-        if (guilty) DeleteProgram(program);
-    });
-
-    bool vertex_fragment_shader = (vertex_text != nullptr); // Compute shader if no vertex source provided
-    if (vertex_fragment_shader)
-    {
-        vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-        if (vertex_shader == 0)
-        {
+        bool vertex_fragment_shader = (vertex_text !=
+                                       nullptr); // Compute shader if no vertex source provided
+        if (vertex_fragment_shader) {
+            vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+            if (vertex_shader == 0) {
+                CHECK_GL_ERROR;
+                return true;
+            }
+        }
+        CHECK_GL_ERROR;
+        main_shader = glCreateShader(
+                vertex_fragment_shader ? GL_FRAGMENT_SHADER : GL_COMPUTE_SHADER);
+        if (main_shader == 0) {
             CHECK_GL_ERROR;
             return true;
         }
-    }
-    main_shader = glCreateShader(vertex_fragment_shader ? GL_FRAGMENT_SHADER: GL_COMPUTE_SHADER);
-    if (main_shader == 0)
-    {
         CHECK_GL_ERROR;
-        return true;
-    }
-
-    glShaderSource(main_shader, 1, &fragment_or_compute_text, nullptr);
-    if (CHECK_GL_ERROR) return true;
-    glCompileShader(main_shader);
-    CHECK_GL_ERROR;
-    GLint compiled = 0;
-    glGetShaderiv(main_shader, GL_COMPILE_STATUS, &compiled);
-    CHECK_GL_ERROR;
-    if (compiled == GL_FALSE)
-    {
-        LOGE("Error compiling shader");
-        if (mDumpShaderErrors)
-        {
-            DumpEmbeddedLines(fragment_or_compute_text, "Compute or Fragment Shader:");
-        }
-        GLint infoLen = 500;
-        glGetShaderiv(main_shader, GL_INFO_LOG_LENGTH, &infoLen);
-        CHECK_GL_ERROR;
-        if (infoLen > 0)
-        {
-            char *buf = new char[infoLen];
-            if (buf)
-            {
-                glGetShaderInfoLog(main_shader, infoLen, nullptr, buf);
-                LOGE("Compile log : %s", buf);
-                delete[] buf;
-            }
-        }
-        return true;
-    }
-    if (vertex_fragment_shader)
-    {
-        glShaderSource(vertex_shader, 1, &vertex_text, nullptr);
+        glShaderSource(main_shader, 1, &fragment_or_compute_text, nullptr);
         if (CHECK_GL_ERROR) return true;
-        glCompileShader(vertex_shader);
+        glCompileShader(main_shader);
         CHECK_GL_ERROR;
         GLint compiled = 0;
-        glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compiled);
+        glGetShaderiv(main_shader, GL_COMPILE_STATUS, &compiled);
         CHECK_GL_ERROR;
-        if (compiled == GL_FALSE)
-        {
+        if (compiled == GL_FALSE) {
             LOGE("Error compiling shader");
-            if (mDumpShaderErrors)
-            {
-                DumpEmbeddedLines(vertex_text, "Vertex Shader:");
+            if (mDumpShaderErrors) {
+                DumpEmbeddedLines(fragment_or_compute_text, "Compute or Fragment Shader:");
             }
             GLint infoLen = 500;
-            glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &infoLen);
+            glGetShaderiv(main_shader, GL_INFO_LOG_LENGTH, &infoLen);
             CHECK_GL_ERROR;
-            if (infoLen > 0)
-            {
+            if (infoLen > 0) {
                 char *buf = new char[infoLen];
-                if (buf)
-                {
+                if (buf) {
                     glGetShaderInfoLog(main_shader, infoLen, nullptr, buf);
                     LOGE("Compile log : %s", buf);
                     delete[] buf;
@@ -150,153 +113,162 @@ bool CompileAndLinkShader(GLuint &program, char const *fragment_or_compute_text,
             }
             return true;
         }
-    }
-
-    // Link the shader
-    program = glCreateProgram();
-    if (CHECK_GL_ERROR) return true;
-    if (vertex_fragment_shader)
-    {
-        glAttachShader(program, vertex_shader);
-        if (CHECK_GL_ERROR) return true;
-    }
-    glAttachShader(program, main_shader);
-    if (CHECK_GL_ERROR) return true;
-    glLinkProgram(program);
-    if (CHECK_GL_ERROR) return true;
-
-    GLint linked = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    CHECK_GL_ERROR;
-    if (!linked)
-    {
-        LOGE("Error linking shader");
-        if (mDumpShaderErrors)
-        {
-            DumpEmbeddedLines(vertex_text, "Vertex Shader:");
-            DumpEmbeddedLines(fragment_or_compute_text, "Compute or Fragment Shader:");
-        }
-        GLint infoLen = 500;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
-        CHECK_GL_ERROR;
-        if (infoLen > 0)
-        {
-            char *buf = new char[infoLen];
-            if (buf)
-            {
-                glGetProgramInfoLog(program, infoLen, nullptr, buf);
+        if (vertex_fragment_shader) {
+            glShaderSource(vertex_shader, 1, &vertex_text, nullptr);
+            if (CHECK_GL_ERROR) return true;
+            glCompileShader(vertex_shader);
+            CHECK_GL_ERROR;
+            GLint compiled = 0;
+            glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compiled);
+            CHECK_GL_ERROR;
+            if (compiled == GL_FALSE) {
+                LOGE("Error compiling shader");
+                if (mDumpShaderErrors) {
+                    DumpEmbeddedLines(vertex_text, "Vertex Shader:");
+                }
+                GLint infoLen = 500;
+                glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &infoLen);
                 CHECK_GL_ERROR;
-                LOGE("Link log : %s", buf);
-                delete[] buf;
+                if (infoLen > 0) {
+                    char *buf = new char[infoLen];
+                    if (buf) {
+                        glGetShaderInfoLog(main_shader, infoLen, nullptr, buf);
+                        LOGE("Compile log : %s", buf);
+                        delete[] buf;
+                    }
+                }
+                return true;
             }
         }
-        return true;
-    }
 
-    glUseProgram(program);
-    if (CHECK_GL_ERROR) return true;
-    LOGI("Program created: %d", program);
+        // Link the shader
+        program = glCreateProgram();
+        if (CHECK_GL_ERROR) return true;
+        if (vertex_fragment_shader) {
+            glAttachShader(program, vertex_shader);
+            if (CHECK_GL_ERROR) return true;
+        }
+        glAttachShader(program, main_shader);
+        if (CHECK_GL_ERROR) return true;
+        glLinkProgram(program);
+        if (CHECK_GL_ERROR) return true;
+
+        GLint linked = 0;
+        glGetProgramiv(program, GL_LINK_STATUS, &linked);
+        CHECK_GL_ERROR;
+        if (!linked) {
+            LOGE("Error linking shader");
+            if (mDumpShaderErrors) {
+                DumpEmbeddedLines(vertex_text, "Vertex Shader:");
+                DumpEmbeddedLines(fragment_or_compute_text, "Compute or Fragment Shader:");
+            }
+            GLint infoLen = 500;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
+            CHECK_GL_ERROR;
+            if (infoLen > 0) {
+                char *buf = new char[infoLen];
+                if (buf) {
+                    glGetProgramInfoLog(program, infoLen, nullptr, buf);
+                    CHECK_GL_ERROR;
+                    LOGE("Link log : %s", buf);
+                    delete[] buf;
+                }
+            }
+            return true;
+        }
+
+        glUseProgram(program);
+        if (CHECK_GL_ERROR) return true;
+        LOGI("Program created: %d", program);
 
 #if 0
-    DumpEmbeddedLines(vertex_text, "Vertex Shader:");
-    DumpEmbeddedLines(fragment_or_compute_text, "Compute or Fragment Shader:");
+        DumpEmbeddedLines(vertex_text, "Vertex Shader:");
+        DumpEmbeddedLines(fragment_or_compute_text, "Compute or Fragment Shader:");
 #endif
 
-    guilty = false; // Tell the cleanup Lambda that we're successful
-    return guilty;
-}
+        guilty = false; // Tell the cleanup Lambda that we're successful
+        return guilty;
+    }
 
 // Note that the argument is passed by reference to these functions
 // These functions use the convention that unallocated handles are initlialized
 // to GL_INVALID_VALUE, and when release are reset to GL_INVALID_VALUE
-void DeleteTexture(GLuint &handle)
-{
-    GLuint item[1];
-    if (handle != GL_INVALID_VALUE)
-    {
-        item[0] = handle;
-        glDeleteTextures(1, item);
-        handle = GL_INVALID_VALUE;
+    void DeleteTexture(GLuint &handle) {
+        GLuint item[1];
+        if (handle != GL_INVALID_VALUE) {
+            item[0] = handle;
+            glDeleteTextures(1, item);
+            handle = GL_INVALID_VALUE;
+        }
     }
-}
 
 // Note that the argument is passed by reference
-void DeleteProgram(GLuint &handle)
-{
-    if (handle != GL_INVALID_VALUE)
-    {
-        glDeleteProgram(handle);
-        handle = GL_INVALID_VALUE;
+    void DeleteProgram(GLuint &handle) {
+        if (handle != GL_INVALID_VALUE) {
+            glDeleteProgram(handle);
+            handle = GL_INVALID_VALUE;
+        }
     }
-}
 
 // Note that the argument is passed by reference
-void DeleteShader(GLuint &handle)
-{
-    if ((handle != GL_INVALID_VALUE) && (handle != 0))
-    {
-        glDeleteShader(handle);
-        handle = GL_INVALID_VALUE;
+    void DeleteShader(GLuint &handle) {
+        if ((handle != GL_INVALID_VALUE) && (handle != 0)) {
+            glDeleteShader(handle);
+            handle = GL_INVALID_VALUE;
+        }
     }
-}
 
 // Note that the argument is passed by reference
-void DeleteBuffer(GLuint &handle)
-{
-    if (handle != GL_INVALID_VALUE)
-    {
-        glDeleteBuffers(1, &handle);
-        handle = GL_INVALID_VALUE;
+    void DeleteBuffer(GLuint &handle) {
+        if (handle != GL_INVALID_VALUE) {
+            glDeleteBuffers(1, &handle);
+            handle = GL_INVALID_VALUE;
+        }
     }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // CheckGlError
 
-bool CheckGlError(const char *function, const char *file, int line)
-{
-    GLenum last_code = GL_NO_ERROR;
-    bool guilty = false; // Innocent until proven guilty
-    for (GLenum code = glGetError(); code != GL_NO_ERROR && code != last_code; code = glGetError())
-    {
-        last_code = code;
-        LOGE("GL error in function: %s, file: %s, line: %d, 0x%X", function, file, line, code);
-        guilty = true;
-    }
+    bool CheckGlError(const char *function, const char *file, int line) {
+        GLenum last_code = GL_NO_ERROR;
+        bool guilty = false; // Innocent until proven guilty
+        for (GLenum code = glGetError();
+             code != GL_NO_ERROR && code != last_code; code = glGetError()) {
+            last_code = code;
+            LOGE("GL error in function: %s, file: %s, line: %d, 0x%X", function, file, line, code);
+            guilty = true;
+        }
 //    if (guilty) assert(false);
-    return guilty;
-}
+        return guilty;
+    }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other tools
 
-void DumpEmbeddedLines(const char *text, const char *error_label)
-{
-    char *next = nullptr, *ptr = (char *)text;
-    char line[2048];
-    int index = 1;
+    void DumpEmbeddedLines(const char *text, const char *error_label) {
+        char *next = nullptr, *ptr = (char *) text;
+        char line[2048];
+        int index = 1;
 
-    if (text == nullptr) return;
-    if (error_label) LOGE("%s", error_label);
-    next = strstr(ptr, "\n");
-    while (next)
-    {
-        int count = std::min((size_t)(next - ptr), GetLength(line) - 1);
-        strncpy(line, ptr, count);
-        line[count] = 0;
-        LOGI("%d: %s", index++, line);
-        ptr = next + 1;
+        if (text == nullptr) return;
+        if (error_label) LOGE("%s", error_label);
         next = strstr(ptr, "\n");
-    }
+        while (next) {
+            int count = std::min((size_t) (next - ptr), GetLength(line) - 1);
+            strncpy(line, ptr, count);
+            line[count] = 0;
+            LOGI("%d: %s", index++, line);
+            ptr = next + 1;
+            next = strstr(ptr, "\n");
+        }
 
-    // Last line doesn't end in newline?
-    if (*ptr)
-    {
-        int count = std::min((size_t)(next - ptr), strlen(ptr));
-        strncpy(line, ptr, count);
-        line[count] = 0;
-        LOGI("%d: %s", index++, line);
+        // Last line doesn't end in newline?
+        if (*ptr) {
+            int count = std::min((size_t) (next - ptr), strlen(ptr));
+            strncpy(line, ptr, count);
+            line[count] = 0;
+            LOGI("%d: %s", index++, line);
+        }
     }
-}
 
 } // namespace Simulation

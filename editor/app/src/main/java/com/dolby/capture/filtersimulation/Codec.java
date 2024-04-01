@@ -58,7 +58,6 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
     public static final long TWO_SECONDS_US = 2000000;
 
     private int codecState;
-
     public final int STATE_STARTING = 0;
     public final int STATE_STARTED = 1;
     public final int STATE_STOPING = 2;
@@ -95,16 +94,16 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
         codecState = STATE_CREATED;
     }
 
-    public void run()
-    {
+    public void run() {
         this.start();
     }
 
-    private void start()
-    {
+    public void start() {
         Log.d(TAG, "start");
         codecState = STATE_STARTING;
-        this.getCodec().start();
+        if (getCodec() != null) {
+            this.getCodec().start();
+        }
         onStart();
     }
 
@@ -124,8 +123,7 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
         return this.appContext;
     }
 
-    public void clipAdjustTS(MediaCodec.BufferInfo b)
-    {
+    public void clipAdjustTS(MediaCodec.BufferInfo b) {
         b.presentationTimeUs -= TEN_SECONDS_US;
 
     }
@@ -148,9 +146,8 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
             finally {
                 this.getCodec().release();
             }
-
-            onStop();
         }
+        onStop();
     }
 
     public int getCodecState() {

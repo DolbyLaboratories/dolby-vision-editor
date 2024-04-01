@@ -78,53 +78,70 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
 
         Log.d(TAG, "AudioDecoder: CHANNELS " + ex.getAudioFormat().getInteger(MediaFormat.KEY_CHANNEL_COUNT));
         this.getCodec().configure(ex.getAudioFormat(), null, null, 0);
-
     }
 
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            Log.d(TAG, "onInputBufferAvailable: codec not start, just return");
+            return;
+        }
+
         MediaCodec.BufferInfo info = this.ex.getChunk(this.getCodec().getInputBuffer(i));
-        Log.d(TAG, "onInputBufferAvailable: started");
 
         if(info.size >= 0) {
-
-            Log.d(TAG, "onInputBufferAvailable: Valid Buffer " + info.presentationTimeUs);
             this.getCodec().queueInputBuffer(i, 0, info.size, info.presentationTimeUs, info.flags);
-        }
-        else
-        {
+        } else {
             Log.w(TAG, "onInputBufferAvailable: Empty Buffer");
             this.getCodec().queueInputBuffer(i, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
         }
 
-        synchronized (format)
-        {
-            if(!format.isPresent() && info.presentationTimeUs > 0)
-            {
+        synchronized (format) {
+            if(!format.isPresent() && info.presentationTimeUs > 0) {
                 this.ex.rewind();
             }
         }
+    }
 
+
+    @Override
+    void stop() {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
+        audioDown.release(audioDown.getQueueLength());
+        audioUp.release(audioUp.getQueueLength());
+        getAudioDoneSemaphore().release(getAudioDoneSemaphore().getQueueLength());
+        super.stop();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (encoder != null) {
+            // stop encoder after decoder stopped
+            Log.d(TAG, "stop audio encoder");
+            encoder.stop();
+        }
     }
 
     @Override
     public void onOutputBufferAvailable(MediaCodec decoder, int index, MediaCodec.BufferInfo info) {
 
-        Log.d(TAG, "onOutputBufferAvailable: started");
-        synchronized (format)
-        {
-            if(!format.isPresent())
-            {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
 
+        synchronized (format) {
+            if(!format.isPresent()) {
                 decoder.releaseOutputBuffer(index, false);
                 return;
             }
         }
 
         ByteBuffer data = decoder.getOutputBuffer(index);
-
         AudioData audioPacket = new AudioData(data,info);
-
         if(includePacket(audioPacket.info)) {
 
             try {
@@ -134,12 +151,9 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
                 e.printStackTrace();
             }
 
-
             synchronized (bufferQueue) {
                 try {
-
                     bufferQueue.add(audioPacket);
-
                 } catch (IllegalStateException e) {
                     Log.e(TAG, "onOutputBufferAvailable: STATE EXCEPTION");
                     e.printStackTrace();
@@ -148,20 +162,19 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
 
             audioUp.release();
 
-            while(bufferQueue.size() > 0)
-            {
+            while(bufferQueue.size() > 0) {
                 try {
                     Thread.sleep(1);
-                }
-                catch (InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
 
-
-
+        // need to check codec state again
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
         decoder.releaseOutputBuffer(index, false);
 
         if( (MediaCodec.BUFFER_FLAG_END_OF_STREAM & audioPacket.getInfo().flags) == MediaCodec.BUFFER_FLAG_END_OF_STREAM)
@@ -219,7 +232,7 @@ public class AudioDecoder extends DecoderOutput implements Runnable {
             super(looper);
             this.decoder = new WeakReference<AudioDecoder>(audioDecoder);
             this.decoder.get().getCodec().setCallback(this.decoder.get(), this);
-            this.decoder.get().getCodec().start();
+            this.decoder.get().start();
         }
     }
 

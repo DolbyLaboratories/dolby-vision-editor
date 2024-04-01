@@ -37,53 +37,42 @@ import android.media.ImageWriter;
 import android.media.MediaCodec;
 import android.util.Log;
 
+import com.dolby.vision.codecselection.CodecBuilderImpl;
+
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
-public class FrameHandler implements VideoCallback, OnFrameEncoded{
+public class FrameHandler implements VideoCallback, OnFrameEncoded {
 
     private ImagePipeline pipeline;
-
     private ImageWriter writer;
-
     private boolean preview;
-
     private CodecSynchro sync;
-
     private ConcurrentLinkedQueue<Long> buffers;
-
     private Semaphore bufferLock = new Semaphore(1);
-
     private Semaphore dowait = new Semaphore(10);
-
     private static int totalEncodeTime = 0;
-
     private static final String TAG = "FrameHandler";
+    private boolean isFirstFrameEncodeDone = false;
+    private Semaphore waitFirstFrameEncodeDone = new Semaphore(5);
 
     private enum FrameHandlerState {
-        INITIALIZED,
-        RELEASED
+        INITIALIZED, RELEASED
     }
 
     private FrameHandlerState handlerState;
 
-    public FrameHandler(boolean preview, CodecSynchro sync, ImagePipeline pipeline)
-    {
+    public FrameHandler(boolean preview, CodecSynchro sync, ImagePipeline pipeline) {
         this.preview = preview;
         this.sync = sync;
         this.pipeline = pipeline;
-
-        this.writer = this.pipeline.getImageWriter();
-
         buffers = new ConcurrentLinkedQueue<Long>();
-
         handlerState = FrameHandlerState.INITIALIZED;
     }
 
-    public void release()
-    {
+    public void release() {
         handlerState = FrameHandlerState.RELEASED;
-        if(this.sync != null) {
+        if (this.sync != null) {
             this.sync.release();
         }
 
@@ -98,64 +87,56 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
             dowait.release(queueLen);
             dowait = null;
         }
+
+        isFirstFrameEncodeDone = false;
+        waitFirstFrameEncodeDone.release(waitFirstFrameEncodeDone.getQueueLength());
     }
 
     public FrameHandlerState getHandlerState() {
         return handlerState;
     }
 
-    public native int processFrame(HardwareBuffer inbuf, HardwareBuffer opbuf);
+    public native int processFrameToSurface(HardwareBuffer inbuf);
 
+    public native void setPresentationTime(long nsecs);
     @Override
     public void onFrameAvailable(Image inputImage, String codecName, Constants.ColorStandard standard) {
 
-        if(handlerState != FrameHandlerState.INITIALIZED) {
+        if (handlerState != FrameHandlerState.INITIALIZED) {
             // not in initialized state, do nothing
             return;
         }
 
+        long inputPts = inputImage.getTimestamp();
         HardwareBuffer input = inputImage.getHardwareBuffer();
-
-        Image outputImage = writer.dequeueInputImage();
-
-        HardwareBuffer output = outputImage.getHardwareBuffer();
-
-        if (input.isClosed() || output.isClosed()) {
+        if (input.isClosed()) {
             Log.w(TAG, "input or output hardware buffer is closed");
             return;
         }
 
-        processFrame(input, output);
+        setPresentationTime(inputImage.getTimestamp());
+        processFrameToSurface(input);
 
-        outputImage.setDataSpace(pipeline.getOutputDataSpace());
+        inputImage.close();
+        input.close();
 
-        outputImage.setTimestamp(inputImage.getTimestamp());
-
-        if(!preview) {
+        if (!preview) {
             try {
                 bufferLock.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.d(TAG, "onFrameAvailable: " + buffers );
-            Log.d(TAG, "onFrameAvailable: QUEUED FRAME TS: " + outputImage.getTimestamp() );
-            buffers.add(outputImage.getTimestamp());
+            buffers.add(inputPts);
             Log.d(TAG, "onFrameAvailable: QUEUED FRAME Size: " + buffers.size());
-
             bufferLock.release();
-
         }
 
-
         long start = System.currentTimeMillis();
-
-        writer.queueInputImage(outputImage);
 
         if (!preview) {
 
             try {
                 Log.d(TAG, "onFrameAvailable: WAITING ON ENCODER...");
-
                 dowait.acquire();
 
             } catch (InterruptedException e) {
@@ -164,49 +145,55 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
 
             long end = System.currentTimeMillis();
 
-            long encodeTime = (end -  start);
+            long encodeTime = (end - start);
 
             totalEncodeTime += encodeTime;
 
             Log.d(TAG, "onFrameAvailable: Encode time " +  encodeTime + " " + totalEncodeTime);
         }
 
-        inputImage.close();
-        outputImage.close();
-        output.close();
-        input.close();
 
-        Log.d(TAG, "onFrameAvailable: FINISHED" );
     }
 
 
+    public void waitFirstEncodeDone() {
+        if (!preview && !isFirstFrameEncodeDone) {
+            try {
+                waitFirstFrameEncodeDone.acquire();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Override
     public void onFrameEncoded(MediaCodec.BufferInfo info) {
-
-        Log.d(TAG, "onFrameEncoded: " );
 
         try {
             bufferLock.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-
         Long ts = buffers.poll();
-        if(ts != null) {
+        if (ts != null) {
 
             if (ts == (info.presentationTimeUs * 1000)) {
-                Log.d(TAG, "onFrameEncoded: Frame check okay " + info.presentationTimeUs);
+//                Log.d(TAG, "onFrameEncoded: Frame check okay " + info.presentationTimeUs);
                 dowait.release();
-            }
-            else
-            {
+
+                if (!isFirstFrameEncodeDone) {
+                    /** wait for encode to finish encoding the first frames,
+                     * since this could be a long time
+                     */
+                    Log.d(TAG, "first frame encode done");
+                    waitFirstFrameEncodeDone.release();
+                    isFirstFrameEncodeDone = true;
+                }
+            } else {
                 throw new IllegalStateException("TS miss match!");
             }
-        }
-        else
-        {
-            Log.w(TAG, "onFrameEncoded: Queue empty, likely CSD buffer. Ignoring." );
+        } else {
+            Log.w(TAG, "onFrameEncoded: Queue empty, likely CSD buffer. Ignoring.");
         }
 
         bufferLock.release();

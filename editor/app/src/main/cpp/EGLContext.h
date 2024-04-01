@@ -33,9 +33,11 @@
 #define FILTERSIMULATION_EGLCONTEXT_H
 
 #include <android/log.h>
-
+#include "Tools.h"
 #include "HardwareBuffer.h"
 #include "Exceptions.h"
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
 
 namespace Simulation
 {
@@ -43,7 +45,7 @@ namespace Simulation
 class Context
 {
 public:
-    Context(EGLContext toShare);
+    Context(EGLContext toShare, ANativeWindow *window, bool isDPUSolution, bool isPreviewMode, int transfer);
 
     ~Context();
 
@@ -52,13 +54,17 @@ public:
     void makeCurrent();
 
     EGLDisplay getDisplay();
-
+    bool hasEglExtension(EGLDisplay dpy, const char* extensionName);
     bool isContextValid(EGLContextError* rete = nullptr) const;
+    bool swapBuffers();
+    void setPresentationTime(long nsecs);
 
 private:
     EGLConfig  config;
     EGLDisplay display;
     EGLContext context;
+    ANativeWindow *nativeWindow;
+    EGLSurface eglSurface = EGL_NO_SURFACE;
 
     bool            valid = true;
     EGLContextError error = EGLContextError::NO_ERROR;

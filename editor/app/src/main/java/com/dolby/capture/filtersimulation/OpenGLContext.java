@@ -31,38 +31,48 @@
 
 package com.dolby.capture.filtersimulation;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Message;
+import android.view.Surface;
+
+import androidx.annotation.NonNull;
 
 public class OpenGLContext {
-
+    public static final int EGLINIT = 0;
+    public static final int SDR = 0;
+    public static final int TRANSFER_HLG = 2;
+    public static final int TRANSFER_SDR = 0;
     private static HandlerThread imageCallback = new HandlerThread("imageCallback");
-
-    private static Handler image;
-
+    private static Handler imageProcessHandler;
     private static boolean started = false;
-
-    public native int eglInit();
-
+    public native int eglInitWithSurface(Surface outputSurface, boolean isDPUSoution, boolean isPreviewMode, int transfer);
 
     public OpenGLContext() {
-
         if(!started) {
+            imageCallback = new HandlerThread("imageCallback");
             imageCallback.start();
-            image = new Handler(imageCallback.getLooper());
-
-            image.post(new Runnable() {
+            imageProcessHandler = new Handler(imageCallback.getLooper()) {
                 @Override
-                public void run() {
-                    eglInit();
+                public void handleMessage(@NonNull Message msg) {
+                    switch (msg.what) {
+                        case OpenGLContext.EGLINIT:
+                            Surface outputSurface = (Surface) msg.obj;
+                            Bundle eglInitData = msg.getData();
+                            int transfer = eglInitData.getInt("transfer");
+                            boolean isPreviewMode = eglInitData.getBoolean("isPreviewMode");
+                            boolean isDPUSolution = eglInitData.getBoolean("isDPUSolution");
+                            eglInitWithSurface(outputSurface, isDPUSolution, isPreviewMode, transfer);
+                            break;
+                    }
                 }
-            });
-
+            };
             started = true;
         }
     }
 
-    public Handler getImage() {
-        return image;
+    public Handler getImageProcessHandler() {
+        return imageProcessHandler;
     }
 }

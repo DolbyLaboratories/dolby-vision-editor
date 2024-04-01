@@ -30,8 +30,6 @@ add_library( # Sets the name of the library.
         EditShaders.cpp
         EditShadersText.cpp
         hlg_lut_500_p3_33.cpp
-        mp4remuxer-jni.cpp
-        mp4remuxer.c
         )
 
 # Searches for a specified prebuilt library and stores the path as a

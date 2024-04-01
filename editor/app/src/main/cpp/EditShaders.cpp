@@ -28,14 +28,12 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+#define LOG_TAG "EditShaders"
+//#define LOG_NDEBUG 0
 
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-
-#ifndef LOG_TAG
-#define LOG_TAG "EditShaders"
-#endif // LOG_TAG
 
 #include "EditShaders.h"
 #include "hlg_lut_500_p3_33.h"
@@ -189,7 +187,7 @@ void EditShadersUniformBlock::SetParameter(EffectParameters parameter, float val
         case HLG_BETA_FRACTION:
         case PARAMETER_COUNT:
         {
-            LOGE("EditShaders::SetParameter: Read-only parameter: %d", parameter);
+            LOGI("EditShaders::SetParameter: Read-only parameter: %d", parameter);
             return;
         }
         default: break;
@@ -241,8 +239,9 @@ static const float twoThirdsSizeMatrix[4][4] =
 
 EditShaders::EditShaders()
 {
-    LOGI("EditShaders:: CTOR 1");
+    LOGI("EditShaders:: CTOR");
     Init();
+    CHECK_GL_ERROR;
 }
 
 EditShaders::EditShaders(
@@ -252,7 +251,7 @@ EditShaders::EditShaders(
     eColorSpace input_colorspace,
     eColorSpace output_colorspace)
 {
-    LOGI("EditShaders:: CTOR 2");
+    LOGI("EditShaders:: CTOR");
     Init(output_width, output_height, color_standard, input_colorspace, output_colorspace);
 }
 
@@ -271,8 +270,9 @@ void EditShaders::Init(
 {
     LOGI("EditShaders::Init output_width: %d, output_height: %d, color_standard: %d",
         output_width, output_height, color_standard);
+    CHECK_GL_ERROR;
     ReleaseAll();
-
+    CHECK_GL_ERROR;
     // Arbitrate UI control with uniform block and compositing texture access
     std::unique_lock<std::mutex> lock(mPipelineMutex);
 
@@ -282,19 +282,19 @@ void EditShaders::Init(
     mColorStandard = color_standard;
     mInputColorSpace = input_colorspace;
     mOutputColorSpace = output_colorspace;
-
+    CHECK_GL_ERROR;
     // Since pipeline is off, don't need to use mutex
     mEditShadersUniformBlock.SetDefaults();
     if (mTestStrobe)
         mEditShadersUniformBlock.setTestEffectParams(); // For test only
-
+    CHECK_GL_ERROR;
     // Set up the compositing image
     mTextTextureData.resize(mOutputWidth * mOutputHeight * 4);
     memset(mTextTextureData.data(), 0, mTextTextureData.size());
     if (mTestStrobe)
         CompositingImageTestPattern();
     mReloadCompositingTexture = true;
-
+    CHECK_GL_ERROR;
     m3dLutSize = HLG_LUT_500_P3_33_SIZE;
     float *m3dLutData = hlg_lut_500_p3_33;
 
@@ -306,6 +306,7 @@ void EditShaders::Init(
     MemCopy(mCompositorTransformMatrix, halfSizeMatrix);
 #endif
     LOGI("EditShaders::Init done");
+    CHECK_GL_ERROR;
 }
 
 void EditShaders::ReleaseAll()
@@ -506,7 +507,7 @@ std::string EditShaders::EditShaderPreamble(bool include_version)
     if (include_version) preamble += mVersionAndExtensions;
 
     if (mColorStandard == eColorStandard10BitRec2020)
-        preamble += "#define INPUT_REC_2020_10_BIT\n#define EDIT_REC_2020_10_BIT\n#define OUTPUT_REC_2020_10_BIT\n";
+        preamble += "#define INPUT_REC_2020_10_BIT\n#define EDIT_REC_2020\n#define OUTPUT_REC_2020_10_BIT\n";
     else if (mColorStandard == eColorStandard10BitRec709)
         preamble += "#define INPUT_REC_709\n#define EDIT_REC_709\n#define OUTPUT_REC_709\n";
 
@@ -795,6 +796,7 @@ bool EditShaders::RunEditComputeShader(
         }
     }
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+    if (CHECK_GL_ERROR) return true;
 
     mFrameCounter++;
     return false;

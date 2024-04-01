@@ -202,9 +202,6 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
 
-        Log.d(TAG, "onOutputBufferAvailable: " + info.presentationTimeUs + " " + info.flags );
-
-
         ByteBuffer x = codec.getOutputBuffer(index);
 
         m.writeSampleData(muxID, x, info);
@@ -216,6 +213,12 @@ public class VideoEncoder extends Codec implements BroadcastClient{
         }
 
         if (endFramePts != -1 && endFramePts <= info.presentationTimeUs ) {
+            MediaCodec.BufferInfo endInfo = new MediaCodec.BufferInfo();
+            endInfo.presentationTimeUs = info.presentationTimeUs;
+            endInfo.size = 0;
+            endInfo.flags = MediaCodec.BUFFER_FLAG_END_OF_STREAM;
+            m.writeSampleData(muxID, x, endInfo);
+
             Log.d(TAG, "get EOS");
             if (encodingDone != null && encodingDone.availablePermits() == 0) {
                 encodingDone.release();
@@ -226,6 +229,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
 
 
     private void sendEncodeDone() {
+        Log.d(TAG, "sendEncodeDone -");
         DecoderDoneMessage<VideoEncoder> encodeDoneMsg = new DecoderDoneMessage<>("Done", this);
         encoderComms.broadcast(encodeDoneMsg);
     }
@@ -266,6 +270,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onStop() {
         Log.d(TAG, "codec stopped");
+        audioHandler.onStop();
         this.m.stopMuxer();
     }
 

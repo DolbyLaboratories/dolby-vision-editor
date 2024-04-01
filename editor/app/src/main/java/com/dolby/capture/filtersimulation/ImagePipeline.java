@@ -54,7 +54,7 @@ public class ImagePipeline {
     public static final String TAG = ImagePipeline.class.getSimpleName();
     public static final int MAX_IMAGES = 10;
     private ImageReader reader;
-    private ImageWriter writer;
+    private Surface outputSurface;
     private int dataspace;
 
     /**
@@ -72,6 +72,7 @@ public class ImagePipeline {
 
         Log.d(TAG, "inputSize=" + inputSize + ", outputSize=" + outputSize + ", previewMode=" + previewMode + ", inputProfile=" + inputProfile + ", encoderFormat=" + encoderFormat);
 
+        this.outputSurface = outputSurface;
         // Configure dataspace
         if (previewMode && inputProfile != MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt) {
             this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_SMPTE_170M, DataSpace.RANGE_LIMITED);
@@ -91,23 +92,6 @@ public class ImagePipeline {
                 .setUsage(usage)
                 .setImageFormat(ImageFormat.PRIVATE)
                 .build();
-
-        // Build ImageWriter
-        int hwBufferFormat;
-        if (previewMode || encoderFormat.equals(Constants.DV_ME)) {
-            hwBufferFormat = HardwareBuffer.YCBCR_P010;
-        } else if (encoderFormat.equals(Constants.HEVC)) {
-            hwBufferFormat = HardwareBuffer.YCBCR_P010;
-        } else {
-            hwBufferFormat = HardwareBuffer.YCBCR_420_888;
-        }
-        this.writer = new ImageWriter.Builder(outputSurface)
-                .setWidthAndHeight(outputSize.getWidth(), outputSize.getHeight())
-                .setMaxImages(MAX_IMAGES)
-                .setDataSpace(this.dataspace)
-                .setHardwareBufferFormat(hwBufferFormat)
-                .build();
-
     }
 
     /**
@@ -119,13 +103,9 @@ public class ImagePipeline {
         return reader;
     }
 
-    /**
-     * Gets a reference to the ImageWriter object configured for Dolby Vision editing.
-     *
-     * @return The ImageWriter object.
-     */
-    public ImageWriter getImageWriter() {
-        return writer;
+
+    public Surface getOutputSurface() {
+        return outputSurface;
     }
 
     /**
@@ -142,11 +122,6 @@ public class ImagePipeline {
         if (reader != null) {
             reader.close();
             reader = null;
-        }
-
-        if (writer != null) {
-            writer.close();
-            writer = null;
         }
     }
 

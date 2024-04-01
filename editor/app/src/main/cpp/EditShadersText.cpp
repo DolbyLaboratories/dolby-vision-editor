@@ -715,9 +715,10 @@ mat4 editPixel(mat4 originalPixel, mat4 compositePixel, mat2x4 vidCoords, mat4x2
 
 #ifdef EDIT_REC_2020
     // Convert from Rec709 RGB to Rec 2020 RGB
-    mat4 linear = sRGB2L(compositePixel.rgb);
+//    mat4 linear = sRGB2L(compositePixel.rgb);
+    mat4 linear = compositePixel;
     linear = ColorSpaceConversion(RgbRec709xyzRec2020, linear);
-    compositePixel.rgb = L2HLG(linear);
+    compositePixel = L2HLG(linear);
 #endif // EDIT_REC_2020
 
     // Perform RGB gain and offset

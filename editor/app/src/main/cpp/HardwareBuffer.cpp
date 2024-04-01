@@ -28,16 +28,16 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+#define LOG_TAG "HardwareBuffer"
+//#define LOG_NDEBUG 0
 
 #include "HardwareBuffer.h"
-
 #include <android/log.h>
 #include <string>
 #include <memory>
 
 //#define SHARE_CURRENT_CONTEXT
 
-#define LOG_TAG "HardwareBuffer"
 
 // Qualcomm AHardwareBuffer format value constants
 static const uint32_t TP10 = 0x7fa30c09;
@@ -53,7 +53,7 @@ Simulation::HardwareBuffer::HardwareBuffer(AHardwareBuffer* inputBuffer)
 Simulation::HardwareBuffer::HardwareBuffer(AHardwareBuffer_Format format, int width, int height)
     : targetOwnedLocally(true)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "CTOR: (format: 0x%02X, width: %d, height: %d)", format, width, height);
+    LOGI("CTOR: (format: 0x%02X, width: %d, height: %d)", format, width, height);
 
     // TODO: change name
     targetDescription.width  = width;
@@ -69,11 +69,11 @@ Simulation::HardwareBuffer::HardwareBuffer(AHardwareBuffer_Format format, int wi
         int allocateResult = AHardwareBuffer_allocate(&targetDescription, &target);
         if (allocateResult != 0)
         {
-            __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "native hardware buffer allocation: %s (code: %d)", "FAIL", allocateResult);
+            LOGE("native hardware buffer allocation: %s (code: %d)", "FAIL", allocateResult);
         }
         else
         {
-            __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native hardware buffer allocation: %s", "PASS");
+            LOGI("native hardware buffer allocation: %s", "PASS");
         }
 
         void*   bufferAddress = nullptr;
@@ -83,7 +83,7 @@ Simulation::HardwareBuffer::HardwareBuffer(AHardwareBuffer_Format format, int wi
         if ((targetDescription.usage & AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY) == AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY)
         {
             AHardwareBuffer_lockAndGetInfo(target, AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY, 0, nullptr, &bufferAddress, &outBPP, &outBPS);
-            __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native hardware buffer locked information: (BPP: %d, BPS: %d)", outBPP, outBPS);
+            LOGI("native hardware buffer locked information: (BPP: %d, BPS: %d)", outBPP, outBPS);
 
             auto* data  = static_cast<char*>(bufferAddress);
             char  value = 255;
@@ -96,21 +96,21 @@ Simulation::HardwareBuffer::HardwareBuffer(AHardwareBuffer_Format format, int wi
             int writeResult = AHardwareBuffer_unlock(target, nullptr);
             if (writeResult != 0)
             {
-                __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "native hardware buffer write: %s (code: %d)", "FAIL", writeResult);
+                LOGE("native hardware buffer write: %s (code: %d)", "FAIL", writeResult);
             }
             else
             {
-                __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native hardware buffer write: %s", "PASS");
+                LOGI("native hardware buffer write: %s", "PASS");
             }
         }
         else
         {
-            __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "native hardware buffer missing flag: %s", "AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY");
+            LOGE("native hardware buffer missing flag: %s", "AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY");
         }
     }
     else
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "native hardware buffer configuration supported: %s", "FAIL");
+        LOGE("native hardware buffer configuration supported: %s", "FAIL");
     }
 }
 
@@ -134,18 +134,18 @@ char Simulation::HardwareBuffer::readData(int index)
     int32_t outBPS; // bytes per stride
 
     AHardwareBuffer_lockAndGetInfo(target, AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY, 0, nullptr, &bufferAddress, &outBPP, &outBPS);
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native hardware buffer locked information: (BPP: %d, BPS: %d)", outBPP, outBPS);
+    LOGI("native hardware buffer locked information: (BPP: %d, BPS: %d)", outBPP, outBPS);
 
     auto* data = static_cast<char*>(bufferAddress);
 
     int readResult = AHardwareBuffer_unlock(target, nullptr);
     if (readResult != 0)
     {
-        __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "native hardware buffer read: %s (code: %d)", "FAIL", readResult);
+        LOGE("native hardware buffer read: %s (code: %d)", "FAIL", readResult);
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native hardware buffer read: %s", "PASS");
+        LOGI("native hardware buffer read: %s", "PASS");
     }
 
     return data[index];
