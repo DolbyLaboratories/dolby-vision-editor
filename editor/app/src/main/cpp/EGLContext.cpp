@@ -28,14 +28,16 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+#define LOG_TAG "EGLContext"
+//#define LOG_NDEBUG 0
 
 #include "EGLContext.h"
 
-#define LOG_TAG "EGLContext"
+
 
 Simulation::Context::Context(EGLContext toShare)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "CTOR");
+    LOGI("CTOR");
 
     const EGLint configAttribs[] = {
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
@@ -46,7 +48,7 @@ Simulation::Context::Context(EGLContext toShare)
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (display == EGL_NO_DISPLAY)
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "EGL default display acquisition: FAIL");
+        LOGE("EGL default display acquisition: FAIL");
 
         if (valid)
         {
@@ -56,16 +58,14 @@ Simulation::Context::Context(EGLContext toShare)
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "default display acquisition: PASS");
+        LOGI("default display acquisition: PASS");
     }
 
     EGLint versionMajor;
     EGLint versionMinor;
     if (!eglInitialize(display, &versionMajor, &versionMinor))
     {
-       
-
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "EGL display initialization: FAIL (major: %d, minor: %d)", versionMajor, versionMinor);
+        LOGE("EGL display initialization: FAIL (major: %d, minor: %d)", versionMajor, versionMinor);
 
         if (valid)
         {
@@ -75,15 +75,14 @@ Simulation::Context::Context(EGLContext toShare)
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "EGL display initialization: PASS (major: %d, minor: %d)", versionMajor, versionMinor);
+        LOGI("EGL display initialization: PASS (major: %d, minor: %d)", versionMajor, versionMinor);
     }
 
     int numConfigs;
     if (!eglChooseConfig(display, configAttribs, &config, 1, &numConfigs))
     {
-       
 
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "EGL configuration acquisition: FAIL");
+        LOGE("EGL configuration acquisition: FAIL");
 
         if (valid)
         {
@@ -93,7 +92,7 @@ Simulation::Context::Context(EGLContext toShare)
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "EGL configuration acquisition: PASS");
+        LOGI("EGL configuration acquisition: PASS");
     }
 
     int contextAttribs[] = {
@@ -117,7 +116,7 @@ Simulation::Context::Context(EGLContext toShare)
 
     if (!context)
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "EGL context acquisition: FAIL");
+        LOGE("EGL context acquisition: FAIL");
 
         if (valid)
         {
@@ -127,13 +126,13 @@ Simulation::Context::Context(EGLContext toShare)
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "EGL context acquisition: PASS");
+        LOGI("EGL context acquisition: PASS");
     }
 }
 
 Simulation::Context::~Context()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "DTOR");
+    LOGI("DTOR");
 
     eglDestroyContext(display, context);
 }
@@ -141,7 +140,7 @@ Simulation::Context::~Context()
 
 void Simulation::Context::makeUncurrent()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "makeUncurrent");
+    LOGI("makeUncurrent");
 
     if (valid)
     {
@@ -149,13 +148,13 @@ void Simulation::Context::makeUncurrent()
     }
     else
     {
-        __android_log_print(ANDROID_LOG_WARN, LOG_TAG,  "cannot make invalid context uncurrent");
+        LOGE("cannot make invalid context uncurrent");
     }
 }
 
 void Simulation::Context::makeCurrent()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "makeCurrent");
+    LOGI("makeCurrent");
 
     if (valid)
     {
@@ -163,20 +162,20 @@ void Simulation::Context::makeCurrent()
     }
     else
     {
-        __android_log_print(ANDROID_LOG_WARN, LOG_TAG,  "cannot make invalid context current");
+        LOGE("cannot make invalid context current");
     }
 }
 
 EGLDisplay Simulation::Context::getDisplay()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "getDisplay");
+    LOGI("getDisplay");
 
     return display;
 }
 
 bool Simulation::Context::isContextValid(Simulation::EGLContextError* rete) const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG,  "isContextValid");
+    LOGI("isContextValid");
 
     if (rete)
     {

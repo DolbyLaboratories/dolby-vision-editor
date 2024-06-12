@@ -28,8 +28,8 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-
 #define LOG_TAG "Renderer"
+//#define LOG_NDEBUG 0
 
 #include "Renderer.h"
 #include "Tools.h"
@@ -287,12 +287,12 @@ static const GLushort VERTEX_INDICES[] = {
 Simulation::Renderer::Renderer()
         : program(0)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "CTOR");
+    LOGI("CTOR");
 }
 
 Simulation::Renderer::~Renderer()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "DTOR");
+    LOGI("DTOR");
 
     if (program)
     {
@@ -308,7 +308,7 @@ void Simulation::Renderer::init()
 
 void Simulation::Renderer::render(GLuint textureId, GLuint lutTextureId, bool convert, bool useLUT) const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "render");
+    LOGI("render");
 
     glUseProgram(program);
     CHECK_GL_ERROR;
@@ -366,7 +366,7 @@ void Simulation::Renderer::render(GLuint textureId, GLuint lutTextureId, bool co
     glUniform1i(uConvertLoc, convert ? 1 : 0);
     CHECK_GL_ERROR;
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "opengl: (program: %d, position vbo: %d, texture coord vbo: %d, ebo: %d, uniforms: (texture: %d, lut texture: %d, lut spec: %d, convert: %d))",
+    LOGI("opengl: (program: %d, position vbo: %d, texture coord vbo: %d, ebo: %d, uniforms: (texture: %d, lut texture: %d, lut spec: %d, convert: %d))",
                         program,
                         vboPosition,
                         vboTextureCoord,
@@ -406,12 +406,12 @@ void Simulation::Renderer::render(GLuint textureId, GLuint lutTextureId, bool co
 Simulation::CopyRenderer::CopyRenderer()
         : program(0)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "CTOR");
+    LOGI("CopyRenderer", "CTOR");
 }
 
 Simulation::CopyRenderer::~CopyRenderer()
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "DTOR");
+    LOGI("CopyRenderer", "DTOR");
 
     if (program)
     {
@@ -422,7 +422,7 @@ Simulation::CopyRenderer::~CopyRenderer()
 
 void Simulation::CopyRenderer::init(bool destBufferIsYUV)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "init");
+    LOGI("CopyRenderer", "init");
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &VERTEX_SHADER_SOURCE, nullptr);
@@ -444,7 +444,7 @@ void Simulation::CopyRenderer::init(bool destBufferIsYUV)
 
 void Simulation::CopyRenderer::render(GLuint textureId) const
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, "CopyRenderer", "render");
+    LOGI("CopyRenderer", "render");
 
     glUseProgram(program);
 
@@ -478,7 +478,7 @@ void Simulation::CopyRenderer::render(GLuint textureId) const
     glBindTexture(GL_TEXTURE_2D, textureId);
     glUniform1i(uTextureLoc, 2);
 
-    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "opengl: (program: %d, position vbo: %d, texture coord vbo: %d, ebo: %d, uniforms: (texture: %d))",
+    LOGI("opengl: (program: %d, position vbo: %d, texture coord vbo: %d, ebo: %d, uniforms: (texture: %d))",
                         program,
                         vboPosition,
                         vboTextureCoord,

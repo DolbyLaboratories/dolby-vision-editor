@@ -28,6 +28,8 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+#define LOG_TAG "native-lib"
+//#define LOG_NDEBUG 0
 
 #include <jni.h>
 #include <string>
@@ -63,7 +65,7 @@ namespace JNI_GLOBAL
 extern "C" JNIEXPORT jint JNICALL
 Java_com_dolby_capture_filtersimulation_OpenGLContext_eglInit(JNIEnv *env, jobject /* this */)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE, "native-lib", "eglInit");
+    LOGI("native-lib", "eglInit");
 
     JNI_GLOBAL::context = std::make_shared<Simulation::Context>(nullptr);
     JNI_GLOBAL::context->makeCurrent();

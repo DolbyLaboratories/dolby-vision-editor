@@ -33,7 +33,7 @@
 #define FILTERSIMULATION_EGLCONTEXT_H
 
 #include <android/log.h>
-
+#include "Tools.h"
 #include "HardwareBuffer.h"
 #include "Exceptions.h"
 

@@ -55,9 +55,15 @@
 #define LOG_TAG "tools"
 #endif // LOG_TAG
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__))
+#if defined(LOG_NDEBUG) && (LOG_NDEBUG==0)
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
 #define LOGV(...) ((void)__android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__))
+#else
+#define LOGI(...)
+#define LOGV(...)
+#endif
+
 
 using namespace std;
 using namespace std::chrono;
