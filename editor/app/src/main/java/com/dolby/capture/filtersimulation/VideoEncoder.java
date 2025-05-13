@@ -159,28 +159,45 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     }
 
     private int getDolbyVisionLevel(int fps, Size videoSize) {
-        int level = 0;
-        if (videoSize.getHeight() == 3840 || videoSize.getWidth() == 3840) {
-            if (fps <= 24) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd24;
-            } else if (fps > 24 && fps <= 30) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd30;
-            } else if (fps > 30 && fps <= 48) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd48;
-            } else if (fps > 48 && fps <= 60) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd60;
-            } else {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd60;
+        int level = -1;
+        int width = videoSize.getWidth();
+        int height = videoSize.getHeight();
+        int maxWidthHeight = Math.max(width, height);
+        float pps = width * height * fps;
+        Log.d(TAG, "fps = " + fps + "pps = " + pps );
+
+        if (maxWidthHeight <= 1280) {
+            if (pps <= 22118400) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelHd24;  // Level 01 1280 x 720 @ 24
+            } else if (pps <= 27648000) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelHd30;  // Level 02 1280 x 720 @ 30
             }
-        } else if (videoSize.getHeight() == 1920 || videoSize.getWidth() == 1920) {
-            if (fps <= 24) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd24;
-            } else if (fps > 24 && fps <= 30) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd30;
-            } else if (fps > 30 && fps <= 60) {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd60;
+        } else if (maxWidthHeight <= 1920 && pps <= 49766400) {
+            level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd24;  // Level 03 1920 x 1080 @ 24
+        } else if (maxWidthHeight <= 2560 && pps <= 62208000) {
+            level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd30;  // Level 04 1920 x 1080 @ 30
+        } else if (maxWidthHeight <= 3840) {
+            if (pps <= 124416000) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd60;  // Level 05 1920 x 1080 @ 60
+            } else if (pps <= 199065600) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd24;  // Level 06 3840 x 2160 @ 24
+            } else if (pps <= 248832000) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd30;  // Level 07 3840 x 2160 @ 30
+            } else if (pps <= 398131200) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd48;  // Level 08 3840 x 2160 @ 48
+            } else if (pps <= 497664000) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd60;  // Level 09 3840 x 2160 @ 60
+            } else if (pps <= 995328000) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelUhd120;  // Level 10 3840 x 2160 @ 120
+            }
+            else {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevel8k60;  // Level 12 7680 x 720 @ 60 pps <= 1990656000
+            }
+        } else if (maxWidthHeight <= 7680) {
+            if (pps <= 995328000) {
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevel8k30;  // Level 11 7680 x 4320 @ 30
             } else {
-                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevelFhd60;
+                level = MediaCodecInfo.CodecProfileLevel.DolbyVisionLevel8k60;  // Level 12 7680 x 720 @ 60 pps <= 1990656000
             }
         }
 
@@ -202,8 +219,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
 
-        Log.d(TAG, "onOutputBufferAvailable: " + info.presentationTimeUs + " " + info.flags );
-
+//        Log.d(TAG, "onOutputBufferAvailable: " + info.presentationTimeUs + " " + info.flags );
 
         ByteBuffer x = codec.getOutputBuffer(index);
 
@@ -216,6 +232,18 @@ public class VideoEncoder extends Codec implements BroadcastClient{
         }
 
         if (endFramePts != -1 && endFramePts <= info.presentationTimeUs ) {
+            MediaFormat outputFormat = codec.getOutputFormat();
+            int fps = outputFormat.getInteger(MediaFormat.KEY_FRAME_RATE);
+            final long MICROS_PER_SECOND = 1_000_000L;
+            long endDuration = MICROS_PER_SECOND / fps;
+            Log.d(TAG, "endFramePts duration " + endDuration);
+
+            MediaCodec.BufferInfo endInfo = new MediaCodec.BufferInfo();
+            endInfo.presentationTimeUs = info.presentationTimeUs + endDuration;
+            endInfo.size = 0;
+            endInfo.flags = MediaCodec.BUFFER_FLAG_END_OF_STREAM;
+            m.writeSampleData(muxID, x, endInfo);
+
             Log.d(TAG, "get EOS");
             if (encodingDone != null && encodingDone.availablePermits() == 0) {
                 encodingDone.release();
@@ -226,6 +254,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
 
 
     private void sendEncodeDone() {
+        Log.d(TAG, "sendEncodeDone -");
         DecoderDoneMessage<VideoEncoder> encodeDoneMsg = new DecoderDoneMessage<>("Done", this);
         encoderComms.broadcast(encodeDoneMsg);
     }
@@ -266,6 +295,7 @@ public class VideoEncoder extends Codec implements BroadcastClient{
     @Override
     public void onStop() {
         Log.d(TAG, "codec stopped");
+        audioHandler.onStop();
         this.m.stopMuxer();
     }
 

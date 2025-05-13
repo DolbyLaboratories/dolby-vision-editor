@@ -43,25 +43,20 @@ import java.util.concurrent.Semaphore;
 public class FrameHandler implements VideoCallback, OnFrameEncoded{
 
     private ImagePipeline pipeline;
-
     private ImageWriter writer;
-
     private boolean preview;
-
     private CodecSynchro sync;
-
     private ConcurrentLinkedQueue<Long> buffers;
-
     private Semaphore bufferLock = new Semaphore(1);
-
     private Semaphore dowait = new Semaphore(10);
-
     private static int totalEncodeTime = 0;
-
     private static final String TAG = "FrameHandler";
+    private boolean isFirstFrameEncodeDone = false;
+    private Semaphore waitFirstFrameEncodeDone = new Semaphore(5);
 
-    private enum FrameHandlerState {
+    enum FrameHandlerState {
         INITIALIZED,
+        RELEASING,
         RELEASED
     }
 
@@ -98,24 +93,30 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
             dowait.release(queueLen);
             dowait = null;
         }
+
+        isFirstFrameEncodeDone = false;
+        waitFirstFrameEncodeDone.release(waitFirstFrameEncodeDone.getQueueLength());
     }
 
     public FrameHandlerState getHandlerState() {
         return handlerState;
     }
 
+    public void setHandlerState(FrameHandlerState status) {
+        handlerState = status;
+    }
+
     public native int processFrame(HardwareBuffer inbuf, HardwareBuffer opbuf);
 
     @Override
     public void onFrameAvailable(Image inputImage, String codecName, Constants.ColorStandard standard) {
-
         if(handlerState != FrameHandlerState.INITIALIZED) {
             // not in initialized state, do nothing
             return;
         }
 
+        long inputPts = inputImage.getTimestamp();
         HardwareBuffer input = inputImage.getHardwareBuffer();
-
         Image outputImage = writer.dequeueInputImage();
 
         HardwareBuffer output = outputImage.getHardwareBuffer();
@@ -127,9 +128,16 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
 
         processFrame(input, output);
 
-        outputImage.setDataSpace(pipeline.getOutputDataSpace());
+        inputImage.close();
+        input.close();
 
-        outputImage.setTimestamp(inputImage.getTimestamp());
+        try{
+            outputImage.setDataSpace(pipeline.getOutputDataSpace());
+            outputImage.setTimestamp(inputPts);
+        } catch (IllegalStateException e){
+            Log.e(TAG, "Image already closed", e);
+            return;
+        }
 
         if(!preview) {
             try {
@@ -137,15 +145,14 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.d(TAG, "onFrameAvailable: " + buffers );
-            Log.d(TAG, "onFrameAvailable: QUEUED FRAME TS: " + outputImage.getTimestamp() );
+//            Log.d(TAG, "onFrameAvailable: " + buffers );
+//            Log.d(TAG, "onFrameAvailable: QUEUED FRAME TS: " + outputImage.getTimestamp() );
             buffers.add(outputImage.getTimestamp());
-            Log.d(TAG, "onFrameAvailable: QUEUED FRAME Size: " + buffers.size());
+//            Log.d(TAG, "onFrameAvailable: QUEUED FRAME Size: " + buffers.size());
 
             bufferLock.release();
 
         }
-
 
         long start = System.currentTimeMillis();
 
@@ -154,8 +161,7 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         if (!preview) {
 
             try {
-                Log.d(TAG, "onFrameAvailable: WAITING ON ENCODER...");
-
+//                Log.d(TAG, "onFrameAvailable: WAITING ON ENCODER...");
                 dowait.acquire();
 
             } catch (InterruptedException e) {
@@ -168,22 +174,26 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
 
             totalEncodeTime += encodeTime;
 
-            Log.d(TAG, "onFrameAvailable: Encode time " +  encodeTime + " " + totalEncodeTime);
+//            Log.d(TAG, "onFrameAvailable: Encode time " +  encodeTime + " " + totalEncodeTime);
         }
 
-        inputImage.close();
         outputImage.close();
         output.close();
-        input.close();
-
-        Log.d(TAG, "onFrameAvailable: FINISHED" );
     }
 
 
+    public void waitFirstEncodeDone() {
+        if(!preview && !isFirstFrameEncodeDone) {
+            try {
+                waitFirstFrameEncodeDone.acquire();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Override
     public void onFrameEncoded(MediaCodec.BufferInfo info) {
-
-        Log.d(TAG, "onFrameEncoded: " );
 
         try {
             bufferLock.acquire();
@@ -196,16 +206,23 @@ public class FrameHandler implements VideoCallback, OnFrameEncoded{
         if(ts != null) {
 
             if (ts == (info.presentationTimeUs * 1000)) {
-                Log.d(TAG, "onFrameEncoded: Frame check okay " + info.presentationTimeUs);
+//                Log.d(TAG, "onFrameEncoded: Frame check okay " + info.presentationTimeUs);
                 dowait.release();
+
+                if (!isFirstFrameEncodeDone) {
+                    /** wait for encode to finish encoding the first frames,
+                     * since this could be a long time
+                     */
+                    Log.d(TAG, "first frame encode done");
+                    waitFirstFrameEncodeDone.release();
+                    isFirstFrameEncodeDone = true;
+                }
             }
             else
             {
                 throw new IllegalStateException("TS miss match!");
             }
-        }
-        else
-        {
+        } else {
             Log.w(TAG, "onFrameEncoded: Queue empty, likely CSD buffer. Ignoring." );
         }
 

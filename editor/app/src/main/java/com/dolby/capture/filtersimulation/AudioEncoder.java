@@ -52,25 +52,17 @@ import java.util.concurrent.Semaphore;
 public class AudioEncoder extends EncoderOutput implements Runnable{
 
     private static final String mime = MediaFormat.MIMETYPE_AUDIO_AAC;
-
     public static final int highQualityAACBitRate = 320000;
-
     private boolean firstSample = true;
-
     private long videoLen;
-
     private long PrevpresentationTimeUs = 0;
-
     private int NUM_SAMPLES_FADEOUT = 3;
-
     private boolean EOS = false;
-
     private WeakReference<ArrayBlockingQueue> bufferQueue = null;
     private WeakReference<Semaphore> audioUp = null;
     private WeakReference<Semaphore> audioDown = null;
-
     private final Object lock = new Object();
-
+    private Semaphore audioDone;
     private static final String TAG = "AudioEncoder";
 
     public AudioEncoder(MediaFormat format, long videoLen, boolean trim, Context appContext) {
@@ -99,7 +91,10 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
-        Log.d("AudioEncoder", "onInputBufferAvailable");
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
+
         synchronized (lock) {
 
             if (this.bufferQueue == null) {
@@ -131,13 +126,16 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
                     }
                 }
 
+                // need to check codec state again
+                if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+                    return;
+                }
+
                 if (data != null) {
                     b.put(data.getData());
-
                     b.flip();
 
-                    if(firstSample)
-                    {
+                    if(firstSample) {
                         this.applyFadeCurve(b);
                         this.firstSample = false;
                     }
@@ -211,6 +209,9 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
 
         synchronized (lock) {
 
@@ -226,10 +227,13 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
                 if(bufferInfo.presentationTimeUs > 0) {
 
-                    Log.d(TAG, "onOutputBufferAvailable, pts: " + bufferInfo.presentationTimeUs );
+//                    Log.d(TAG, "onOutputBufferAvailable, pts: " + bufferInfo.presentationTimeUs );
                     this.getMuxer().writeSampleData(this.getTrackID(), encodedData, bufferInfo);
                 }
 
+                if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+                    return;
+                }
                 mediaCodec.releaseOutputBuffer(i, false);
             }
 
@@ -241,6 +245,10 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
 
     }
 
+    public void setAudioDoneSemaphore(Semaphore sem) {
+        audioDone = sem;
+    }
+
     @Override
     public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
         Log.d(TAG, "onOutputFormatChanged");
@@ -248,6 +256,20 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
         this.setTrackId(this.getMuxer().addTrack(mediaFormat));
         this.getMuxer().setMuxerStarted();
 
+    }
+
+    @Override
+    void stop() {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
+
+        super.stop();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     public void run() {
@@ -300,15 +322,15 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
             }
             EOS = true;
 
-
             synchronized (lock) {
                 stop();
             }
 
-            this.getAudioDoneSemaphore().release();
-
+            Log.d(TAG, "audio track eos");
+            if (audioDone != null) {
+                audioDone.release();
+            }
             Log.d(TAG, "propertyChange: Audio finished, Video signaled.");
-
         }
     }
 
@@ -320,7 +342,7 @@ public class AudioEncoder extends EncoderOutput implements Runnable{
             super(looper);
             this.encoder = new WeakReference<AudioEncoder>(audioEncoder);
             this.encoder.get().getCodec().setCallback(this.encoder.get(), this);
-            this.encoder.get().getCodec().start();
+            this.encoder.get().start();
         }
     }
 }

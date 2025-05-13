@@ -47,20 +47,22 @@ public class ContentLoader {
     private static final String TAG = ContentLoader.class.getSimpleName();
     public static final int DEFAULT_FPS = 30;
     public static final int VARIABLE_FPS_THRESHOLD = 2;
-
+    private TrimDecoder trimDecoder;
     private VideoEncoder encoder;
-
     private VideoDecoder decoder;
-
     private FrameHandler frameHandler;
-
     private ImagePipeline pipeline;
-
     private MainActivity activity;
-
     private Uri inputUri;
 
     private BroadcastServer server;
+
+    private enum loaderState {
+        previewing,
+        transcoding
+    }
+
+    private loaderState mState;
 
 
     static {
@@ -79,15 +81,15 @@ public class ContentLoader {
 
 
     public synchronized void load_trim(Uri inputUri, Surface screen, Context appContext, Size screenDim) throws MediaFormatNotFoundInFileException, IOException {
-
+        Log.d(TAG, "load trim");
         this.inputUri = inputUri;
 
         decoder.stop();
         server = new BroadcastServer(this.activity);
 
         try {
-            TrimDecoder d = new TrimDecoder(this.activity, this.inputUri, server, appContext);
-            Thread t = new Thread(d);
+            trimDecoder = new TrimDecoder(this.activity, this.inputUri, server, appContext);
+            Thread t = new Thread(trimDecoder);
             t.start();
         } catch (MediaFormatNotFoundInFileException e) {
             return;
@@ -96,13 +98,14 @@ public class ContentLoader {
 
 
     public synchronized void load_preview(Uri inputUri, Surface screen, Context appContext, Size screenDim, String encoderFormat, int transfer, boolean outputFormatChange) throws MediaFormatNotFoundInFileException, IOException {
-
+        Log.d(TAG, "load preview");
+        mState = loaderState.previewing;
         stop();
 
         this.inputUri = inputUri;
 
         int profile = getProfile(appContext, inputUri);
-        Log.d(TAG, "profile = " + profile);
+        Log.d(TAG, "profile = " + profile + " transfer: " + transfer);
 
         Size inputSize = getResolution(appContext, inputUri);
 
@@ -125,7 +128,9 @@ public class ContentLoader {
 
 
     public synchronized void load_transcode(MainActivity activity, Uri inputUri, Context appContext, Size screenDim, String resolution, String encoderFormat, int transfer, int iFrameInterval) throws MediaFormatNotFoundInFileException, IOException {
-
+        if (mState == loaderState.transcoding) return;
+        Log.d(TAG, "load transcode");
+        mState = loaderState.transcoding;
         stop();
 
         this.inputUri = inputUri;
@@ -151,6 +156,9 @@ public class ContentLoader {
                 break;
             case Constants.RESOLUTION_4K:
                 outputSize = new Size(Constants.RESOLUTION_4K_WIDTH, Constants.RESOLUTION_4K_HEIGHT);
+                break;
+            case Constants.RESOLUTION_8K:
+                outputSize = new Size(Constants.RESOLUTION_8K_WIDTH, Constants.RESOLUTION_8K_HEIGHT);
                 break;
             default:
                 outputSize = getResolution(appContext, inputUri);
@@ -217,12 +225,23 @@ public class ContentLoader {
 
     public void stop()
     {
+        Log.d(TAG, "ContentLoader stop");
         if(decoder != null) {
             decoder.stop();
             decoder = null;
         }
 
-        if (pipeline != null) {
+        if(trimDecoder != null) {
+            trimDecoder.stop();
+            trimDecoder = null;
+        }
+
+        if(frameHandler != null) {
+            frameHandler.release();
+            frameHandler = null;
+        }
+
+        if(pipeline != null) {
             Log.d(TAG, "close pipline");
             pipeline.closePipline();
             pipeline = null;
@@ -231,11 +250,6 @@ public class ContentLoader {
         if(encoder != null) {
             encoder.stop();
             encoder = null;
-        }
-
-        if(frameHandler != null) {
-            frameHandler.release();
-            frameHandler = null;
         }
     }
 
@@ -318,5 +332,20 @@ public class ContentLoader {
             }
         }
         return profile;
+    }
+
+    public static int getCCID(Context appContext, Uri inputUri) {
+        MediaExtractor extractor = getExtractor(appContext, inputUri);
+        int ccid = -1;
+        for (int i = 0; i < extractor.getTrackCount(); i++) {
+            MediaFormat format = extractor.getTrackFormat(i);
+            String mimeType = format.getString(MediaFormat.KEY_MIME);
+            if (mimeType.startsWith("video/") &&
+                    format.containsKey("bl_compatibility_id")) {
+                ccid = format.getInteger("bl_compatibility_id");
+                break;
+            }
+        }
+        return ccid;
     }
 }

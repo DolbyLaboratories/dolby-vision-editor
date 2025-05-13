@@ -38,11 +38,14 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -55,6 +58,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.widget.AdapterView;
@@ -78,7 +82,9 @@ import com.google.android.material.slider.Slider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.IntStream;
 
 public class MainActivity extends Activity implements View.OnClickListener, AdapterView.OnItemSelectedListener, SurfaceHolder.Callback, Comparator<String>, BroadcastClient {
@@ -118,7 +124,10 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
     private String inputPath;
     private Uri inputUri;
-
+    private Size inSize;
+    private AlertDialog progressDialog;
+    private View loadingProgress;
+    private static ByteBuffer reusableBuffer;
     private static final int APP_STORAGE_ACCESS_REQUEST_CODE = 2;
 
     @Override
@@ -131,7 +140,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         setContentView(R.layout.activity_main);
 
         requestPermissions();
-        maybeUseExtraVideoClip();
 
         // Initializing all xml elements
         btnStartExport = findViewById(R.id.btn_start_video_export);
@@ -164,8 +172,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         dimControlsView = findViewById(R.id.dim_controls);
         dimScreenView = findViewById(R.id.dim_screen);
         exportOverlayView = findViewById(R.id.export_overlay);
+        loadingProgress = findViewById(R.id.loading_progress);
 
         populateSpinners();
+
+        maybeUseExtraVideoClip();
 
         preview.getHolder().addCallback(this);
 
@@ -333,6 +344,23 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         this.screen = this.setVideoSize(new Size(1920, 1080),0);
 
+        Intent intent = getIntent();
+        if(intent != null) {
+            if(Intent.ACTION_SEND.equals(intent.getAction())
+                /*&& MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION.equals(intent.getType())*/) {
+                /*
+                if OEM's local media app is implemented based on Google Gallery, the mime type from
+                intent.getType() can be only one of image/*, video/*, audio/*, etc.
+                it's possible to co-work with OEM and 3rd party apps, send and check the real media
+                mime type from extractor, so that local media app get to know whether the 3rd party app
+                supports Dolby Vision content uploading/sharing.
+                 */
+                inputUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                inputPath = inputUri.getPath();
+                Log.e(TAG, "Received content from  " + inputUri + "\n" + inputPath);
+                maybeStartPreview();
+            }
+        }
     }
 
     private void maybeUseExtraVideoClip() {
@@ -356,7 +384,18 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             Log.d(TAG, "get auto test streams: " + extraFileName);
             inputUri = Uri.parse(extraFileName);
             inputPath = extraFileName;
+            inSize = ContentLoader.getResolution(this, inputUri);
         }
+
+        // only support dolby vision profile 8.4 input
+        if (!isContentSupport()) {
+            Log.w(TAG, "external file format not support");
+            inputUri = null;
+            inputPath = null;
+            alertDialog("Wrong input file format", "Only support Dolby Vision profile 8.4 ");
+        }
+
+        updateOutResolutionSpinner();
     }
 
     private void loadVideoEffects() {
@@ -496,9 +535,25 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         dialog.show();
     }
 
+    private void alertDialog(String title, String message) {
+        // setup the alert builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        // add a button
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public void onClick(View v) {
-        Log.d(TAG, "Click!");
         int id = v.getId();
         if (id == R.id.cl_select_video_bar || id == R.id.btn_select_new_video) {
 
@@ -555,15 +610,46 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
     }
 
+    private boolean isContentSupport() {
+        boolean ret = false;
+
+        if (inputUri == null) {
+            return ret;
+        }
+
+        int ccid = -1;
+        int dvProfile = -1;
+        dvProfile = ContentLoader.getProfile(this, inputUri);
+        ccid = ContentLoader.getCCID(this, inputUri);
+        // only support dolby vision profile 8.4 input
+        if (dvProfile == MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt && ccid == 4) {
+            ret = true;
+        }
+        return ret;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "OnActivityResult!");
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == REQUEST_FOR_VIDEO_FILE && resultCode == RESULT_OK) {
             if (data != null && data.getData() != null) {
+                showProgressDialog();
                 inputUri = data.getData();
                 inputPath = data.getData().toString();
+                inSize = ContentLoader.getResolution(this, inputUri);
                 Log.i(TAG, "Video file selected Input path:" + inputPath);
+
+                if(!isContentSupport()) {
+                    Log.w(TAG, "not support input file format");
+                    inputUri = null;
+                    inputPath = null;
+                    alertDialog("Wrong input file format", "Only support Dolby Vision profile 8.4 ");
+                    return;
+                }
+
+                updateOutResolutionSpinner();
 
                 maybeStartPreview();
             }
@@ -649,6 +735,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         if (p != null) {
             p.stop();
+            p = null;
+        }
+
+        if(progressOverlayView != null && progressOverlayView.getVisibility() == View.VISIBLE) {
+            animateView(progressOverlayView, View.GONE, 0, 200);
         }
 
         Log.d(TAG, "onPause: ");
@@ -688,18 +779,18 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
 
         // Get the SurfaceView layout parameters
-        android.view.ViewGroup.LayoutParams lp = preview.getLayoutParams();
+        ViewGroup.LayoutParams lp = preview.getLayoutParams();
         Log.d(TAG, "setVideoSize: Change in params " + lp.width + " " + lp.height);
 
         if (videoProportion > screenProportion) {
             Log.d(TAG, "setVideoSize: BRANCH 1 " + lp.width + " " + lp.height);
-            lp.width = screenWidth;
-            lp.height = (int) ((float) screenWidth / videoProportion);
+            lp.width = makeEven(screenWidth);
+            lp.height = makeEven((int) ((float) screenWidth / videoProportion));
 
         } else {
             Log.d(TAG, "setVideoSize: BRANCH 2"  );
-            lp.width = (int) (videoProportion * (float) screenHeight);
-            lp.height = screenHeight;
+            lp.width = makeEven((int) (videoProportion * (float) screenHeight));
+            lp.height = makeEven(screenHeight);
         }
 
         // Commit the layout parameters
@@ -715,7 +806,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
         }
 
         p.stop();
-        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, TRANSFER_SDR, false);
+
+        if (encoderFormat.equals(Constants.DV_ME)) {
+            transfer = TRANSFER_HLG;
+        } else {
+            transfer = TRANSFER_SDR;
+        }
+
+        p.load_preview(inputUri, screenSurface, this, this.screen, encoderFormat, transfer, false);
     }
 
     private boolean requestPermissions() {
@@ -788,8 +886,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             return ret;
         }
 
+        enableControls();
         try {
-            enableControls();
             render(this.inputUri);
             ret = true;
         } catch (MediaFormatNotFoundInFileException | IOException e) {
@@ -807,6 +905,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
             loadVideoEffects();
             loadVideoFilter();
             applyTextCompositing();
+            hideProgressDialog();
         } else if (message.getPayload() instanceof VideoDecoder && message.getTitle().equals("Done")) {
             Log.d(TAG, "VideoDecoder acceptMessage: " + message.getTitle());
             onEditDone(true);
@@ -902,15 +1001,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
 
         // The text bitmap is created in Java
-        Size resolution = ContentLoader.getResolution(this, inputUri);
-        Bitmap bitmap = Bitmap.createBitmap(resolution.getWidth(), resolution.getHeight(), Bitmap.Config.ARGB_8888);
+        Size textResolution = inSize;
+        Bitmap bitmap = Bitmap.createBitmap(textResolution.getWidth(), textResolution.getHeight(), Bitmap.Config.ARGB_8888);
         bitmap.eraseColor(0);
         Canvas canvas = new Canvas(bitmap);
         Paint textPaint = new Paint();
 
         Rect r = new Rect();
         textPaint.getTextBounds(text, 0, text.length(), r);
-        textPaint.setTextSize(resolution.getHeight() / 9);
+        textPaint.setTextSize(textResolution.getHeight() / 9);
         textPaint.setAntiAlias(true);
         textPaint.setTextAlign(Paint.Align.CENTER);
         switch (color) {
@@ -949,7 +1048,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         // Convert bitmap to byte array
         int num_bytes = bitmap.getRowBytes() * bitmap.getHeight();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(num_bytes);
+        ByteBuffer byteBuffer;
+        if (reusableBuffer != null && reusableBuffer.capacity() == num_bytes){
+            byteBuffer = reusableBuffer;
+            byteBuffer.clear();
+        }
+        else{
+            byteBuffer = ByteBuffer.allocate(num_bytes);
+            reusableBuffer = byteBuffer;
+        }
         bitmap.copyPixelsToBuffer(byteBuffer);
         byte[] byteArray = byteBuffer.array();
 
@@ -963,7 +1070,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
     Call this method instead of applyTextCompositing() to apply the example.
      */
     public void setTestText() {
-        Size videoDimensions = ContentLoader.getResolution(this, inputUri);
+        Size videoDimensions = inSize;
         int startX = videoDimensions.getWidth() / 9;
         int startY = videoDimensions.getHeight() / 3;
         int height = videoDimensions.getHeight() / 5;
@@ -996,6 +1103,74 @@ public class MainActivity extends Activity implements View.OnClickListener, Adap
 
         p.EditShadersSetCompositingImage(byteArray);
         p.EditShadersSetParameter(EffectParameters.COMPOSITOR_ENABLE.ordinal(), 1.0f);
+    }
+
+    private int makeEven(int value) { return (value % 2 == 0) ? value : value + 1; }
+
+    public void showProgressDialog() {
+        Log.d(TAG, "showProgressDialog - ");
+        btnStartExport.setAlpha(0.5f);
+        btnStartExport.setEnabled(false);
+        simpleEditText.setAlpha(0.5f);
+        simpleEditText.setEnabled(false);
+        preview.setAlpha(0.5f);
+
+        if (progressDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Loading Video")
+                    .setTitle("Processing");
+            builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    progressDialog.cancel();
+                    progressDialog = null;
+                }
+            });
+            progressDialog = builder.create();
+//            progressDialog.show();
+        }
+
+        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                btnStartExport.setAlpha(1.0f);
+                btnStartExport.setEnabled(true);
+                simpleEditText.setAlpha(1.0f);
+                simpleEditText.setEnabled(true);
+                preview.setAlpha(1.0f);
+            }
+
+        });
+    }
+
+    public void updateOutResolutionSpinner() {
+        if (inSize != null) {
+            String[] resolutionOption = null;
+            switch (inSize.toString()) {
+                case Constants.RESOLUTION_DEFAULT:
+                    resolutionOption = new String[]{Constants.RESOLUTION_DEFAULT};
+                    break;
+                case Constants.RESOLUTION_2K:
+                    resolutionOption = new String[]{Constants.RESOLUTION_DEFAULT, Constants.RESOLUTION_2K};
+                    break;
+                case Constants.RESOLUTION_4K:
+                    resolutionOption = new String[]{Constants.RESOLUTION_DEFAULT, Constants.RESOLUTION_2K, Constants.RESOLUTION_4K};
+                    break;
+                case Constants.RESOLUTION_8K:
+                    resolutionOption = new String[]{Constants.RESOLUTION_DEFAULT, Constants.RESOLUTION_2K, Constants.RESOLUTION_4K, Constants.RESOLUTION_8K};
+                    break;
+            }
+            ArrayAdapter<String> outResolutionVal = new ArrayAdapter<String>(this, R.layout.custom_spinner_item, resolutionOption);
+            outResolutionVal.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerResolutionVal.setAdapter(outResolutionVal);
+        }
+    }
+
+    public void hideProgressDialog() {
+        Log.d(TAG, "hideProgressDialog - ");
+        if (progressDialog != null) {
+            progressDialog.cancel();
+            progressDialog = null;
+        }
     }
 
 }

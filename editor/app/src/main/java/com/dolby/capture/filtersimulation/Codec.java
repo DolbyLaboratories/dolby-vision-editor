@@ -34,17 +34,15 @@ package com.dolby.capture.filtersimulation;
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
 
-import com.dolby.vision.codecselection.BuilderCodecTemplate;
-
 import java.io.IOException;
-import java.util.concurrent.Semaphore;
 
-public abstract class Codec extends BuilderCodecTemplate implements Runnable {
+public abstract class Codec extends MediaCodec.Callback implements Runnable {
 
     private final String TAG = "Codec";
     private Surface inputSurface;
@@ -58,7 +56,6 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
     public static final long TWO_SECONDS_US = 2000000;
 
     private int codecState;
-
     public final int STATE_STARTING = 0;
     public final int STATE_STARTED = 1;
     public final int STATE_STOPING = 2;
@@ -66,12 +63,21 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
     public final int STATE_CREATED = 4;
     public final int STATE_IDLE = 5;
 
+    public static final String VENDOR_DOLBY_CODEC_TRANSFER_PARAMKEY = "vendor.dolby.codec.transfer.value";
+
+    public static final String[] TRANSFER_PARAMS = {"transfer.sdr.normal", "transfer.sdr.high.fidelity", "transfer.hlg", "transfer.dolby"};
+    private MediaCodec codec;
 
     public Codec(boolean trim, Context appContext) {
         this.trim = trim;
         this.appContext = appContext;
         codecState = STATE_IDLE;
     }
+
+    public final void createCodec(MediaCodec codec) {
+        this.codec = codec;
+    }
+
 
     public void setInputSurface(Surface inputSurface) {
         if (this.inputSurface == null) {
@@ -95,16 +101,16 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
         codecState = STATE_CREATED;
     }
 
-    public void run()
-    {
+    public void run() {
         this.start();
     }
 
-    private void start()
-    {
+    public void start() {
         Log.d(TAG, "start");
         codecState = STATE_STARTING;
-        this.getCodec().start();
+        if (getCodec() != null) {
+            this.getCodec().start();
+        }
         onStart();
     }
 
@@ -124,8 +130,7 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
         return this.appContext;
     }
 
-    public void clipAdjustTS(MediaCodec.BufferInfo b)
-    {
+    public void clipAdjustTS(MediaCodec.BufferInfo b) {
         b.presentationTimeUs -= TEN_SECONDS_US;
 
     }
@@ -148,27 +153,29 @@ public abstract class Codec extends BuilderCodecTemplate implements Runnable {
             finally {
                 this.getCodec().release();
             }
+        }
+        onStop();
+    }
 
-            onStop();
+    public final void setTransfer(String transfer) {
+        if (this.getCodec() != null) {
+            Bundle transferBundle = new Bundle();
+            transferBundle.putString(VENDOR_DOLBY_CODEC_TRANSFER_PARAMKEY, transfer);
+            this.getCodec().setParameters(transferBundle);
         }
     }
 
+    public final MediaCodec getCodec() {
+        return codec;
+    }
     public int getCodecState() {
         return codecState;
-    }
-
-    private static final Semaphore audioDoneSemaphore = new Semaphore(0);
-
-    public Semaphore getAudioDoneSemaphore()
-    {
-        return audioDoneSemaphore;
     }
 
     public Surface getInputSurface()
     {
         return this.inputSurface;
     }
-
 
     @Override
     public abstract void onInputBufferAvailable(@NonNull MediaCodec codec, int index);

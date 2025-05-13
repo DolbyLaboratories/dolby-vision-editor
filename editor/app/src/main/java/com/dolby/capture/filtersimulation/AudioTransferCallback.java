@@ -37,4 +37,6 @@ public interface AudioTransferCallback {
 
     int addTrack(Muxer m);
 
+    void onStop();
+
 }

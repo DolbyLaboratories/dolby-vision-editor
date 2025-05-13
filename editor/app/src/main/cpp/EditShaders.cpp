@@ -36,7 +36,7 @@
 #include <math.h>
 
 #include "EditShaders.h"
-#include "hlg_lut_500_p3_33.h"
+#include "hlg_lut_1000_bt2020_pq_33.h"
 
 using namespace std;
 
@@ -293,8 +293,9 @@ void EditShaders::Init(
         CompositingImageTestPattern();
     mReloadCompositingTexture = true;
 
-    m3dLutSize = HLG_LUT_500_P3_33_SIZE;
-    float *m3dLutData = hlg_lut_500_p3_33;
+    m3dLutSize = LUT_33_SIZE;
+    float *m3dLutData = hlg_lut_1000_bt2020_pq_33;
+    CHECK_GL_ERROR;
 
 #if 1
     MemCopy(mInputTransformMatrix, identityMatrix);
@@ -322,7 +323,8 @@ void EditShaders::ReleaseAll()
     DeleteProgram(mEditComputeProgram);
 
    // Nuke the compositing data
-    mTextTextureData.clear();
+// The clear processing delay is too long while loading 8k content.
+//    mTextTextureData.clear();
     mReloadCompositingTexture = true;
     mOutputWidth  = 0;
     mOutputHeight = 0;
