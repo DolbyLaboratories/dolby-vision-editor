@@ -71,10 +71,13 @@ public class ImagePipeline {
     public ImagePipeline(Size inputSize, Size outputSize, Surface outputSurface, boolean previewMode, int inputProfile, String encoderFormat) {
 
         Log.d(TAG, "inputSize=" + inputSize + ", outputSize=" + outputSize + ", previewMode=" + previewMode + ", inputProfile=" + inputProfile + ", encoderFormat=" + encoderFormat);
-
         // Configure dataspace
-        if (previewMode && inputProfile != MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt) {
-            this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_SMPTE_170M, DataSpace.RANGE_LIMITED);
+        if (previewMode){
+            if(inputProfile == MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt && encoderFormat.equals(Constants.DV_ME)) {
+                this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT2020, DataSpace.TRANSFER_ST2084, DataSpace.RANGE_LIMITED);
+            } else {
+                this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT709, DataSpace.TRANSFER_SMPTE_170M, DataSpace.RANGE_LIMITED);
+            }
         } else {
             if (encoderFormat.equals(Constants.DV_ME)) {
                 this.dataspace = DataSpace.pack(DataSpace.STANDARD_BT2020, DataSpace.TRANSFER_HLG, DataSpace.RANGE_LIMITED);

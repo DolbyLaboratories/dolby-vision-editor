@@ -1,6 +1,6 @@
 /******************************************************************************
  * The Clear BSD License
- * Copyright (c) 2023 Dolby Laboratories
+ * Copyright (c) 2024 Dolby Laboratories
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,57 +29,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
-#ifndef HLG_LUT_P3_33_H
-#define HLG_LUT_P3_33_H
+package com.dolby.capture.filtersimulation;
 
-namespace Simulation
-{
+import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
+import android.media.MediaExtractor;
+import android.view.Surface;
 
-template <class TYPE>
-void Indentity3dLut(int size, TYPE *data)
-{
-    for (int x = 0; x < size; x++)
-    {
-        TYPE fx = ((TYPE)x) / ((TYPE)(size - 1));
-        for (int y = 0; y < size; y++)
-        {
-            TYPE fy = ((TYPE)y) / ((TYPE)(size - 1));
-            for (int z = 0; z < size; z++)
-            {
-                TYPE fz = ((TYPE)z) / ((TYPE)(size - 1));
-                *data++ = fz;
-                *data++ = fy;
-                *data++ = fx;
-            }
-        }
+import java.io.IOException;
+
+//Refine the sloppy codec assembly code
+public interface CodecBuilder {
+
+    MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+    MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
+
+    String getCodecName() throws IOException, CodecBuilderImpl.NoCodecException;
+
+    boolean isDolbySupported();
+
+    MediaExtractor configure(MediaCodec codec, Surface s, Codec c, int transfer) throws CodecBuilderImpl.NoCodecException;
+
+    enum CodecType {
+        VIDEO,
     }
 }
-
-/*
-#Created by : Dolby Laboratories
-#Copyright: (C) Copyright 2022 Dolby Laboratories
-
-#is_rgb_input 1
-#is_rgb_output 1
-#input_offset 0.000000
-#shape_order, 1.000000
-#format 6
-# MaxLuma:500.00 MinLuma:0.00010 Eotf=Gamma
-
-#LUT Size
-LUT_3D_SIZE 33
-
-#data domain
-
-DOMAIN_MIN 0 0 0
-DOMAIN_MIN, 1.0, 1.0, 1.0
-
-#LUT data points
-*/
-#define HLG_LUT_500_P3_33_SIZE (33)
-#define HLG_LUT_500_P3_33_VALUE_COUNT (HLG_LUT_500_P3_33_SIZE * HLG_LUT_500_P3_33_SIZE * HLG_LUT_500_P3_33_SIZE * 3)
-
-extern float hlg_lut_500_p3_33[HLG_LUT_500_P3_33_VALUE_COUNT];
-
-} // namespace Simulation
-#endif // HLG_LUT_P3_33_H

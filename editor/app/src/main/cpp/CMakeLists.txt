@@ -29,7 +29,7 @@ add_library( # Sets the name of the library.
         Tools.cpp
         EditShaders.cpp
         EditShadersText.cpp
-        hlg_lut_500_p3_33.cpp
+        hlg_lut_1000_bt2020_pq_33.cpp
         )
 
 # Searches for a specified prebuilt library and stores the path as a

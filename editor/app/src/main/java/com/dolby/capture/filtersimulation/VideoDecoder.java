@@ -47,8 +47,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.dolby.vision.codecselection.CodecBuilderImpl;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
@@ -66,7 +64,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
     private CodecBuilderImpl builder;
 
-    private final VideoCallback callback;
+    private final FrameHandler frameHandler;
 
     private boolean preview;
 
@@ -107,10 +105,12 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
     public native int EditShadersRelease();
     public native int EditShadersEnableLut(int enable);
 
+    private final Object codecLock = new Object();
 
-    public VideoDecoder(Uri inputUri, Context appContext, VideoCallback callback, BroadcastAction encoderComms, ImagePipeline pipeline, boolean preview, int transfer, int profile, String encoderFormat, boolean outputFormatChange) {
+
+    public VideoDecoder(Uri inputUri, Context appContext, FrameHandler frameHandler, BroadcastAction encoderComms, ImagePipeline pipeline, boolean preview, int transfer, int profile, String encoderFormat, boolean outputFormatChange) {
         super(inputUri, false, appContext);
-        this.callback = callback;
+        this.frameHandler = frameHandler;
 
         this.encoderComms = encoderComms;
 
@@ -150,7 +150,6 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
             Log.d(TAG, "VideoDecoder: FRAME RATE " + fr);
 
-
             try {
                 mediaExtractor = builder.configure(this.getCodec(), this.getInputSurface(), this, transfer);
             } catch (CodecBuilderImpl.NoCodecException e) {
@@ -160,9 +159,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
             e.printStackTrace();
         }
 
-        bufferProcessor = new BufferProcessor(decoderOutputBuffers, fr, this.preview, regulator, down, up, mediaExtractor);
-        bufferProcessor.setStarted();
-        bufferProcessor.setEOSCallback(encoderComms);
+        this.codecName = this.getCodec().getName();
 
         if (profile == MediaCodecInfo.CodecProfileLevel.DolbyVisionProfileDvheSt && encoderFormat.equals(Constants.DV_ME)) {
             Log.d("VideoDecoder", "edit in BT2020 color space");
@@ -173,7 +170,9 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
         }
         Log.d("VideoDecoder", "standard.ordinal()=" + this.standard.ordinal());
 
-        this.codecName = this.getCodec().getName();
+        bufferProcessor = new BufferProcessor(decoderOutputBuffers, fr, this.preview, regulator, down, up, mediaExtractor);
+        bufferProcessor.setEOSCallback(encoderComms);
+        bufferProcessor.setStarted();
     }
 
     public void editShaderRelease() {
@@ -186,14 +185,18 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
     @Override
     void stop() {
-        Log.d(TAG, "stop");
-        if (inputFeedThread != null) {
-            inputFeedThread.setStop();
-            inputFeedThread = null;
+        synchronized (codecLock) {
+            Log.d(TAG, "stop");
+            if (inputFeedThread != null) {
+                inputFeedThread.setStop();
+                inputFeedThread = null;
+            }
+            if (frameHandler != null) {
+                frameHandler.setHandlerState(FrameHandler.FrameHandlerState.RELEASING);
+            }
+            setPaused();
+            super.stop();
         }
-
-        setPaused();
-        super.stop();
     }
 
     @Override
@@ -280,10 +283,12 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
     @Override
     public void onImageAvailable(ImageReader reader) {
-
-        Log.d(TAG, "onImageAvailable: ");
-
-        Image in = reader.acquireLatestImage();
+        if(getCodecState() != STATE_STARTED){
+            Log.e(TAG, "decodec error: decoder does not start");
+            return;
+        }
+        Image in = reader.acquireNextImage();
+        long timestamp = in.getTimestamp();
 
         if (in != null) {
 
@@ -302,7 +307,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
                 Log.d(TAG, "onImageAvailable, input color space: " + inputColorSpace);
                 EditShadersInit(in.getWidth(), in.getHeight(), this.standard.ordinal(), inputColorSpace, 0); // Set color configuration here
 
-                if (CodecBuilderImpl.isDolbyGPUDecoder(codecName) && preview && standard == Constants.ColorStandard.eColorStandard10BitRec2020) {
+                if (!builder.isDolbyDecoder(codecName) && preview && standard == Constants.ColorStandard.eColorStandard10BitRec2020) {
                     Log.d(TAG, "Enable LUT");
                     EditShadersEnableLut(1);
                 } else {
@@ -315,11 +320,11 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
             }
 
             if (shaderinit) {
-                callback.onFrameAvailable(in, this.codecName, this.standard);
+                frameHandler.onFrameAvailable(in, this.codecName, this.standard);
+            } else {
+                Log.w(TAG, "shader not initialized, skip the buffer " + timestamp);
+                if(in != null) in.close();
             }
-
-            in.close();
-
             up.release();
 
         }
@@ -351,7 +356,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
     }
 
-    public static class BufferProcessor extends Thread {
+    public class BufferProcessor extends Thread {
         private final WeakReference<ConcurrentLinkedQueue<DecoderInputInfo>> bufferList;
 
         private Semaphore regulator;
@@ -367,8 +372,6 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
         private final boolean preview;
 
         private BroadcastAction callback;
-
-        private Message toSend;
 
         private MediaExtractor mediaExtractor;
 
@@ -407,12 +410,12 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
         {
             Log.d(TAG, "setStopped");
             this.isStarted = false;
+            bufferList.clear();
         }
 
         private void renderBuffer(DecoderInputInfo x)
         {
-            Log.d(TAG, "renderBuffer: " + x.sampleTime );
-
+//            Log.d(TAG, "renderBuffer: " + x.sampleTime );
             try {
                 x.getCodec().releaseOutputBuffer(x.getIndex(), true);
             }
@@ -422,32 +425,24 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
         private void frameRateDelay(long renderTime)
         {
-
             if(preview) {
-
-                long frameDelay  = frDelay - renderTime;
-
-                Log.d(TAG, "frameRateDelay: " + frameDelay );
-
                 try {
                     Thread.sleep(Math.max(0, frDelay - renderTime));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
-
         }
 
         private boolean EOS(DecoderInputInfo x)
         {
-            if ((x.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
+            if ((x.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == MediaCodec.BUFFER_FLAG_END_OF_STREAM && x.size == 0) {
                 Log.d(TAG, "run: EOS Buffer Processor queue size " + bufferList.get().size() );
 
                 if(preview)
                 {
                     synchronized (mediaExtractor) {
-                        mediaExtractor.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+                        inputFeedThread.seekToStart();
                     }
                     x.getCodec().flush();
                     bufferList.get().clear();
@@ -458,10 +453,14 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
                     Message<Long> endFramePtsMsg = new Message<Long>("endFramePts", lastFramePts) {
                     };
                     this.setStopped();
+
                     /**
                      * EOS event should be sent from encoder when all frames encoded
                      */
-                    this.callback.broadcast(endFramePtsMsg);
+                    Log.d(TAG, "boradcast transcoding done message");
+                    if(callback != null) {
+                        callback.broadcast(endFramePtsMsg);
+                    }
                 }
 
                 return true;
@@ -490,21 +489,23 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
                 DecoderInputInfo x = bufferList.get().poll();
 
                 if(x!=null) {
-                    
-                    long start = System.currentTimeMillis();
+                    synchronized (codecLock) {
+                        if (bufferList.get() == null) return;
+                        long start = System.currentTimeMillis();
 
-                    lastFramePts = lastFramePts > x.sampleTime ? lastFramePts : x.sampleTime;
-                    renderBuffer(x);
+                        lastFramePts = lastFramePts > x.sampleTime ? lastFramePts : x.sampleTime;
+                        renderBuffer(x);
 
-                    if(!EOS(x)) {
-                        confirmBuffer();
+                        if (!EOS(x)) {
+                            confirmBuffer();
+                        }
+
+                        long end = System.currentTimeMillis();
+
+                        long renderTime = (end - start);
+
+                        frameRateDelay(renderTime);
                     }
-
-                    long end = System.currentTimeMillis();
-
-                    long renderTime = (end-start);
-
-                    frameRateDelay(renderTime);
                     
                 } else {
                     try {
@@ -521,11 +522,11 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
     private class InputFeedThread extends Thread {
 
         private final WeakReference<ConcurrentLinkedQueue<DecoderInputInfo>> bufferList;
-
         private final String TAG = "VideoDecoder-InputFeedThread";
         private MediaExtractor mediaExtractor;
-
         private boolean isStart = false;
+        private boolean receivedEOS = false;
+        private boolean firstFrameQueued;
 
         public boolean isStart() {
             return isStart;
@@ -538,6 +539,11 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
             }
         }
 
+        public void seekToStart() {
+            mediaExtractor.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+            receivedEOS = false;
+        }
+
         public void setStop() {
             if (isStart) {
                 isStart = false;
@@ -547,6 +553,7 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
         InputFeedThread(MediaExtractor ex, ConcurrentLinkedQueue<DecoderInputInfo> bl) {
             mediaExtractor = ex;
             bufferList = new WeakReference<>(bl);
+            firstFrameQueued = false;
         }
 
         @Override
@@ -554,9 +561,14 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
 
             while (isStart) {
 
-                if (!bufferList.get().isEmpty() && getCodecState() == STATE_STARTED) {
+                if (!receivedEOS && !bufferList.get().isEmpty() && getCodecState() == STATE_STARTED) {
+
+                    if (firstFrameQueued) {
+                        frameHandler.waitFirstEncodeDone();
+                    }
 
                     DecoderInputInfo inputInfo = bufferList.get().poll();
+
                     MediaCodec codec = inputInfo.codec;
                     int index = inputInfo.index;
 
@@ -566,25 +578,37 @@ public class VideoDecoder extends DecoderOutput implements ImageReader.OnImageAv
                     } catch (IllegalStateException ignore) {
                     }
 
-                    if (inputBuffer == null) {
+                    if (inputBuffer == null || !inputBuffer.isDirect()) {
                         continue;
                     }
 
-                    synchronized (mediaExtractor) {
-                        int size = mediaExtractor.readSampleData(inputBuffer, 0);
+                    synchronized (codecLock) {
+                        Log.d(TAG, "Reading sample data to buffer: address=" + inputBuffer + ", size=" + inputBuffer.capacity());
+                        if (!isStart || getCodecState() != STATE_STARTED || mediaExtractor == null) return;
 
                         try {
+                            int size = mediaExtractor.readSampleData(inputBuffer, 0);
                             if (size <= 0 ||
                                     (mediaExtractor.getSampleFlags() & MediaCodec.BUFFER_FLAG_END_OF_STREAM)
                                             == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
+                                receivedEOS = true;
                                 codec.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                             } else {
                                 codec.queueInputBuffer(index, 0, size, mediaExtractor.getSampleTime(), mediaExtractor.getSampleFlags());
+
+                                if (!firstFrameQueued) {
+                                    firstFrameQueued = true;
+                                }
                             }
-                        } catch (IllegalStateException ignored) {
+                        } catch (IllegalStateException e) {
+                            Log.e(TAG, "Codec operation failed", e);
+                            return;
                         }
 
-                        mediaExtractor.advance();
+                        if(!receivedEOS) {
+                            mediaExtractor.advance();
+                        }
+                        Log.d(TAG, "readSampleData sample data done");
                     }
                 } else {
                     try {

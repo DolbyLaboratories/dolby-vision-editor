@@ -57,7 +57,7 @@
 #define LOG_TAG "EditShaders"
 #endif // LOG_TAG
 
-#include "hlg_lut_500_p3_33.h"
+#include "hlg_lut_1000_bt2020_pq_33.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -328,8 +328,8 @@ protected:
     eColorStandard mColorStandard = eColorStandard10BitRec709;
 
     volatile bool mReloadCompositingTexture = true;
-    int m3dLutSize = HLG_LUT_500_P3_33_SIZE;
-    float *m3dLutData = hlg_lut_500_p3_33;
+    int m3dLutSize = LUT_33_SIZE;
+    float *m3dLutData = hlg_lut_1000_bt2020_pq_33;
 
     // Compute shader configuration options
     int mComputeShaderQuadFactor = 4; // Compute shader body does: 1 = single pixel at a time, 4 = 4 pixels at a time

@@ -34,15 +34,20 @@ package com.dolby.capture.filtersimulation;
 public class TranscodeAudioTransfer implements AudioTransferCallback{
 
     private AudioExtractor aux;
-
-    public TranscodeAudioTransfer(AudioExtractor aux)
-    {
+    private final static String TAG = "TranscodeAudioTransfer";
+    public TranscodeAudioTransfer(AudioExtractor aux) {
         this.aux = aux;
     }
 
     @Override
     public void copyAudio(Muxer m, int trackID) {
         aux.copyAudio(m, trackID);
+    }
+
+    public void onStop() {
+        if (aux != null) {
+            aux.stop();
+        }
     }
 
     @Override

@@ -45,11 +45,10 @@ import java.nio.ByteBuffer;
  */
 public class Muxer {
 
+    private static final String TAG = "Muxer";
     //The android muxer instance.
     private MediaMuxer mMuxer;
-
     private boolean running = false;
-
     private String outputPath;
 
     /**
@@ -59,11 +58,11 @@ public class Muxer {
 
         try {
 
-            Log.d("MUXER", "Muxer: initializing" );
+            Log.d(TAG, "Muxer: initializing" );
             this.outputPath = "/sdcard" + "/DCIM/" + System.currentTimeMillis() + ".mp4";
             this.mMuxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
             this.mMuxer.setOrientationHint(rotation);
-            Log.d("MUXER", "Muxer: initialized" );
+            Log.d(TAG, "Muxer: initialized" );
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,18 +75,17 @@ public class Muxer {
     }
 
 
-
     public synchronized void setMuxerStarted()
     {
         if(!running) {
 
             this.mMuxer.start();
 
-            Log.d("MUXER", "startMuxer: Lifting access gate...");
+            Log.d(TAG, "startMuxer: Lifting access gate...");
 
             running = true;
 
-            Log.d("MUXER", "startMuxer: Lifted access gate...");
+            Log.d(TAG, "startMuxer: Lifted access gate...");
         }
     }
 
@@ -104,11 +102,11 @@ public class Muxer {
     public synchronized void stopMuxer()
     {
         if(running) {
-            Log.d("MUXER", "stopMuxer: Attempting to replace access gate...");
+            Log.d(TAG, "stopMuxer: Attempting to replace access gate...");
 
             running = false;
 
-            Log.d("MUXER", "stopMuxer: Replaced access gate...");
+            Log.d(TAG, "stopMuxer: Replaced access gate...");
 
             this.mMuxer.stop();
 

@@ -31,6 +31,7 @@
 
 package com.dolby.capture.filtersimulation;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
@@ -43,13 +44,18 @@ import java.nio.ByteBuffer;
 
 public class AudioExtractor {
 
+    private static final String TAG = "AudioExtractor";
     private static final String requestedMime = MediaFormat.MIMETYPE_AUDIO_AAC;
-
     private MediaExtractor extractor = null;
-
     private MediaFormat format = null;
-
     private int NUM_AUD_CHANNELS = 2;
+    private enum ExState {
+        INIT,
+        START,
+        STOP
+    }
+    private ExState exState;
+
 
     public AudioExtractor(Uri inputUri, Context appContext, boolean trimOnly) throws MediaFormatNotFoundInFileException {
         extractor = new MediaExtractor();
@@ -75,12 +81,12 @@ public class AudioExtractor {
             }
         }
 
-        Log.d("AudioExtractor", "AudioExtractor: " + this.format);
+        Log.d(TAG, "AudioExtractor: " + this.format);
 
         if (!trimOnly) {
             if(this.format == null) {
                 // Allow transcode with no audio channel
-                Log.d("AudioExtractor", "File did not contain AAC audio channel");
+                Log.d(TAG, "File did not contain AAC audio channel");
             }
         }
 
@@ -94,13 +100,14 @@ public class AudioExtractor {
                 throw new MediaFormatNotFoundInFileException("File did not contain specified audio codec AAC.");
             } else {
                 int count = this.format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-                Log.d("AudioExtractor", "Trim only: number of audio channels = " + count);
+                Log.d(TAG, "Trim only: number of audio channels = " + count);
                 if (count > NUM_AUD_CHANNELS) {
                     throw new MediaFormatNotFoundInFileException("File contains more than 2 audio channels");
                 }
             }
         }
 
+        exState = ExState.INIT;
     }
 
     public MediaFormat getAudioFormat()
@@ -113,6 +120,7 @@ public class AudioExtractor {
         extractor.seekTo(0,MediaExtractor.SEEK_TO_CLOSEST_SYNC);
     }
 
+    @SuppressLint("WrongConstant")
     public MediaCodec.BufferInfo getChunk(ByteBuffer buffer)
     {
         int size = extractor.readSampleData(buffer, 0);
@@ -125,13 +133,26 @@ public class AudioExtractor {
         extractor.advance();
 
         return info;
-
     }
 
 
+    public void stop() {
+        if(exState == ExState.START) {
+            exState = ExState.STOP;
+        }
+    }
+
+
+    @SuppressLint("WrongConstant")
     public void copyAudio(Muxer copyTo, int trackID)
     {
+
+        if(exState == ExState.START) {
+            return;
+        }
+
         boolean result;
+        exState = ExState.START;
 
         do {
 
@@ -148,11 +169,15 @@ public class AudioExtractor {
             info.size = size;
             info.flags = extractor.getSampleFlags();
 
-            copyTo.writeSampleData(trackID, inputBuffer, info);
+            if (copyTo.isRunning()) {
+                copyTo.writeSampleData(trackID, inputBuffer, info);
+            }
 
-            result = extractor.advance();
+            result = extractor.advance() && (exState != ExState.STOP);
         }
         while(result);
+
+        exState = ExState.STOP;
     }
 
 }

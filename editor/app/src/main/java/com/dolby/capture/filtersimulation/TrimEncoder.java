@@ -33,6 +33,7 @@ package com.dolby.capture.filtersimulation;
 
 import android.content.Context;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.net.Uri;
 import android.util.Log;
@@ -43,31 +44,21 @@ import androidx.annotation.NonNull;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Semaphore;
 
 /**
  * Dummy encoder for use when trimming only.
  */
 public class TrimEncoder extends EncoderOutput {
     private final static String TAG = "TrimEncoder";
-
     private Uri inputUri;
-
     private TrimDecoder decoder;
-
     private AudioDecoder audioDecoder;
-
     private AudioExtractor extractor;
-
-    private boolean isDolby;
-
-    private String dolbyType;
-
-    private int fps;
-
     private boolean trim;
-
     private BroadcastAction UIComms;
     private long mVideoStartPosi = -1;
+    private Semaphore audioDone;
 
     /**
      * Sets up the muxer, and muxes the audio. This should not need to be
@@ -83,17 +74,12 @@ public class TrimEncoder extends EncoderOutput {
         super(trim, appContext);
         this.inputUri = inputUri;
         this.decoder = decoder;
-        this.fps = format.getInteger(MediaFormat.KEY_FRAME_RATE);
         this.trim = trim;
         this.UIComms = UIComms;
 
-        String mime = format.getString(MediaFormat.KEY_MIME);
-        int profile = format.getInteger(MediaFormat.KEY_PROFILE);
-        this.isDolby = mime.equals(MediaFormat.MIMETYPE_VIDEO_DOLBY_VISION);
-        if (this.isDolby) {
-            format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_HEVC);
-            this.dolbyType = Constants.DV_ME;
-        }
+        //Dolby Vision on input
+        //Since the source bitstream parameters (resolution, bitrate, frame rate) aren't changed,
+        //the Dolby Vision (profile and level) signalization for the output mp4 container is taken from the source.
 
         // Try to create audio objects before starting the muxer
         // If there is an exception, don't let the muxer create an empty file
@@ -110,7 +96,6 @@ public class TrimEncoder extends EncoderOutput {
             if(UIComms != null) {
                 this.UIComms.broadcast(m);
             }
-
             throw e;
         }
 
@@ -120,6 +105,13 @@ public class TrimEncoder extends EncoderOutput {
 
     public void setVideoStartPosi(long posi) {
         mVideoStartPosi = posi;
+    }
+
+    public void setAudioDoneSemaphore(Semaphore sem) {
+        audioDone = sem;
+        if(audioDecoder != null) {
+            audioDecoder.setAudioDoneSemaphore(audioDone);
+        }
     }
 
     /**
@@ -132,24 +124,29 @@ public class TrimEncoder extends EncoderOutput {
             this.clipAdjustTS(info);
         }
         this.getMuxer().writeSampleData(this.getTrackID(), buffer, info);
-        Log.d(TAG, "Sent buffer with timestamp " + info.presentationTimeUs);
     }
 
     /**
      * Stop the muxer, and remux if the original file is Dolby Vision Profile 8.4
      */
+    @Override
     public void stop() {
-        this.getMuxer().stopMuxer();
-        if (this.isDolby && this.dolbyType.equals(Constants.DV_ME)) {
-            String inputPath = this.getMuxer().getOutputPath();
-            String outputPath = "/sdcard" + "/DCIM/" + System.currentTimeMillis() + "_REMUXED.mp4";
-            int dvProfile = 8;
-            int dvLevel = fr2lv(this.fps, this.decoder.getDimensions());
-            int dvBackCompatibility = 4;
-            remuxFile(inputPath, outputPath, dvProfile, dvLevel, dvBackCompatibility);
-            deleteMuxedFile(inputPath);
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
         }
-        Log.d(TAG, "Muxer stopped");
+
+        super.stop();
+        if(trim) {
+            audioDecoder.stop();
+        } else {
+            extractor.stop();
+        }
+        this.getMuxer().stopMuxer();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     public void muxAudio() {
@@ -192,72 +189,4 @@ public class TrimEncoder extends EncoderOutput {
     public void propertyChange(PropertyChangeEvent evt) {
 
     }
-
-
-    /**
-     * JNI call to mp4remuxer.
-     * Remuxes the output file to insert the MP4 metadata box for Dolby Vision.
-     *
-     * @param inputPath path to input video
-     * @param outputPath path to output video
-     * @param dvProfile Dolby Vision profile (raw value, not as specified in MediaCodecInfo.CodecProfileLevel)
-     * @param dvLevel Dolby Vision level (raw value before bit shift, not as specified in MediaCodecInfo.CodecProfileLevel)
-     * @param dvBackCompatibility Dolby Vision back compatibility ID
-     */
-    private native int remuxFile(String inputPath, String outputPath, int dvProfile, int dvLevel, int dvBackCompatibility);
-
-
-    /**
-     * Calculates Dolby Vision level given video frame rate and dimensions.
-     * Returns the raw level value before bit shift, not as specified in MediaCodecInfo.CodecProfileLevel.
-     *
-     * @param fr frame rate
-     * @param dim dimensions
-     */
-    private int fr2lv(int fr, Size dim) {
-        if (fr <= 30) {
-            if (dim.getWidth() == Constants.RESOLUTION_2K_WIDTH && dim.getHeight() == Constants.RESOLUTION_2K_HEIGHT) {
-                Log.d(TAG, "fr2lv: 4");
-                return 4;
-            } else if (dim.getWidth() == Constants.RESOLUTION_4K_WIDTH && dim.getHeight() == Constants.RESOLUTION_4K_HEIGHT) {
-                Log.d(TAG, "fr2lv: 7");
-                return 7;
-            } else {
-                Log.w(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 7");
-                return 7;
-            }
-        } else if (fr <= 60) {
-            if (dim.getWidth() == Constants.RESOLUTION_2K_WIDTH && dim.getHeight() == Constants.RESOLUTION_2K_HEIGHT) {
-                Log.d(TAG, "fr2lv: 5");
-                return 5;
-            } else if (dim.getWidth() == Constants.RESOLUTION_4K_WIDTH && dim.getHeight() == Constants.RESOLUTION_4K_HEIGHT) {
-                Log.d(TAG, "fr2lv: 9");
-                return 9;
-            } else {
-                Log.w(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 9");
-                return 9;
-            }
-        } else {
-            Log.w(TAG, "fr2lv: Unrecognized dimension and frame rate defaulting to 9");
-            return 9;
-        }
-    }
-
-
-    /**
-     * Deletes the muxed MP4 file.
-     *
-     * @param filePath path to muxed file
-     */
-    private void deleteMuxedFile(String filePath) {
-        File inFile = new File(filePath);
-        if (inFile.exists()) {
-            if (inFile.delete()) {
-                Log.d(TAG, "muxed file deleted: " + filePath);
-            } else {
-                Log.d(TAG, "muxed file not deleted: " + filePath);
-            }
-        }
-    }
-
 }

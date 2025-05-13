@@ -59,6 +59,7 @@ public class Constants {
     public static final String RESOLUTION_DEFAULT = "Default";
     public static final String RESOLUTION_2K = "1920x1080";
     public static final String RESOLUTION_4K = "3840x2160";
+    public static final String RESOLUTION_8K = "7680x4320";
     public static final String ENCODER_HEVC = "HEVC";
     public static final String ENCODER_AVC = "AVC";
     public static final String ENCODER_P84 = "Profile 8.4";
@@ -70,7 +71,7 @@ public class Constants {
     // Arrays to populate all the spinners in MainActivity
     public static final String[] FILTER_OPTIONS = {FILTER_NONE, FILTER_BW, FILTER_SEPIA};
     public static final String[] TEXT_COLORS = {BLACK, WHITE, GRAY, PURPLE};
-    public static final String[] RESOLUTION_OPTIONS = {RESOLUTION_DEFAULT, RESOLUTION_2K, RESOLUTION_4K};
+    public static final String[] RESOLUTION_OPTIONS = {RESOLUTION_DEFAULT, RESOLUTION_2K, RESOLUTION_4K, RESOLUTION_8K};
     public static final String[] ENCODER_FORMAT = {ENCODER_HEVC, ENCODER_AVC, ENCODER_P84};
     public static final String[] IFRAME_INTERVALS = {IFRAME_LOSSLESS, IFRAME_1_SEC};
 
@@ -78,5 +79,7 @@ public class Constants {
     public static final int RESOLUTION_2K_HEIGHT = 1080;
     public static final int RESOLUTION_4K_WIDTH = 3840;
     public static final int RESOLUTION_4K_HEIGHT = 2160;
+    public static final int RESOLUTION_8K_WIDTH = 7680;
+    public static final int RESOLUTION_8K_HEIGHT = 4320;
 
 }

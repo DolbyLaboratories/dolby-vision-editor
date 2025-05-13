@@ -48,26 +48,22 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.Semaphore;
 
 /**
  * Dummy decoder for use when trimming only
  */
-public class TrimDecoder extends DecoderOutput implements Runnable {
+public class TrimDecoder extends DecoderOutput {
+
     private final static String TAG = "TrimDecoder";
-
     private MediaExtractor extractor;
-
     private MediaFormat format;
-
     private TrimEncoder encoder;
-
     private final Size dimensions;
-
     private BroadcastAction UIComms;
-
     private final boolean trim;
-
     private BroadcastServer server;
+    private Semaphore audioDone;
 
     /**
      * Sets up extractor to begin "decoding," as well as
@@ -115,6 +111,8 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
         server = new BroadcastServer(activity);
         // initialize encoder to setup the muxer and audio
         this.encoder = new TrimEncoder(inputUri, server, this, this.format, rotation, this.trim, this.getAppContext());
+        audioDone = new Semaphore(0);
+        encoder.setAudioDoneSemaphore(audioDone);
     }
 
     // find and select the video track
@@ -150,14 +148,32 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
         return dimensions;
     }
 
+    @Override
+    void stop() {
+        if(getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            return;
+        }
+        super.stop();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (encoder != null) {
+            encoder.stop();
+            encoder = null;
+        }
+    }
+
     /**
      * Continuously send encoded video data straight to the muxer.
      * Skip frames that are in the first or last 10 seconds of the video,
      * unless the video is too short.
      */
     @SuppressLint("WrongConstant")
-
+    @Override
     public void run() {
+        super.run();
 
         long start = System.currentTimeMillis();
 
@@ -171,15 +187,20 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
             // This only needs to be done in trim cases, because when not trimming,
             // the audio gets copied over, which is done on the same thread
             try {
-                this.getAudioDoneSemaphore().acquire();
+                audioDone.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             Log.d(TAG, "Audio ready");
+        } else {
+            // no need to trim, simply mux audio synchronously
+            encoder.muxAudio();
         }
 
-        boolean extract = true;
+        boolean extract = getCodecState() == STATE_STARTED;
 
+        int frameCount = 0;
+        long firstPts = extractor.getSampleTime();
         while (extract) {
             ByteBuffer buffer = ByteBuffer.allocate((int) extractor.getSampleSize());
 
@@ -192,21 +213,40 @@ public class TrimDecoder extends DecoderOutput implements Runnable {
                 info.size = size;
                 info.flags = extractor.getSampleFlags();
                 // send the buffer to the dummy encoder
-                encoder.sendBuffer(buffer, info);
-                extract = extractor.advance();
+                if (encoder != null) {
+                    encoder.sendBuffer(buffer, info);
+                    frameCount += 1;
+                }
+                if(extractor != null) {
+                    extract = extractor.advance();
+                }
+                extract = extract && getCodecState() == STATE_STARTED;
             } else {
+                // add the EOS buffer to muxer
+                MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+                info.presentationTimeUs = firstPts + frameCount * 1_000_000L / this.format.getInteger(MediaFormat.KEY_FRAME_RATE) ;
+                Log.d(TAG,"last pts: " +  info.presentationTimeUs + " frameCount after trim : " + frameCount);
+                info.size = 0;
+                info.flags = MediaCodec.BUFFER_FLAG_END_OF_STREAM;
+                encoder.sendBuffer(buffer,info);
                 Log.w(TAG, "Reached last 10 seconds of data, exiting");
                 break;
             }
         }
         encoder.stop();
+        encoder = null;
         extractor.release();
+        extractor = null;
 
         long end = System.currentTimeMillis();
         Log.d(TAG, "Edit pass done in " + (end - start)/1000.0 + " seconds.");
 
-        DecoderDoneMessage<TrimDecoder> m = new DecoderDoneMessage<>("Done",this);
+        if (getCodecState() == STATE_STOPING || getCodecState() == STATE_STOPED) {
+            // stop by user, no need to broadcast the message.
+            return;
+        }
 
+        DecoderDoneMessage<TrimDecoder> m = new DecoderDoneMessage<>("Done",this);
         if(UIComms != null) {
             this.UIComms.broadcast(m);
         }
