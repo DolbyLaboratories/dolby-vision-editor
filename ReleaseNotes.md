@@ -2,7 +2,11 @@
 
 ## What's new in this release
 
-This is the first release of the Dolby Vision editor sample application.
+1. Fix some bugs.
+2. Add 8k video editing.
+3. Add HDR preview while editing HDR videos.
+4. Add source code instead of CodecSelection/codecSelection.aar.
+5. Using the AOSP Muxer instead of the customized muxer.
 
 ## Supported features
 

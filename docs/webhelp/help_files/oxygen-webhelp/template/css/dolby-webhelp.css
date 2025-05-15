@@ -2,6 +2,10 @@
 @import url("../fonts/Avenir/Avenir.css");
 @import url("../fonts/material-icons/material-icons.css");
 /* Copying colors from IGX code examples */
+:root {
+  overscroll-behavior-y: none;
+}
+
 * {
   -webkit-font-smoothing: antialiased;
 }
@@ -347,7 +351,8 @@ span.filepath {
 /* END OF TCOMMS-3061 */
 .codeph {
   color: #293033;
-  background-color: #eff0f1; /* PUBENG-1252 */
+  /*  PUBENG-1252 was: background-color: $silver100; */
+  background-color: transparent; /* PUBENG-5687 */
   font-family: consolas, monospace;
   word-break: break-word;
 }
@@ -609,6 +614,12 @@ h4.sectiontitle, h4.sectiontitle:not(.tasklabel), h5.sectiontitle, h5.sectiontit
   margin-top: 0.5em;
   text-align: initial;
   text-decoration: none;
+}
+
+/* PUBENG-3589-4070-4036 */
+a, a:link, a:link:visited {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 @media only screen and (max-width: 767px) {
@@ -886,7 +897,7 @@ footer .navfooter {
     padding: 1em 0 0 0;
   }
 }
-#wh_topic_body .material-icons {
+#wh_topic_body .material-icons:not(.image-zoom) {
   background: linear-gradient(60deg, #3b48fe 30%, #fb3e79 70%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -1065,6 +1076,10 @@ span :not(figure).image {
   display: block;
 }
 
+figure {
+  position: relative;
+}
+
 .close {
   opacity: 1;
   color: #3b48fe;
@@ -1109,6 +1124,30 @@ div.embed-responsive {
 
 .mermaid-embed svg {
   max-width: 100%;
+  height: auto;
+}
+
+.material-icons.image-zoom {
+  visibility: hidden;
+  position: absolute;
+  left: 0;
+  cursor: pointer;
+  font-size: 3rem;
+  line-height: 3rem;
+  background-color: white;
+  color: #3b48fe;
+  border-radius: 4px;
+  text-decoration-line: none;
+  transition: all;
+}
+
+figure:hover .image-zoom {
+  visibility: visible;
+}
+
+figure:hover .image-zoom:hover {
+  background-color: #3b48fe;
+  color: white;
 }
 
 .ul {
@@ -1346,6 +1385,20 @@ Example:
 td {
  font-size: inherit;
 }*/
+/* PUBENG-3459 aligning glossary links, which somehow lose their semantics when appearing on landing page shortdescs */
+a[href*="topics/g_"] {
+  color: #293033 !important;
+  text-decoration-line: underline !important;
+  text-decoration-style: dotted !important;
+  text-decoration-color: #293033 !important;
+}
+a[href*="topics/g_"]:hover {
+  color: #3b48fe !important;
+  text-decoration-line: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-color: #3b48fe !important;
+}
+
 @media only screen and (max-width: 767px) {
   .wh_tiles {
     padding-bottom: 12em;
@@ -1936,6 +1989,7 @@ body {
   margin-bottom: 0; /* TCOMMS-1416, was 15px */
   /* TCOMMS-3001 */
   background-color: #ffffff;
+  overscroll-behavior-y: none;
 }
 
 /*.wh_logo {
@@ -3032,6 +3086,32 @@ th {
   text-align: left;
 }
 
+.sort-table th {
+  cursor: pointer;
+}
+
+th.sorting_asc {
+  cursor: pointer;
+}
+th.sorting_asc::after {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  --tw-content: "▾";
+  font-family: monospace;
+  content: var(--tw-content);
+}
+
+th.sorting_desc {
+  cursor: pointer;
+}
+th.sorting_desc::after {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  --tw-content: "▴";
+  font-family: monospace;
+  content: var(--tw-content);
+}
+
 @media (max-width: 500px) {
   table {
     margin-right: 0px;
@@ -3221,6 +3301,15 @@ th {
   .dd-table p {
     margin: 0px;
   }
+  tr.valign-middle td {
+    vertical-align: middle;
+  }
+  tr.valign-top td {
+    vertical-align: top;
+  }
+  tr.valign-bottom td {
+    vertical-align: bottom;
+  }
 }
 section.ol.steps,
 section.ul.steps-unordered {
@@ -3238,10 +3327,6 @@ dt.prereq {
 
 div.tasklabel {
   margin-top: 1em;
-}
-
-span.cmd {
-  font-weight: 600;
 }
 
 .step-optional + .cmd {
@@ -3434,6 +3519,10 @@ li.step div {
 .wh_topic_toc .active {
   color: #3b48fe;
 }
+.wh_topic_toc .wh_topic_label + ul {
+  max-height: 60vh;
+  overflow-y: scroll;
+}
 
 #bck_toc {
   margin-left: -40px;
@@ -3474,3 +3563,76 @@ li.step div {
     display: none;
   }
 }
+/* PUBENG-2358 */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.lightbox-content {
+  margin: 4rem;
+  padding: 8rem;
+  background-color: white;
+  border: solid 1px #909098;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.18) 0px 0px 8px 0px;
+  max-height: 95vh;
+}
+
+.lightbox-content img, .lightbox-content object, .lightbox-content object.image:not(img[height]) {
+  width: 100%;
+  height: calc(95vh - 16rem);
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+.lightbox-close.material-icons {
+  position: absolute;
+  top: 6rem;
+  right: 6rem;
+  margin: 1rem;
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 2rem;
+  background-color: white;
+  color: #3b48fe;
+  border: solid 2px #3b48fe;
+  border-radius: 4px;
+  text-decoration-line: none;
+  transition: all;
+}
+
+.lightbox-close.material-icons:hover {
+  background-color: #3b48fe;
+  color: white;
+}
+
+.fade-in {
+  animation: fade-in 0.2s ease-in;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0; /* Start fully transparent */
+  }
+  100% {
+    opacity: 1; /* End fully opaque */
+  }
+}
+.fade-out {
+  animation: fade-out 0.3s ease-out;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1; /* Start fully opaque */
+  }
+  100% {
+    opacity: 0; /* End fully transparent */
+  }
+}/*# sourceMappingURL=dolby-webhelp.css.map */
