@@ -25,9 +25,3 @@ See [ReleaseNotes.md](https://github.com/DolbyLaboratories/dolby-vision-editor/t
 ## License
 
 This project is licensed under the BSD-3 license.  See the [LICENSE](https://github.com/DolbyLaboratories/dolby-vision-editor/tree/main/LICENSE) file for details.
-
-## Related projects
-
-See the [dolby-vision-codec-selection-library](https://github.com/DolbyLaboratories/dolby-vision-codec-selection-library) project.  
-
-The editor uses the codec selection library, which can also be used separately.
